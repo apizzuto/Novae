@@ -1,0 +1,256 @@
+000 (5699537.000.000) 09/10 14:55:01 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_0
+...
+000 (5699539.000.000) 09/10 14:55:02 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_1
+...
+000 (5699541.000.000) 09/10 14:55:03 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_2
+...
+000 (5699544.000.000) 09/10 14:55:04 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_3
+...
+000 (5699547.000.000) 09/10 14:55:05 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_4
+...
+000 (5699552.000.000) 09/10 14:55:11 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_5
+...
+000 (5699554.000.000) 09/10 14:55:12 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_6
+...
+000 (5699556.000.000) 09/10 14:55:14 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_02_arg_7
+...
+001 (5699537.000.000) 09/10 14:56:57 Job executing on host: <10.128.11.58:37025?addrs=10.128.11.58-37025>
+...
+001 (5699544.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+001 (5699541.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+001 (5699547.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+001 (5699539.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+001 (5699552.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+001 (5699554.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+001 (5699556.000.000) 09/10 14:56:57 Job executing on host: <10.128.10.49:50640?addrs=10.128.10.49-50640>
+...
+006 (5699537.000.000) 09/10 14:57:05 Image size of job updated: 54956
+	41  -  MemoryUsage of job (MB)
+	41364  -  ResidentSetSize of job (KB)
+...
+006 (5699544.000.000) 09/10 14:57:05 Image size of job updated: 5368
+	6  -  MemoryUsage of job (MB)
+	5324  -  ResidentSetSize of job (KB)
+...
+006 (5699541.000.000) 09/10 14:57:05 Image size of job updated: 5768
+	6  -  MemoryUsage of job (MB)
+	5328  -  ResidentSetSize of job (KB)
+...
+006 (5699547.000.000) 09/10 14:57:05 Image size of job updated: 5536
+	6  -  MemoryUsage of job (MB)
+	5352  -  ResidentSetSize of job (KB)
+...
+006 (5699539.000.000) 09/10 14:57:06 Image size of job updated: 8244
+	8  -  MemoryUsage of job (MB)
+	8112  -  ResidentSetSize of job (KB)
+...
+006 (5699552.000.000) 09/10 14:57:06 Image size of job updated: 8244
+	8  -  MemoryUsage of job (MB)
+	8120  -  ResidentSetSize of job (KB)
+...
+006 (5699554.000.000) 09/10 14:57:06 Image size of job updated: 9540
+	8  -  MemoryUsage of job (MB)
+	8184  -  ResidentSetSize of job (KB)
+...
+006 (5699556.000.000) 09/10 14:57:06 Image size of job updated: 8920
+	9  -  MemoryUsage of job (MB)
+	8444  -  ResidentSetSize of job (KB)
+...
+005 (5699537.000.000) 09/10 14:57:13 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:01, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:01, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :        0        1         1 
+	   Disk (KB)             :        7  1000000   3300405 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :       41     8000      8064 
+...
+006 (5699544.000.000) 09/10 14:57:37 Image size of job updated: 61076
+	6  -  MemoryUsage of job (MB)
+	5324  -  ResidentSetSize of job (KB)
+...
+005 (5699544.000.000) 09/10 14:57:37 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.06        1         1 
+	   Disk (KB)             :     7     1000000   3284534 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     6        8000      8064 
+...
+006 (5699554.000.000) 09/10 14:57:37 Image size of job updated: 63144
+	9  -  MemoryUsage of job (MB)
+	8200  -  ResidentSetSize of job (KB)
+...
+006 (5699556.000.000) 09/10 14:57:37 Image size of job updated: 62608
+	9  -  MemoryUsage of job (MB)
+	8444  -  ResidentSetSize of job (KB)
+...
+006 (5699547.000.000) 09/10 14:57:37 Image size of job updated: 61796
+	6  -  MemoryUsage of job (MB)
+	5352  -  ResidentSetSize of job (KB)
+...
+006 (5699541.000.000) 09/10 14:57:38 Image size of job updated: 61624
+	6  -  MemoryUsage of job (MB)
+	5328  -  ResidentSetSize of job (KB)
+...
+006 (5699552.000.000) 09/10 14:57:38 Image size of job updated: 62032
+	8  -  MemoryUsage of job (MB)
+	8120  -  ResidentSetSize of job (KB)
+...
+005 (5699556.000.000) 09/10 14:57:38 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.06        1         1 
+	   Disk (KB)             :     7     1000000   3284532 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     9        8000      8064 
+...
+005 (5699547.000.000) 09/10 14:57:38 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.06        1         1 
+	   Disk (KB)             :     7     1000000   3284534 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     6        8000      8064 
+...
+005 (5699554.000.000) 09/10 14:57:38 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.07        1         1 
+	   Disk (KB)             :     7     1000000   3284533 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     9        8000      8064 
+...
+005 (5699539.000.000) 09/10 14:57:38 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.04        1         1 
+	   Disk (KB)             :     7     1000000   3284535 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     8        8000      8064 
+...
+005 (5699552.000.000) 09/10 14:57:38 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.07        1         1 
+	   Disk (KB)             :     7     1000000   3284533 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     8        8000      8064 
+...
+005 (5699541.000.000) 09/10 14:57:38 Job terminated.
+	(1) Normal termination (return value 1)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Admin_mutex_1         :                           0 
+	   Admin_mutex_2         :                           0 
+	   Admin_mutex_3         :                           0 
+	   Cpus                  :     0.06        1         1 
+	   Disk (KB)             :     7     1000000   3284534 
+	   Gpus                  :                           0 
+	   Machine_token         :                           0 
+	   Memory (MB)           :     6        8000      8064 
+...

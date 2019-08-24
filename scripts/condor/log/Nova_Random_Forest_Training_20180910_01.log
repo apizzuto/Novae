@@ -1,0 +1,136 @@
+000 (5699166.000.000) 09/10 14:49:01 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_0
+...
+000 (5699170.000.000) 09/10 14:49:03 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_1
+...
+000 (5699173.000.000) 09/10 14:49:04 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_2
+...
+000 (5699175.000.000) 09/10 14:49:05 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_3
+...
+000 (5699178.000.000) 09/10 14:49:06 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_4
+...
+000 (5699188.000.000) 09/10 14:49:12 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_5
+...
+000 (5699190.000.000) 09/10 14:49:13 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_6
+...
+000 (5699193.000.000) 09/10 14:49:15 Job submitted from host: <10.128.11.86:51044?addrs=10.128.11.86-51044>
+    DAG Node: Nova_Random_Forest_Training_20180910_01_arg_7
+...
+001 (5699190.000.000) 09/10 14:50:56 Job executing on host: <10.128.10.142:45810?addrs=10.128.10.142-45810>
+...
+001 (5699188.000.000) 09/10 14:50:56 Job executing on host: <10.128.10.66:58945?addrs=10.128.10.66-58945>
+...
+001 (5699193.000.000) 09/10 14:50:56 Job executing on host: <10.128.10.65:51059?addrs=10.128.10.65-51059>
+...
+001 (5699178.000.000) 09/10 14:50:56 Job executing on host: <10.128.10.100:59735?addrs=10.128.10.100-59735>
+...
+007 (5699193.000.000) 09/10 14:50:56 Shadow exception!
+	Error from slot1_6@node001.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=False --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+007 (5699188.000.000) 09/10 14:50:56 Shadow exception!
+	Error from slot1_3@node002.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=True --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+012 (5699193.000.000) 09/10 14:50:56 Job was held.
+	Error from slot1_6@node001.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=False --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+007 (5699190.000.000) 09/10 14:50:56 Shadow exception!
+	Error from slot1_1@node102.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=False --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+012 (5699188.000.000) 09/10 14:50:56 Job was held.
+	Error from slot1_3@node002.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=True --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+001 (5699175.000.000) 09/10 14:50:56 Job executing on host: <10.128.11.115:47813?addrs=10.128.11.115-47813>
+...
+012 (5699190.000.000) 09/10 14:50:56 Job was held.
+	Error from slot1_1@node102.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=False --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+001 (5699173.000.000) 09/10 14:50:56 Job executing on host: <10.128.11.104:37745?addrs=10.128.11.104-37745>
+...
+007 (5699178.000.000) 09/10 14:50:56 Shadow exception!
+	Error from slot1_4@gtx-15.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=True --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+012 (5699178.000.000) 09/10 14:50:56 Job was held.
+	Error from slot1_4@gtx-15.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=False --s=True --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+001 (5699170.000.000) 09/10 14:50:57 Job executing on host: <10.128.11.111:60410?addrs=10.128.11.111-60410>
+...
+007 (5699175.000.000) 09/10 14:50:57 Shadow exception!
+	Error from slot1_5@burn-in14.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=False --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+012 (5699175.000.000) 09/10 14:50:57 Job was held.
+	Error from slot1_5@burn-in14.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=False --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+007 (5699173.000.000) 09/10 14:50:57 Shadow exception!
+	Error from slot1_26@burn-in03.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=False --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+001 (5699166.000.000) 09/10 14:50:57 Job executing on host: <10.128.11.27:59712?addrs=10.128.11.27-59712>
+...
+007 (5699170.000.000) 09/10 14:50:57 Shadow exception!
+	Error from slot1_18@burn-in10.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=True --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+007 (5699166.000.000) 09/10 14:50:57 Shadow exception!
+	Error from slot1_7@c8-8.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=True --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+...
+012 (5699170.000.000) 09/10 14:50:57 Job was held.
+	Error from slot1_18@burn-in10.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=True --log=False: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+012 (5699173.000.000) 09/10 14:50:57 Job was held.
+	Error from slot1_26@burn-in03.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=False --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+012 (5699166.000.000) 09/10 14:50:57 Job was held.
+	Error from slot1_7@c8-8.icecube.wisc.edu: Failed to execute '/home/apizzuto/Nova/scripts/angularError_randomForest.py' with arguments --a=True --s=True --log=True: invalid interpreter (usr/bin/env) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+009 (5699193.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699190.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699188.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699178.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699175.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699173.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699170.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...
+009 (5699166.000.000) 09/10 14:54:26 Job was aborted by the user.
+	removed because <OtherJobRemoveRequirements = DAGManJobId =?= 5699079> fired when job (5699079.0) was removed
+...

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/apizzuto/Nova/scripts/convert_l7mc_hdf5.py", line 3, in <module>
+    import icecube
+ImportError: No module named icecube
+Traceback (most recent call last):
+  File "/home/apizzuto/Nova/scripts/convert_l7mc_hdf5.py", line 3, in <module>
+    import icecube
+ImportError: No module named icecube

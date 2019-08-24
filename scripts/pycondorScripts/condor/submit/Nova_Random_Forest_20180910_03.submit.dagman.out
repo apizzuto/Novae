@@ -1,0 +1,399 @@
+09/10/18 14:54:56 Setting maximum file descriptors to 80000.
+09/10/18 14:54:56 ******************************************************
+09/10/18 14:54:56 ** condor_scheduniv_exec.5699511.0 (CONDOR_DAGMAN) STARTING UP
+09/10/18 14:54:56 ** /usr/bin/condor_dagman
+09/10/18 14:54:56 ** SubsystemInfo: name=DAGMAN type=DAGMAN(10) class=DAEMON(1)
+09/10/18 14:54:56 ** Configuration: subsystem:DAGMAN local:<NONE> class:DAEMON
+09/10/18 14:54:56 ** $CondorVersion: 8.7.7 Mar 13 2018 BuildID: 435313 $
+09/10/18 14:54:56 ** $CondorPlatform: x86_64_RedHat7 $
+09/10/18 14:54:56 ** PID = 78935
+09/10/18 14:54:56 ** Log last touched time unavailable (No such file or directory)
+09/10/18 14:54:56 ******************************************************
+09/10/18 14:54:56 Using config source: /etc/condor/condor_config
+09/10/18 14:54:56 Using local config sources: 
+09/10/18 14:54:56    /etc/condor/config.d/00_logging
+09/10/18 14:54:56    /etc/condor/config.d/00_security
+09/10/18 14:54:56    /etc/condor/config.d/20_ganglia
+09/10/18 14:54:56    /etc/condor/config.d/20_master_daemons
+09/10/18 14:54:56    /etc/condor/config.d/20_schedd
+09/10/18 14:54:56    /etc/condor/config.d/20_schedd_limit_num_jobs
+09/10/18 14:54:56    /etc/condor/config.d/20_schedd_stats
+09/10/18 14:54:56    /etc/condor/config.d/20_schedd_stats_rss
+09/10/18 14:54:56    /etc/condor/config.d/20_shared_port
+09/10/18 14:54:56    /etc/condor/config.d/20_submit
+09/10/18 14:54:56    /etc/condor/config.d/21_submit_singularity
+09/10/18 14:54:56    /etc/condor/config.d/60_npx_submit
+09/10/18 14:54:56    /etc/condor/config.d/60_npx_submit_sane_reqs
+09/10/18 14:54:56    /etc/condor/config.d/99_block_submissions_group_long
+09/10/18 14:54:56    /etc/condor/condor_config.local
+09/10/18 14:54:56 config Macros = 134, Sorted = 134, StringBytes = 5421, TablesBytes = 4984
+09/10/18 14:54:56 CLASSAD_CACHING is ENABLED
+09/10/18 14:54:56 Daemon Log is logging: D_ALWAYS D_ERROR
+09/10/18 14:54:56 DaemonCore: No command port requested.
+09/10/18 14:54:56 DAGMAN_USE_STRICT setting: 1
+09/10/18 14:54:56 DAGMAN_VERBOSITY setting: 3
+09/10/18 14:54:56 DAGMAN_DEBUG_CACHE_SIZE setting: 5242880
+09/10/18 14:54:56 DAGMAN_DEBUG_CACHE_ENABLE setting: False
+09/10/18 14:54:56 DAGMAN_SUBMIT_DELAY setting: 1
+09/10/18 14:54:56 DAGMAN_MAX_SUBMIT_ATTEMPTS setting: 6
+09/10/18 14:54:56 DAGMAN_STARTUP_CYCLE_DETECT setting: False
+09/10/18 14:54:56 DAGMAN_MAX_SUBMITS_PER_INTERVAL setting: 5
+09/10/18 14:54:56 DAGMAN_AGGRESSIVE_SUBMIT setting: False
+09/10/18 14:54:56 DAGMAN_USER_LOG_SCAN_INTERVAL setting: 5
+09/10/18 14:54:56 DAGMAN_QUEUE_UPDATE_INTERVAL setting: 300
+09/10/18 14:54:56 DAGMAN_DEFAULT_PRIORITY setting: 0
+09/10/18 14:54:56 DAGMAN_SUPPRESS_NOTIFICATION setting: True
+09/10/18 14:54:56 allow_events (DAGMAN_ALLOW_EVENTS) setting: 114
+09/10/18 14:54:56 DAGMAN_RETRY_SUBMIT_FIRST setting: True
+09/10/18 14:54:56 DAGMAN_RETRY_NODE_FIRST setting: False
+09/10/18 14:54:56 DAGMAN_MAX_JOBS_IDLE setting: 1000
+09/10/18 14:54:56 DAGMAN_MAX_JOBS_SUBMITTED setting: 0
+09/10/18 14:54:56 DAGMAN_MAX_PRE_SCRIPTS setting: 20
+09/10/18 14:54:56 DAGMAN_MAX_POST_SCRIPTS setting: 20
+09/10/18 14:54:56 DAGMAN_MUNGE_NODE_NAMES setting: True
+09/10/18 14:54:56 DAGMAN_PROHIBIT_MULTI_JOBS setting: False
+09/10/18 14:54:56 DAGMAN_SUBMIT_DEPTH_FIRST setting: False
+09/10/18 14:54:56 DAGMAN_ALWAYS_RUN_POST setting: False
+09/10/18 14:54:56 DAGMAN_ABORT_DUPLICATES setting: True
+09/10/18 14:54:56 DAGMAN_ABORT_ON_SCARY_SUBMIT setting: True
+09/10/18 14:54:56 DAGMAN_PENDING_REPORT_INTERVAL setting: 600
+09/10/18 14:54:56 DAGMAN_AUTO_RESCUE setting: True
+09/10/18 14:54:56 DAGMAN_MAX_RESCUE_NUM setting: 100
+09/10/18 14:54:56 DAGMAN_WRITE_PARTIAL_RESCUE setting: True
+09/10/18 14:54:56 DAGMAN_DEFAULT_NODE_LOG setting: @(DAG_DIR)/@(DAG_FILE).nodes.log
+09/10/18 14:54:56 DAGMAN_GENERATE_SUBDAG_SUBMITS setting: True
+09/10/18 14:54:56 DAGMAN_MAX_JOB_HOLDS setting: 100
+09/10/18 14:54:56 DAGMAN_HOLD_CLAIM_TIME setting: 20
+09/10/18 14:54:56 ALL_DEBUG setting: 
+09/10/18 14:54:56 DAGMAN_DEBUG setting: 
+09/10/18 14:54:56 DAGMAN_SUPPRESS_JOB_LOGS setting: False
+09/10/18 14:54:56 DAGMAN_REMOVE_NODE_JOBS setting: True
+09/10/18 14:54:56 argv[0] == "condor_scheduniv_exec.5699511.0"
+09/10/18 14:54:56 argv[1] == "-Lockfile"
+09/10/18 14:54:56 argv[2] == "condor/submit/Nova_Random_Forest_20180910_03.submit.lock"
+09/10/18 14:54:56 argv[3] == "-AutoRescue"
+09/10/18 14:54:56 argv[4] == "1"
+09/10/18 14:54:56 argv[5] == "-DoRescueFrom"
+09/10/18 14:54:56 argv[6] == "0"
+09/10/18 14:54:56 argv[7] == "-Dag"
+09/10/18 14:54:56 argv[8] == "condor/submit/Nova_Random_Forest_20180910_03.submit"
+09/10/18 14:54:56 argv[9] == "-MaxJobs"
+09/10/18 14:54:56 argv[10] == "3000"
+09/10/18 14:54:56 argv[11] == "-Suppress_notification"
+09/10/18 14:54:56 argv[12] == "-CsdVersion"
+09/10/18 14:54:56 argv[13] == "$CondorVersion: 8.7.7 Mar 13 2018 BuildID: 435313 $"
+09/10/18 14:54:56 argv[14] == "-Dagman"
+09/10/18 14:54:56 argv[15] == "/usr/bin/condor_dagman"
+09/10/18 14:54:56 Workflow batch-name: <Nova_Random_Forest_20180910_03.submit+5699511>
+09/10/18 14:54:56 Workflow accounting_group: <>
+09/10/18 14:54:56 Workflow accounting_group_user: <>
+09/10/18 14:54:56 Warning: failed to get attribute DAGNodeName
+09/10/18 14:54:56 DAGMAN_LOG_ON_NFS_IS_ERROR setting: False
+09/10/18 14:54:56 Default node log file is: </home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log>
+09/10/18 14:54:56 DAG Lockfile will be written to condor/submit/Nova_Random_Forest_20180910_03.submit.lock
+09/10/18 14:54:56 DAG Input file is condor/submit/Nova_Random_Forest_20180910_03.submit
+09/10/18 14:54:56 Parsing 1 dagfiles
+09/10/18 14:54:56 Parsing condor/submit/Nova_Random_Forest_20180910_03.submit ...
+09/10/18 14:54:56 Dag contains 8 total jobs
+09/10/18 14:54:56 Sleeping for 3 seconds to ensure ProcessId uniqueness
+09/10/18 14:54:59 Bootstrapping...
+09/10/18 14:54:59 Number of pre-completed nodes: 0
+09/10/18 14:54:59 MultiLogFiles: truncating log file /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:54:59 DAG status: 0 (DAG_STATUS_OK)
+09/10/18 14:54:59 Of 8 nodes total:
+09/10/18 14:54:59  Done     Pre   Queued    Post   Ready   Un-Ready   Failed
+09/10/18 14:54:59   ===     ===      ===     ===     ===        ===      ===
+09/10/18 14:54:59     0       0        0       0       8          0        0
+09/10/18 14:54:59 0 job proc(s) currently held
+09/10/18 14:54:59 DAGMan Runtime Statistics: [ EventCycleTimeSum = 0.0; EventCycleTimeCount = 0.0; SleepCycleTimeCount = 0.0; SubmitCycleTimeSum = 0.0; SubmitCycleTimeCount = 0.0; LogProcessCycleTimeSum = 0.0; SleepCycleTimeSum = 0.0; LogProcessCycleTimeCount = 0.0; ]
+09/10/18 14:54:59 Registering condor_event_timer...
+09/10/18 14:55:00 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:01 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_0 job(s)...
+09/10/18 14:55:01 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:01 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:01 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:01 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_0 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_0 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=True' '--s=True' '--log=True -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:01 From submit: Submitting job(s).
+09/10/18 14:55:01 From submit: 1 job(s) submitted to cluster 5699537.
+09/10/18 14:55:01 	assigned HTCondor ID (5699537.0.0)
+09/10/18 14:55:01 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:02 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_1 job(s)...
+09/10/18 14:55:02 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:02 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:02 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:02 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_1 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_1 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=True' '--s=True' '--log=False -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:02 From submit: Submitting job(s).
+09/10/18 14:55:02 From submit: 1 job(s) submitted to cluster 5699539.
+09/10/18 14:55:02 	assigned HTCondor ID (5699539.0.0)
+09/10/18 14:55:02 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:03 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_2 job(s)...
+09/10/18 14:55:03 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:03 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:03 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:03 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_2 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_2 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=True' '--s=False' '--log=True -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:03 From submit: Submitting job(s).
+09/10/18 14:55:03 From submit: 1 job(s) submitted to cluster 5699541.
+09/10/18 14:55:03 	assigned HTCondor ID (5699541.0.0)
+09/10/18 14:55:03 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:04 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_3 job(s)...
+09/10/18 14:55:04 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:04 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:04 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:04 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_3 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_3 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=True' '--s=False' '--log=False -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:04 From submit: Submitting job(s).
+09/10/18 14:55:04 From submit: 1 job(s) submitted to cluster 5699544.
+09/10/18 14:55:04 	assigned HTCondor ID (5699544.0.0)
+09/10/18 14:55:04 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:05 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_4 job(s)...
+09/10/18 14:55:05 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:05 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:05 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:05 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_4 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_4 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=False' '--s=True' '--log=True -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:05 From submit: Submitting job(s).
+09/10/18 14:55:05 From submit: 1 job(s) submitted to cluster 5699547.
+09/10/18 14:55:05 	assigned HTCondor ID (5699547.0.0)
+09/10/18 14:55:05 Just submitted 5 jobs this cycle...
+09/10/18 14:55:05 Currently monitoring 1 HTCondor log file(s)
+09/10/18 14:55:05 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_0 from (5699537.0.0) to (5699537.0.0)
+09/10/18 14:55:05 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_0 (5699537.0.0) {09/10/18 14:55:01}
+09/10/18 14:55:05 Number of idle job procs: 1
+09/10/18 14:55:05 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_1 from (5699539.0.0) to (5699539.0.0)
+09/10/18 14:55:05 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_1 (5699539.0.0) {09/10/18 14:55:02}
+09/10/18 14:55:05 Number of idle job procs: 2
+09/10/18 14:55:05 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_2 from (5699541.0.0) to (5699541.0.0)
+09/10/18 14:55:05 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_2 (5699541.0.0) {09/10/18 14:55:03}
+09/10/18 14:55:05 Number of idle job procs: 3
+09/10/18 14:55:05 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_3 from (5699544.0.0) to (5699544.0.0)
+09/10/18 14:55:05 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_3 (5699544.0.0) {09/10/18 14:55:04}
+09/10/18 14:55:05 Number of idle job procs: 4
+09/10/18 14:55:05 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_4 from (5699547.0.0) to (5699547.0.0)
+09/10/18 14:55:05 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_4 (5699547.0.0) {09/10/18 14:55:05}
+09/10/18 14:55:05 Number of idle job procs: 5
+09/10/18 14:55:05 DAG status: 0 (DAG_STATUS_OK)
+09/10/18 14:55:05 Of 8 nodes total:
+09/10/18 14:55:05  Done     Pre   Queued    Post   Ready   Un-Ready   Failed
+09/10/18 14:55:05   ===     ===      ===     ===     ===        ===      ===
+09/10/18 14:55:05     0       0        5       0       3          0        0
+09/10/18 14:55:05 0 job proc(s) currently held
+09/10/18 14:55:05 DAGMan Runtime Statistics: [ EventCycleTimeCount = 0.0; SleepCycleTimeSum = 0.0; EventCycleTimeSum = 0.0; LogProcessCycleTimeCount = 1.0; LogProcessCycleTimeSum = 0.0002419948577880859; LogProcessCycleTimeMin = 0.0002419948577880859; LogProcessCycleTimeMax = 0.0002419948577880859; LogProcessCycleTimeAvg = 0.0002419948577880859; LogProcessCycleTimeStd = 0.0002419948577880859; SubmitCycleTimeMax = 5.421288967132568; SubmitCycleTimeCount = 1.0; SleepCycleTimeCount = 0.0; SubmitCycleTimeSum = 5.421288967132568; SubmitCycleTimeStd = 5.421288967132568; SubmitCycleTimeAvg = 5.421288967132568; SubmitCycleTimeMin = 5.421288967132568; ]
+09/10/18 14:55:10 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:11 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_5 job(s)...
+09/10/18 14:55:11 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:11 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:11 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:11 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_5 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_5 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=False' '--s=True' '--log=False -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:11 From submit: Submitting job(s).
+09/10/18 14:55:11 From submit: 1 job(s) submitted to cluster 5699552.
+09/10/18 14:55:11 	assigned HTCondor ID (5699552.0.0)
+09/10/18 14:55:11 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:12 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_6 job(s)...
+09/10/18 14:55:12 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:12 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:12 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:12 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_6 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_6 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=False' '--s=False' '--log=True -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:12 From submit: Submitting job(s).
+09/10/18 14:55:12 From submit: 1 job(s) submitted to cluster 5699554.
+09/10/18 14:55:12 	assigned HTCondor ID (5699554.0.0)
+09/10/18 14:55:12 Sleeping for 1 s (DAGMAN_SUBMIT_DELAY) to throttle submissions...
+09/10/18 14:55:13 Submitting HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_7 job(s)...
+09/10/18 14:55:13 Adding a DAGMan workflow log /home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log
+09/10/18 14:55:13 Masking the events recorded in the DAGMAN workflow log
+09/10/18 14:55:13 Mask for workflow log is 0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36
+09/10/18 14:55:13 submitting: /usr/bin/condor_submit -a dag_node_name' '=' 'Nova_Random_Forest_Training_20180910_02_arg_7 -a +DAGManJobId' '=' '5699511 -a DAGManJobId' '=' '5699511 -batch-name Nova_Random_Forest_20180910_03.submit+5699511 -a submit_event_notes' '=' 'DAG' 'Node:' 'Nova_Random_Forest_Training_20180910_02_arg_7 -a dagman_log' '=' '/home/apizzuto/Nova/scripts/pycondorScripts/condor/submit/Nova_Random_Forest_20180910_03.submit.nodes.log -a +DAGManNodesMask' '=' '"0,1,2,4,5,7,9,10,11,12,13,16,17,24,27,35,36" -a ARGS' '=' '--a=False' '--s=False' '--log=False -a DAG_STATUS' '=' '0 -a FAILED_COUNT' '=' '0 -a notification' '=' 'never -a +DAGParentNodeNames' '=' '"" condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:55:14 From submit: Submitting job(s).
+09/10/18 14:55:14 From submit: 1 job(s) submitted to cluster 5699556.
+09/10/18 14:55:14 	assigned HTCondor ID (5699556.0.0)
+09/10/18 14:55:14 Just submitted 3 jobs this cycle...
+09/10/18 14:55:14 Currently monitoring 1 HTCondor log file(s)
+09/10/18 14:55:14 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_5 from (5699552.0.0) to (5699552.0.0)
+09/10/18 14:55:14 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_5 (5699552.0.0) {09/10/18 14:55:11}
+09/10/18 14:55:14 Number of idle job procs: 6
+09/10/18 14:55:14 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_6 from (5699554.0.0) to (5699554.0.0)
+09/10/18 14:55:14 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_6 (5699554.0.0) {09/10/18 14:55:12}
+09/10/18 14:55:14 Number of idle job procs: 7
+09/10/18 14:55:14 Reassigning the id of job Nova_Random_Forest_Training_20180910_02_arg_7 from (5699556.0.0) to (5699556.0.0)
+09/10/18 14:55:14 Event: ULOG_SUBMIT for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_7 (5699556.0.0) {09/10/18 14:55:14}
+09/10/18 14:55:14 Number of idle job procs: 8
+09/10/18 14:55:14 DAG status: 0 (DAG_STATUS_OK)
+09/10/18 14:55:14 Of 8 nodes total:
+09/10/18 14:55:14  Done     Pre   Queued    Post   Ready   Un-Ready   Failed
+09/10/18 14:55:14   ===     ===      ===     ===     ===        ===      ===
+09/10/18 14:55:14     0       0        8       0       0          0        0
+09/10/18 14:55:14 0 job proc(s) currently held
+09/10/18 14:55:14 DAGMan Runtime Statistics: [ EventCycleTimeStd = 5.421676874160767; EventCycleTimeMax = 5.421676874160767; SubmitCycleTimeMin = 3.267675161361694; SubmitCycleTimeAvg = 4.344482064247131; SleepCycleTimeCount = 1.0; SubmitCycleTimeCount = 2.0; SubmitCycleTimeMax = 5.421288967132568; SleepCycleTimeMin = 5.005093097686768; SubmitCycleTimeSum = 8.688964128494263; LogProcessCycleTimeStd = 6.928941895190979E-05; SubmitCycleTimeStd = 1.522834926117553; LogProcessCycleTimeAvg = 0.0001929998397827148; EventCycleTimeMin = 5.421676874160767; LogProcessCycleTimeMax = 0.0002419948577880859; LogProcessCycleTimeMin = 0.0001440048217773438; LogProcessCycleTimeSum = 0.0003859996795654297; LogProcessCycleTimeCount = 2.0; EventCycleTimeSum = 5.421676874160767; SleepCycleTimeSum = 5.005093097686768; SleepCycleTimeAvg = 5.005093097686768; SleepCycleTimeStd = 5.005093097686768; SleepCycleTimeMax = 5.005093097686768; EventCycleTimeCount = 1.0; EventCycleTimeAvg = 5.421676874160767; ]
+09/10/18 14:56:59 Currently monitoring 1 HTCondor log file(s)
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_0 (5699537.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 7
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_3 (5699544.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 6
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_2 (5699541.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 5
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_4 (5699547.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 4
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_1 (5699539.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 3
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_5 (5699552.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 2
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_6 (5699554.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 1
+09/10/18 14:56:59 Event: ULOG_EXECUTE for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_7 (5699556.0.0) {09/10/18 14:56:57}
+09/10/18 14:56:59 Number of idle job procs: 0
+09/10/18 14:57:14 Currently monitoring 1 HTCondor log file(s)
+09/10/18 14:57:14 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_0 (5699537.0.0) {09/10/18 14:57:13}
+09/10/18 14:57:14 Number of idle job procs: 0
+09/10/18 14:57:14 Node Nova_Random_Forest_Training_20180910_02_arg_0 job proc (5699537.0.0) failed with status 1.
+09/10/18 14:57:14 DAG status: 2 (DAG_STATUS_NODE_FAILED)
+09/10/18 14:57:14 Of 8 nodes total:
+09/10/18 14:57:14  Done     Pre   Queued    Post   Ready   Un-Ready   Failed
+09/10/18 14:57:14   ===     ===      ===     ===     ===        ===      ===
+09/10/18 14:57:14     0       0        7       0       0          0        1
+09/10/18 14:57:14 0 job proc(s) currently held
+09/10/18 14:57:14 DAGMan Runtime Statistics: [ EventCycleTimeStd = 1.242237637300213; EventCycleTimeMax = 5.421676874160767; SubmitCycleTimeMin = 4.053115844726562E-06; SubmitCycleTimeAvg = 0.3343071387364314; SleepCycleTimeCount = 25.0; SubmitCycleTimeCount = 26.0; SubmitCycleTimeMax = 5.421288967132568; SleepCycleTimeMin = 5.000370979309082; SubmitCycleTimeSum = 8.691985607147217; LogProcessCycleTimeStd = 0.0003980929211315398; SubmitCycleTimeStd = 1.219217554905127; LogProcessCycleTimeAvg = 0.0004127025604248047; EventCycleTimeMin = 1.287460327148438E-05; LogProcessCycleTimeMax = 0.001004934310913086; LogProcessCycleTimeMin = 0.0001440048217773438; LogProcessCycleTimeSum = 0.001650810241699219; LogProcessCycleTimeCount = 4.0; EventCycleTimeSum = 8.715800523757935; SleepCycleTimeSum = 125.1362364292145; SleepCycleTimeAvg = 5.005449457168579; SleepCycleTimeStd = 0.003672011271346029; SleepCycleTimeMax = 5.021811008453369; EventCycleTimeCount = 25.0; EventCycleTimeAvg = 0.3486320209503174; ]
+09/10/18 14:57:39 Currently monitoring 1 HTCondor log file(s)
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_3 (5699544.0.0) {09/10/18 14:57:37}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_3 job proc (5699544.0.0) failed with status 1.
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_7 (5699556.0.0) {09/10/18 14:57:38}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_7 job proc (5699556.0.0) failed with status 1.
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_4 (5699547.0.0) {09/10/18 14:57:38}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_4 job proc (5699547.0.0) failed with status 1.
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_6 (5699554.0.0) {09/10/18 14:57:38}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_6 job proc (5699554.0.0) failed with status 1.
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_1 (5699539.0.0) {09/10/18 14:57:38}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_1 job proc (5699539.0.0) failed with status 1.
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_5 (5699552.0.0) {09/10/18 14:57:38}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_5 job proc (5699552.0.0) failed with status 1.
+09/10/18 14:57:39 Event: ULOG_JOB_TERMINATED for HTCondor Node Nova_Random_Forest_Training_20180910_02_arg_2 (5699541.0.0) {09/10/18 14:57:38}
+09/10/18 14:57:39 Number of idle job procs: 0
+09/10/18 14:57:39 Node Nova_Random_Forest_Training_20180910_02_arg_2 job proc (5699541.0.0) failed with status 1.
+09/10/18 14:57:39 DAG status: 2 (DAG_STATUS_NODE_FAILED)
+09/10/18 14:57:39 Of 8 nodes total:
+09/10/18 14:57:39  Done     Pre   Queued    Post   Ready   Un-Ready   Failed
+09/10/18 14:57:39   ===     ===      ===     ===     ===        ===      ===
+09/10/18 14:57:39     0       0        0       0       0          0        8
+09/10/18 14:57:39 0 job proc(s) currently held
+09/10/18 14:57:39 DAGMan Runtime Statistics: [ EventCycleTimeStd = 1.137659556348787; EventCycleTimeMax = 5.421676874160767; SubmitCycleTimeMin = 4.053115844726562E-06; SubmitCycleTimeAvg = 0.2805520796006726; SleepCycleTimeCount = 30.0; SubmitCycleTimeCount = 31.0; SubmitCycleTimeMax = 5.421288967132568; SleepCycleTimeMin = 5.000370979309082; SubmitCycleTimeSum = 8.69711446762085; LogProcessCycleTimeStd = 0.0006204487623658675; SubmitCycleTimeStd = 1.119942127215296; LogProcessCycleTimeAvg = 0.0006433963775634765; EventCycleTimeMin = 1.287460327148438E-05; LogProcessCycleTimeMax = 0.001566171646118164; LogProcessCycleTimeMin = 0.0001440048217773438; LogProcessCycleTimeSum = 0.003216981887817383; LogProcessCycleTimeCount = 5.0; EventCycleTimeSum = 8.730272054672241; SleepCycleTimeSum = 150.1615009307861; SleepCycleTimeAvg = 5.005383364359537; SleepCycleTimeStd = 0.003343875829040901; SleepCycleTimeMax = 5.021811008453369; EventCycleTimeCount = 30.0; EventCycleTimeAvg = 0.2910090684890747; ]
+09/10/18 14:57:39 ERROR: the following job(s) failed:
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_0
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 0
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699537.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699537.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_1
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 1
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699539.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699539.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_2
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 2
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699541.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699541.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_3
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 3
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699544.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699544.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_4
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 4
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699547.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699547.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_5
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 5
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699552.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699552.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_6
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 6
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699554.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699554.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------- Job ----------------------
+09/10/18 14:57:39       Node Name: Nova_Random_Forest_Training_20180910_02_arg_7
+09/10/18 14:57:39            Noop: false
+09/10/18 14:57:39          NodeID: 7
+09/10/18 14:57:39     Node Status: STATUS_ERROR    
+09/10/18 14:57:39 Node return val: 1
+09/10/18 14:57:39           Error: Job proc (5699556.0.0) failed with status 1
+09/10/18 14:57:39 Job Submit File: condor/submit/Nova_Random_Forest_Training_20180910_02.submit
+09/10/18 14:57:39  HTCondor Job ID: (5699556.0.0)
+09/10/18 14:57:39       Q_PARENTS: <END>
+09/10/18 14:57:39       Q_WAITING: <END>
+09/10/18 14:57:39      Q_CHILDREN: <END>
+09/10/18 14:57:39 ---------------------------------------	<END>
+09/10/18 14:57:39 Aborting DAG...
+09/10/18 14:57:39 Writing Rescue DAG to condor/submit/Nova_Random_Forest_20180910_03.submit.rescue001...
+09/10/18 14:57:39 Removing submitted jobs...
+09/10/18 14:57:39 Removing any/all submitted HTCondor jobs...
+09/10/18 14:57:39 Running: /usr/bin/condor_rm -const DAGManJobId' '=?=' '5699511
+09/10/18 14:57:39 Note: 0 total job deferrals because of -MaxJobs limit (3000)
+09/10/18 14:57:39 Note: 0 total job deferrals because of -MaxIdle limit (1000)
+09/10/18 14:57:39 Note: 0 total job deferrals because of node category throttles
+09/10/18 14:57:39 Note: 0 total PRE script deferrals because of -MaxPre limit (20) or DEFER
+09/10/18 14:57:39 Note: 0 total POST script deferrals because of -MaxPost limit (20) or DEFER
+09/10/18 14:57:39 DAG status: 2 (DAG_STATUS_NODE_FAILED)
+09/10/18 14:57:39 Of 8 nodes total:
+09/10/18 14:57:39  Done     Pre   Queued    Post   Ready   Un-Ready   Failed
+09/10/18 14:57:39   ===     ===      ===     ===     ===        ===      ===
+09/10/18 14:57:39     0       0        0       0       0          0        8
+09/10/18 14:57:39 0 job proc(s) currently held
+09/10/18 14:57:39 DAGMan Runtime Statistics: [ EventCycleTimeStd = 1.137659556348787; EventCycleTimeMax = 5.421676874160767; SubmitCycleTimeMin = 4.053115844726562E-06; SubmitCycleTimeAvg = 0.2805520796006726; SleepCycleTimeCount = 30.0; SubmitCycleTimeCount = 31.0; SubmitCycleTimeMax = 5.421288967132568; SleepCycleTimeMin = 5.000370979309082; SubmitCycleTimeSum = 8.69711446762085; LogProcessCycleTimeStd = 0.0006204487623658675; SubmitCycleTimeStd = 1.119942127215296; LogProcessCycleTimeAvg = 0.0006433963775634765; EventCycleTimeMin = 1.287460327148438E-05; LogProcessCycleTimeMax = 0.001566171646118164; LogProcessCycleTimeMin = 0.0001440048217773438; LogProcessCycleTimeSum = 0.003216981887817383; LogProcessCycleTimeCount = 5.0; EventCycleTimeSum = 8.730272054672241; SleepCycleTimeSum = 150.1615009307861; SleepCycleTimeAvg = 5.005383364359537; SleepCycleTimeStd = 0.003343875829040901; SleepCycleTimeMax = 5.021811008453369; EventCycleTimeCount = 30.0; EventCycleTimeAvg = 0.2910090684890747; ]
+09/10/18 14:57:39 Wrote metrics file condor/submit/Nova_Random_Forest_20180910_03.submit.metrics.
+09/10/18 14:57:39 Metrics not sent because of PEGASUS_METRICS or CONDOR_DEVELOPERS setting.
+09/10/18 14:57:39 DAGMan Runtime Statistics: [ EventCycleTimeStd = 1.137659556348787; EventCycleTimeMax = 5.421676874160767; SubmitCycleTimeMin = 4.053115844726562E-06; SubmitCycleTimeAvg = 0.2805520796006726; SleepCycleTimeCount = 30.0; SubmitCycleTimeCount = 31.0; SubmitCycleTimeMax = 5.421288967132568; SleepCycleTimeMin = 5.000370979309082; SubmitCycleTimeSum = 8.69711446762085; LogProcessCycleTimeStd = 0.0006204487623658675; SubmitCycleTimeStd = 1.119942127215296; LogProcessCycleTimeAvg = 0.0006433963775634765; EventCycleTimeMin = 1.287460327148438E-05; LogProcessCycleTimeMax = 0.001566171646118164; LogProcessCycleTimeMin = 0.0001440048217773438; LogProcessCycleTimeSum = 0.003216981887817383; LogProcessCycleTimeCount = 5.0; EventCycleTimeSum = 8.730272054672241; SleepCycleTimeSum = 150.1615009307861; SleepCycleTimeAvg = 5.005383364359537; SleepCycleTimeStd = 0.003343875829040901; SleepCycleTimeMax = 5.021811008453369; EventCycleTimeCount = 30.0; EventCycleTimeAvg = 0.2910090684890747; ]
+09/10/18 14:57:39 **** condor_scheduniv_exec.5699511.0 (condor_DAGMAN) pid 78935 EXITING WITH STATUS 1

@@ -1,0 +1,10 @@
+# Rescue DAG file, created after running
+#   the condor/submit/Nova_Random_Forest_20180910_04.submit DAG file
+# Created 9/13/2018 01:17:06 UTC
+# Rescue DAG version: 2.0.1 (partial)
+#
+# Total number of Nodes: 8
+# Nodes premarked DONE: 0
+# Nodes that failed: 8
+#   Nova_Random_Forest_Training_20180910_03_arg_0,Nova_Random_Forest_Training_20180910_03_arg_1,Nova_Random_Forest_Training_20180910_03_arg_2,Nova_Random_Forest_Training_20180910_03_arg_3,Nova_Random_Forest_Training_20180910_03_arg_4,Nova_Random_Forest_Training_20180910_03_arg_5,Nova_Random_Forest_Training_20180910_03_arg_6,Nova_Random_Forest_Training_20180910_03_arg_7,<ENDLIST>
+

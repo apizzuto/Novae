@@ -1,0 +1,10 @@
+# Rescue DAG file, created after running
+#   the condor/submit/Nova_GRECO_processing_20190122_02.submit DAG file
+# Created 1/22/2019 21:15:50 UTC
+# Rescue DAG version: 2.0.1 (partial)
+#
+# Total number of Nodes: 9
+# Nodes premarked DONE: 0
+# Nodes that failed: 3
+#   GRECO_Simulation_Processing_20190122_02_arg_3,GRECO_Simulation_Processing_20190122_02_arg_5,GRECO_Simulation_Processing_20190122_02_arg_7,<ENDLIST>
+
