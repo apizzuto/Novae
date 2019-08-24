@@ -22,7 +22,7 @@ class Nova(object):
     '''
 
     def __init__(self, name, gamma, ra, dec, center_time, time_sigma, cutoff=None,
-                    lightcurve=None, flux_norm = 1., ref = 1.*GeV):
+                    lightcurve=None, flux_norm = 1., ref = 1.*GeV, dataset = ):
         r"""Constructor
         
         Parameters
@@ -92,13 +92,21 @@ class Nova(object):
         signal = aeff * time_int_flux * np.diff(energy_bins) #Integrate in energy space
         return energies, signal'''
 
+    def initialize_mc(self):
+        self.mc = None
+
+    def aeff(self):
+        if self.aeff is None:
+            self.initialize_aeff()
+        return 2.
+
     def calc_expected_signal(self, dataset, cutoff = True):
         energy_bins = np.logspace(0., 6., n_bins + 1)
         energies = energy_bins[:-1] + (np.diff(energy_bins) / 2.)
         flux = self.spectrum(energies, cutoff=cutoff)
         time_int_flux = flux * self.time_sigma * 86400.
-        print energies
-        print np.digitize(energies, bins = energy_bins)
+        #print energies
+        #print np.digitize(energies, bins = energy_bins)
         aeff = self.calc_aeff(dataset, energies)
         signal = aeff * time_int_flux * np.diff(energy_bins) #Integrate in energy space
         return energies, signal
@@ -126,10 +134,10 @@ class Nova(object):
         mc_msk = mc[zen_msk] #only look at events in zenith angle band
         aeff = np.histogram(mc_msk['trueE'], bins = energy_bins, weights = mc_msk['ow'])[0]
         aeff = aeff / (2. * np.pi * delta_cos_theta * 1e4 * np.diff(energy_bins)) #scale for solid angle and m^2
-        print aeff
-        print np.digitize(energy, bins = energy_bins)
-        print np.where(energy < 1e3, np.digitize(energy, bins = energy_bins) - 1, aeff[-1])
-        print np.digitize(energy, bins = energy_bins)
+        #print aeff
+        #print np.digitize(energy, bins = energy_bins)
+        #print np.where(energy < 1e3, np.digitize(energy, bins = energy_bins) - 1, aeff[-1])
+        #print np.digitize(energy, bins = energy_bins)
         inds = np.digitize(energy, bins = energy_bins) - 1
         return [aeff[-1] if ind == 50 else aeff[ind] for ind in inds]
 
