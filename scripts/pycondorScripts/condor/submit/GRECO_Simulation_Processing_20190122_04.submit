@@ -1,7 +1,0 @@
-executable = /home/apizzuto/Nova/scripts/convert_l7mc_hdf5.py
-request_memory = 4000
-log = condor/log/GRECO_Simulation_Processing_20190122_04.log
-output = condor/output/GRECO_Simulation_Processing_20190122_04.output
-error = condor/error/GRECO_Simulation_Processing_20190122_04.error
-arguments = $(ARGS)
-queue
