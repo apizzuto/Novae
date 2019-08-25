@@ -7,6 +7,8 @@ TeV = 1000. * GeV
 n_bins = 50
 delta_cos_theta = 0.05
 
+mlarson_path = '/data/user/mlarson/combo_r129072/skylab/scripts/testing/GRECO/version-001-p00/IC86_2012_mc.npy'
+
 class Nova(object):
     r''' A class to handle relevant 
         details of Fermi-LAT detected 
@@ -22,7 +24,7 @@ class Nova(object):
     '''
 
     def __init__(self, name, gamma, ra, dec, center_time, time_sigma, cutoff=None,
-                    lightcurve=None, flux_norm = 1., ref = 1.*GeV, dataset = ):
+                    lightcurve=None, flux_norm = 1., ref = 1.*GeV, dataset = mlarson_path):
         r"""Constructor
         
         Parameters
@@ -56,6 +58,8 @@ class Nova(object):
         self.lightcurve = lightcurve
         self.flux_norm = flux_norm
         self.ref = ref
+        #IDK IS THIS HOW I WANT TO DO IT?
+        self.initialize_aeff()
 
 
     def spectrum(self, energy, cutoff = True):
