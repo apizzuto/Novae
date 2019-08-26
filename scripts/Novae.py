@@ -58,8 +58,11 @@ class Nova(object):
         self.lightcurve = lightcurve
         self.flux_norm = flux_norm
         self.ref = ref
+        self.mc = None
+        self.aeff_spline = None
+        #self.initialize_mc(dataset)
         #IDK IS THIS HOW I WANT TO DO IT?
-        self.initialize_aeff()
+        #self.initialize_aeff()
 
 
     def spectrum(self, energy, cutoff = True):
@@ -96,13 +99,37 @@ class Nova(object):
         signal = aeff * time_int_flux * np.diff(energy_bins) #Integrate in energy space
         return energies, signal'''
 
-    def initialize_mc(self):
-        self.mc = None
+    def initialize_mc(self, dataset):
+         if str(type(dataset)).startswith("<class 'skylab.data"):
+            exp, mc, livetime = dataset.season('IC86, 2015') #MC is all the same
+        elif type(dataset) == str:
+            if os.path.isfile(dataset):
+                mc = np.load(dataset)
+            else:
+                raise Exception("Dataset not valid format. Must be one of:" +
+                "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
+        else:
+            if issubclass(np.ndarray, type(dataset)):
+                mc = dataset
+            else:
+                raise Exception("Dataset not valid format. Must be one of:" +
+                "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
+        self.mc = mc
 
-    def aeff(self):
+    def aeff(self, energies):
+        r'''
+        In units of m^2
+        '''
         if self.aeff is None:
             self.initialize_aeff()
-        return 2.
+        if len(list(energies)) > 1:
+            return np.where(energies < self.aeff_spline['max_sim_en'], 
+                        self.aeff_spline['spline'](energies), 
+                        self.aeff_spline['extrap_val'])
+        elif energies < self.aeff_spline['max_sim_en']:
+            return self.aeff_spline['spline'](energies)
+        else:
+            return self.aeff_spline['extrap_val']       .
 
     def calc_expected_signal(self, dataset, cutoff = True):
         energy_bins = np.logspace(0., 6., n_bins + 1)
@@ -111,12 +138,20 @@ class Nova(object):
         time_int_flux = flux * self.time_sigma * 86400.
         #print energies
         #print np.digitize(energies, bins = energy_bins)
+        # CHANGE THIS TO JUST PASS TO SELF.AEFF, THEN INTEGRATE
         aeff = self.calc_aeff(dataset, energies)
         signal = aeff * time_int_flux * np.diff(energy_bins) #Integrate in energy space
         return energies, signal
 
+    def initialize_aeff(self):
+        self.aeff_spline = None
+
     #SOMETHING IS VERY VERY WRONG HERE< I SHOULD DEFINITELY FIX THIS
     def calc_aeff(self, dataset, energy):
+        if self.mc is None:
+            self.initalize_mc()
+        if self.aeff_spline is None:
+            self.initialize_aeff()
         if str(type(dataset)).startswith("<class 'skylab.data"):
             exp, mc, livetime = dataset.season('IC86, 2015') #MC is all the same
         elif type(dataset) == str:
