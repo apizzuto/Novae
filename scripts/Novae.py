@@ -1,13 +1,16 @@
 import numpy        as np
 import pandas       as pd
+import scipy        as sp
 import os
 
 GeV = 1.
 TeV = 1000. * GeV
 n_bins = 50
-delta_cos_theta = 0.05
+delta_cos_theta = 0.1
 
 mlarson_path = '/data/user/mlarson/combo_r129072/skylab/scripts/testing/GRECO/version-001-p00/IC86_2012_mc.npy'
+def mids(arr):
+    return arr[:-1] + (np.diff(arr) / 2.)
 
 class Nova(object):
     r''' A class to handle relevant 
@@ -59,126 +62,157 @@ class Nova(object):
         self.flux_norm = flux_norm
         self.ref = ref
         self.mc = None
-        self.aeff_spline = None
-        #self.initialize_mc(dataset)
-        #IDK IS THIS HOW I WANT TO DO IT?
-        #self.initialize_aeff()
+        self.aeff_dict = None
+        self.initialize_mc(dataset)
+        self.initialize_aeff()
 
 
     def spectrum(self, energy, cutoff = True):
+        r'''
+        Returns the value of dN/dEdAdt at a given energy
+        Parameters:
+        -----------
+        energy  (float or array-like)
+            energy(-ies) at which to evaluate the flux
+        cutoff  (bool, optional)
+            if the nova has a cutoff, option to include it. If false,
+            same normalization and slope are assumed and extrapolated
+        Returns:
+        --------
+        flux (float or array-like)
+            Value(s) of flux for given energies
+        '''
         if cutoff and self.cutoff is not None:
             return self.flux_norm * np.power(energy/self.ref, self.gamma) \
                  * np.exp(-1. * energy / self.cutoff)
         else:
             return self.flux_norm * np.power(energy / self.ref, self.gamma)
 
-    '''def calc_expected_signal(self, dataset, cutoff = True):
+    def initialize_mc(self, dataset):
+        r'''
+        Initialize a Monte Carlo numpy array from either path or Skylab dataset
+        Parameters:
+        -----------
+        dataset (string, ndarray, or skylab.dataset object)
+            Way to initialize monte-carlo: either
+            (1) skylab.dataset object
+                - Initialize from approved skylab dataset, extracts ndarray
+            (2) path to numpy ndarray
+            (3) numpy ndarray
+        '''
         if str(type(dataset)).startswith("<class 'skylab.data"):
             exp, mc, livetime = dataset.season('IC86, 2015') #MC is all the same
         elif type(dataset) == str:
             if os.path.isfile(dataset):
                 mc = np.load(dataset)
             else:
-                raise Exception("Dataset not valid format. Must be one of:" + 
+                raise Exception("Dataset not valid format. Must be one of:" +
                 "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
         else:
             if issubclass(np.ndarray, type(dataset)):
                 mc = dataset
             else:
-                raise Exception("Dataset not valid format. Must be one of:" + 
+                raise Exception("Dataset not valid format. Must be one of:" +
                 "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
-        energy_bins = np.logspace(0., 4., n_bins + 1)
-        energies = energy_bins[:-1] + (np.diff(energy_bins) / 2.)
-        flux = self.spectrum(energies, cutoff=cutoff)
-        time_int_flux = flux * self.time_sigma * 86400.
         zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
         zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
-        mc_msk = mc[zen_msk] #only look at events in zenith angle band
-        aeff = np.histogram(mc_msk['trueE'], bins = energy_bins, weights = mc_msk['ow'])[0]
-        aeff = aeff / (2. * np.pi * delta_cos_theta * 1e4 * np.diff(energy_bins)) #scale for solid angle and m^2
-        signal = aeff * time_int_flux * np.diff(energy_bins) #Integrate in energy space
-        return energies, signal'''
-
-    def initialize_mc(self, dataset):
-         if str(type(dataset)).startswith("<class 'skylab.data"):
-            exp, mc, livetime = dataset.season('IC86, 2015') #MC is all the same
-        elif type(dataset) == str:
-            if os.path.isfile(dataset):
-                mc = np.load(dataset)
-            else:
-                raise Exception("Dataset not valid format. Must be one of:" +
-                "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
-        else:
-            if issubclass(np.ndarray, type(dataset)):
-                mc = dataset
-            else:
-                raise Exception("Dataset not valid format. Must be one of:" +
-                "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
+        mc = mc[zen_msk] #only look at events in zenith angle band
         self.mc = mc
 
-    def aeff(self, energies):
-        r'''
-        In units of m^2
-        '''
-        if self.aeff is None:
-            self.initialize_aeff()
-        if len(list(energies)) > 1:
-            return np.where(energies < self.aeff_spline['max_sim_en'], 
-                        self.aeff_spline['spline'](energies), 
-                        self.aeff_spline['extrap_val'])
-        elif energies < self.aeff_spline['max_sim_en']:
-            return self.aeff_spline['spline'](energies)
-        else:
-            return self.aeff_spline['extrap_val']       .
-
-    def calc_expected_signal(self, dataset, cutoff = True):
-        energy_bins = np.logspace(0., 6., n_bins + 1)
-        energies = energy_bins[:-1] + (np.diff(energy_bins) / 2.)
-        flux = self.spectrum(energies, cutoff=cutoff)
-        time_int_flux = flux * self.time_sigma * 86400.
-        #print energies
-        #print np.digitize(energies, bins = energy_bins)
-        # CHANGE THIS TO JUST PASS TO SELF.AEFF, THEN INTEGRATE
-        aeff = self.calc_aeff(dataset, energies)
-        signal = aeff * time_int_flux * np.diff(energy_bins) #Integrate in energy space
-        return energies, signal
-
     def initialize_aeff(self):
-        self.aeff_spline = None
-
-    #SOMETHING IS VERY VERY WRONG HERE< I SHOULD DEFINITELY FIX THIS
-    def calc_aeff(self, dataset, energy):
-        if self.mc is None:
-            self.initalize_mc()
-        if self.aeff_spline is None:
-            self.initialize_aeff()
-        if str(type(dataset)).startswith("<class 'skylab.data"):
-            exp, mc, livetime = dataset.season('IC86, 2015') #MC is all the same
-        elif type(dataset) == str:
-            if os.path.isfile(dataset):
-                mc = np.load(dataset)
-            else:
-                raise Exception("Dataset not valid format. Must be one of:" + 
-                "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
+        r'''
+        Calculates effective area from Monte-Carlo events with weights, stores
+        in the class
+        '''
+        d_omega = 2. * np.pi * delta_cos_theta
+        if np.max(self.mc['trueE']) < 1e3:
+            E_bins = np.logspace(0., 3., 31)
         else:
-            if issubclass(np.ndarray, type(dataset)):
-                mc = dataset
+            E_bins = np.logspace(0., 3., 31)
+        logE_bins = np.log10(E_bins)
+        dlog_E = np.diff(logE_bins)
+        weights = self.mc['ow'] / (1e4 * self.mc['trueE'] * dlog_E[np.digitize(np.log10(self.mc['trueE']), bins = logE_bins) -1] * d_omega * np.log(10.))
+        h, b = np.histogram(self.mc['trueE'], weights = weights, bins = E_bins)
+        self.aeff_dict = {'bins': b, 'vals': h}
+
+    def aeff(self, en):
+        r'''
+        Parameters:
+        -----------
+        en (float or array-like)
+            Energy at which you wish to evaluate effective area
+        Returns:
+        --------
+        aeff (float or array-like) 
+            effective area in units of m^2
+        '''
+        if self.aeff_dict == None:
+            self.initialize_aeff()
+        bin_centers = mids(self.aeff_dict['bins'])
+        aeffs = np.interp(en, bin_centers, self.aeff_dict['vals'])
+        return aeffs
+
+    def aeff_binned(self, en):
+        r'''
+        Older implementation of effective area that I don't mind keeping around
+        for cross-checks
+        Parameters:
+        -----------
+        en (float or array-like)
+            Energy at which you wish to evaluate effective area
+        Returns:
+        --------
+        aeff (float or array-like) 
+            effective area in units of m^2
+        '''
+        if type(en) == float or type(en) == int:
+            ind = np.digitize(en, bins = self.aeff_dict['bins']) - 1
+            if ind < len(h[0]):
+                return self.aeff_dict['vals'][ind] 
             else:
-                raise Exception("Dataset not valid format. Must be one of:" + 
-                "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
-        energy_bins = np.logspace(0., 3., n_bins + 1)
-        energies = energy_bins[:-1] + (np.diff(energy_bins) / 2.)
-        zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
-        zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
-        mc_msk = mc[zen_msk] #only look at events in zenith angle band
-        aeff = np.histogram(mc_msk['trueE'], bins = energy_bins, weights = mc_msk['ow'])[0]
-        aeff = aeff / (2. * np.pi * delta_cos_theta * 1e4 * np.diff(energy_bins)) #scale for solid angle and m^2
-        #print aeff
-        #print np.digitize(energy, bins = energy_bins)
-        #print np.where(energy < 1e3, np.digitize(energy, bins = energy_bins) - 1, aeff[-1])
-        #print np.digitize(energy, bins = energy_bins)
-        inds = np.digitize(energy, bins = energy_bins) - 1
-        return [aeff[-1] if ind == 50 else aeff[ind] for ind in inds]
+                return self.aeff_dict['vals'][-1]
+        else:
+            inds = np.digitize(en, bins = self.aeff_dict['bins']) - 1
+            aeffs = [self.aeff_dict['vals'][ind] if ind < len(self.aeff_dict['vals']) else self.aeff_dict['vals'][-1] for ind in inds]
+            return aeffs
 
+    def calc_dNdE(self, energies, time_integrated = False):
+        r'''
+        Given effective area and flux, calculate spectrum of expected
+        events at IceCube. Note: this curve is NOT integrated over energy, 
+        this must be done to get an actual signal
+        Parameters:
+        ----------
+        energies (float or array-like)
+            energies at which to calculate dN/dE
+        time_integrated (bool, optional, default=False)
+            integrate over time of the nova
+        '''
+        flux = self.spectrum(energies)
+        if time_integrated:
+            tot_flux = flux * self.time_sigma * 86400.
+        else:
+            tot_flux = flux
+        aeffs = self.aeff(energies) * 1e4 #Effective area in m^2, convert to cm^2
+        dNdE = aeffs * tot_flux 
+        return dNdE
 
-
+    def calc_expected_signal_binned(self, energy_bins, time_integrated = False):
+        r'''
+        Calculates number of signal events expected per energy bin
+        Parameters:
+        -----------
+        energy_bins (array)
+            bins in true neutrino energy
+        time_integrated (bool, optional, default=False)
+            integrate over time of the nova
+        '''
+        energies = mids(energy_bins)
+        flux = self.spectrum(energies)
+        if time_integrated:
+            tot_flux = flux * self.time_sigma * 86400.
+        else:
+            tot_flux = flux
+        aeffs = self.aeff(energies) * 1e4 #Effective area in m^2, convert to cm^2
+        signal = aeffs * tot_flux * np.diff(energy_bins) #Integrate in energy space
+        return signal, np.sum(signal)
