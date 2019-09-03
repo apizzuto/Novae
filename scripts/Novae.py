@@ -102,20 +102,26 @@ class Nova(object):
         '''
         if str(type(dataset)).startswith("<class 'skylab.data"):
             exp, mc, livetime = dataset.season('IC86, 2015') #MC is all the same
+            zen_msk = np.cos(mc['zenith']) > np.cos(self.zenith) - (delta_cos_theta/2.)
+            zen_msk *= np.cos(mc['zenith']) < np.cos(self.zenith) + (delta_cos_theta/2.)
         elif type(dataset) == str:
             if os.path.isfile(dataset):
                 mc = np.load(dataset)
+                zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
+                zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
             else:
                 raise Exception("Dataset not valid format. Must be one of:" +
                 "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
         else:
             if issubclass(np.ndarray, type(dataset)):
                 mc = dataset
+                zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
+                zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
             else:
                 raise Exception("Dataset not valid format. Must be one of:" +
                 "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
-        zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
-        zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
+        #zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
+        #zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
         mc = mc[zen_msk] #only look at events in zenith angle band
         self.mc = mc
 
