@@ -89,17 +89,17 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path,
     return llh
 
 def initialize_injector(nova, llh, seed=123):
-        r'''Method to make relevant injector in Skylab, done for analysis
-        checks as well as for calculating sensitivities
+    r'''Method to make relevant injector in Skylab, done for analysis
+    checks as well as for calculating sensitivities
 
-        Parameters:
-        -----------
-        nova: Nova object
-        llh: initialized Skylab PointSource Likelihood object
-        Returns:
-        --------
-        inj: Skylab injector object'''
-        print("Initializing Point Source Injector")
-        inj = PointSourceInjector(gamma = nova.famma, E0 = 1., Ecut = nova.cutoff) 
-        inj.fill(nova.dec, llh.exp, llh.mc, llh.livetime, temporal_model=llh.temporal_model)
-        return inj
+    Parameters:
+    -----------
+    nova: Nova object
+    llh: initialized Skylab PointSource Likelihood object
+    Returns:
+    --------
+    inj: Skylab injector object'''
+    print("Initializing Point Source Injector")
+    inj = PointSourceInjector(gamma = nova.gamma, E0 = 1., Ecut = nova.cutoff) 
+    inj.fill(nova.dec, llh.exp, llh.mc, llh.livetime, temporal_model=llh.temporal_model)
+    return inj

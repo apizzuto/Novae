@@ -134,7 +134,7 @@ class Nova(object):
         if np.max(self.mc['trueE']) < 1e3:
             E_bins = np.logspace(0., 3., 31)
         else:
-            E_bins = np.logspace(0., 3., 31)
+            E_bins = np.logspace(0., 9., 31)
         logE_bins = np.log10(E_bins)
         dlog_E = np.diff(logE_bins)
         weights = self.mc['ow'] / (1e4 * self.mc['trueE'] * dlog_E[np.digitize(np.log10(self.mc['trueE']), bins = logE_bins) -1] * d_omega * np.log(10.))
