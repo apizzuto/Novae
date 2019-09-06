@@ -114,9 +114,14 @@ class Nova(object):
                 "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
         else:
             if issubclass(np.ndarray, type(dataset)):
-                mc = dataset
-                zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
-                zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
+                try:
+                    mc = dataset
+                    zen_msk = np.cos(mc['zen']) > np.cos(self.zenith) - (delta_cos_theta/2.)
+                    zen_msk *= np.cos(mc['zen']) < np.cos(self.zenith) + (delta_cos_theta/2.)
+                except:
+                    mc = dataset
+                    zen_msk = np.cos(mc['zenith']) > np.cos(self.zenith) - (delta_cos_theta/2.)
+                    zen_msk *= np.cos(mc['zenith']) < np.cos(self.zenith) + (delta_cos_theta/2.)
             else:
                 raise Exception("Dataset not valid format. Must be one of:" +
                 "\n(1) Skylab Dataset\n(2) Path to MC npy file\n(3) np.ndarray")
