@@ -8,7 +8,7 @@ TeV = 1000. * GeV
 n_bins = 50
 delta_cos_theta = 0.1
 
-mlarson_path = '/data/user/mlarson/combo_r129072/skylab/scripts/testing/GRECO/version-001-p00/IC86_2012_mc.npy'
+mlarson_path = '/home/mlarson/GRECO/version-001-p00/IC86_2012_mc.npy'
 def mids(arr):
     return arr[:-1] + (np.diff(arr) / 2.)
 

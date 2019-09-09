@@ -3,7 +3,7 @@ Set of helper functions for IceCube Novae analysis.
 Author: Alex Pizzuto
 Date: (original commit) August 28, 2019
 '''
-
+import numpy as np
 
 def mids(arr):
     r'''

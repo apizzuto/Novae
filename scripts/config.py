@@ -14,6 +14,7 @@ import dateutil.parser
 import healpy as hp
 import matplotlib as mpl
 import numpy as np
+from helper_functions import *
 from astropy.time import Time
 from scipy.special import erfinv
 from skylab.datasets import Datasets
@@ -55,8 +56,13 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path,
     else:
         exp = np.load(mlarson_path + season + '_data.npy')
         mc = np.load(mlarson_path + 'IC86_2012_mc.npy')
-        exp['angErr'] = sigma
-        mc['angErr'] = sigma
+        if sigma == 'perfect':
+            deltapsi = deltaPsi(mc['dec'], mc['ra'], mc['trueDec'], mc['trueRa'])
+            exp['angErr'] = 30. * np.pi / 180.
+            mc['angErr'] = deltapsi / 1.177 #conversion factor from sigma to median
+        else:
+            exp['angErr'] = sigma
+            mc['angErr'] = sigma
         grl = np.load(mlarson_path + 'GRL/' + season + '_data.npy')
         livetime = np.sum(grl['livetime'])
         sinDec_bins = np.linspace(-1., 1., 21)
