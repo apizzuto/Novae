@@ -66,7 +66,6 @@ class Nova(object):
         self.initialize_mc(dataset)
         self.initialize_aeff()
 
-
     def spectrum(self, energy, cutoff = True):
         r'''
         Returns the value of dN/dEdAdt at a given energy
@@ -87,6 +86,30 @@ class Nova(object):
                  * np.exp(-1. * energy / self.cutoff)
         else:
             return self.flux_norm * np.power(energy / self.ref, self.gamma)
+
+    def neutrino_spectra(self, energy, cutoff = True, k_pi = 1.):
+        r'''
+        Given the gamma-ray best fit spectra, calculate the corresponding 
+        neutrino spectra. Assumes completely hadronic gamma-ray production,
+        and uses:
+
+        $$ \frac{1}{3} \sum_{\alpha} E_{\nu}^{2} Q_{\nu_{\alpha}}\left(E_{\nu}\right) 
+        \simeq \frac{K_{\pi}}{4}\left[E_{\gamma}^{2}
+         Q_{\gamma}\left(E_{\gamma}\right)\right]_{E_{\gamma}=2 E_{\nu}} $$
+
+        Parameters:
+        -----------
+        energy (float or array-like)
+            neutrino energy(-ies) at which to evaluate the flux
+        cutoff  (bool, optional)
+            if the nova has a cutoff, option to include it. If false,
+            same normalization and slope are assumed and extrapolated
+        Returns:
+        --------
+        flux (float or array-like)
+            Value(s) of flux for given energies
+        '''
+        return 3*k_pi*self.spectrum(2*energy, cutoff = cutoff) 
 
     def initialize_mc(self, dataset):
         r'''
