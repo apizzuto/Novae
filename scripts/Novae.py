@@ -87,7 +87,7 @@ class Nova(object):
         else:
             return self.flux_norm * np.power(energy / self.ref, self.gamma)
 
-    def neutrino_spectra(self, energy, cutoff = True, k_pi = 1.):
+    def neutrino_spectrum(self, energy, cutoff = True, k_pi = 1.):
         r'''
         Given the gamma-ray best fit spectra, calculate the corresponding 
         neutrino spectra. Assumes completely hadronic gamma-ray production,
@@ -222,7 +222,7 @@ class Nova(object):
         time_integrated (bool, optional, default=False)
             integrate over time of the nova
         '''
-        flux = self.spectrum(energies)
+        flux = self.neutrino_spectrum(energies)
         if time_integrated:
             tot_flux = flux * self.time_sigma * 86400.
         else:
@@ -242,7 +242,7 @@ class Nova(object):
             integrate over time of the nova
         '''
         energies = mids(energy_bins)
-        flux = self.spectrum(energies)
+        flux = self.neutrino_spectrum(energies)
         if time_integrated:
             tot_flux = flux * self.time_sigma * 86400.
         else:
