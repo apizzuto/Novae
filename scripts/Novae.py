@@ -210,7 +210,7 @@ class Nova(object):
             aeffs = [self.aeff_dict['vals'][ind] if ind < len(self.aeff_dict['vals']) else self.aeff_dict['vals'][-1] for ind in inds]
             return aeffs
 
-    def calc_dNdE(self, energies, time_integrated = False):
+    def calc_dNdE(self, energies, time_integrated = False, neutrino = True):
         r'''
         Given effective area and flux, calculate spectrum of expected
         events at IceCube. Note: this curve is NOT integrated over energy, 
@@ -222,7 +222,10 @@ class Nova(object):
         time_integrated (bool, optional, default=False)
             integrate over time of the nova
         '''
-        flux = self.neutrino_spectrum(energies)
+        if neutrino:
+            flux = self.neutrino_spectrum(energies)
+        else:
+            flux = self.spectrum(energies)
         if time_integrated:
             tot_flux = flux * self.time_sigma * 86400.
         else:
@@ -231,7 +234,7 @@ class Nova(object):
         dNdE = aeffs * tot_flux 
         return dNdE
 
-    def calc_expected_signal_binned(self, energy_bins, time_integrated = False):
+    def calc_expected_signal_binned(self, energy_bins, time_integrated = False, neutrino = True):
         r'''
         Calculates number of signal events expected per energy bin
         Parameters:
@@ -242,7 +245,10 @@ class Nova(object):
             integrate over time of the nova
         '''
         energies = mids(energy_bins)
-        flux = self.neutrino_spectrum(energies)
+        if neutrino:
+            flux = self.neutrino_spectrum(energies)
+        else:
+            flux =  self.spectrum(energies)
         if time_integrated:
             tot_flux = flux * self.time_sigma * 86400.
         else:
