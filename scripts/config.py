@@ -24,12 +24,15 @@ from skylab.ps_llh import PointSourceLLH
 from skylab.spectral_models import PowerLaw
 from skylab.temporal_models import BoxProfile, TemporalModel
 
-mlarson_path = '/data/user/mlarson/combo_r129072/skylab/scripts/testing/GRECO/version-001-p00/'
+import skylab
+print skylab.__file__
+
+mlarson_path = '/home/mlarson/GRECO/version-001-p00/'
 GeV = 1.
 TeV = 1000. * GeV
 
 def initialize_llh(nova, scramble=True, dataset = mlarson_path, 
-                        season = "IC86_2012", ncpu = 1, sigma = 30. * np.pi / 180.):
+                        season = "IC86_2012", ncpu = 1, sigma = 30. * np.pi / 180., perfect_scale = 1.):
     r''' Initializes a point source llh
 
     Parameters:
@@ -58,8 +61,9 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path,
         mc = np.load(mlarson_path + 'IC86_2012_mc.npy')
         if sigma == 'perfect':
             deltapsi = deltaPsi(mc['dec'], mc['ra'], mc['trueDec'], mc['trueRa'])
-            exp['angErr'] = 30. * np.pi / 180.
-            mc['angErr'] = deltapsi / 1.177 #conversion factor from sigma to median
+            #exp['angErr'] = 30. * np.pi / 180.
+            mc['angErr'] = deltapsi / 1.177 * perfect_scale #conversion factor from sigma to median
+            exp['angErr'] = np.random.choice(mc['angErr'], size = len(exp))
         else:
             exp['angErr'] = sigma
             mc['angErr'] = sigma
