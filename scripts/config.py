@@ -63,6 +63,7 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path,
             deltapsi = deltaPsi(mc['dec'], mc['ra'], mc['trueDec'], mc['trueRa'])
             #exp['angErr'] = 30. * np.pi / 180.
             mc['angErr'] = deltapsi / 1.177 * perfect_scale #conversion factor from sigma to median
+            mc['angErr'] *= np.power(10., np.random.randn(len(mc['angErr'])) / 3. )
             exp['angErr'] = np.random.choice(mc['angErr'], size = len(exp))
         else:
             exp['angErr'] = sigma

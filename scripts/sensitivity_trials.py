@@ -11,14 +11,16 @@ sys.path.append(base_path)
 from config import *
 from Novae import Nova
 
-parser = argparse.ArgumentParser(description='Fast Response Analysis')
+parser = argparse.ArgumentParser(description='Nova Analysis Sensitivity')
 parser.add_argument('--sigma', type=str, default = '30',
                     help='Assigned angular uncertainty in degrees, or "RandomForest"')
-parser.add_argument('--n', type=int, default=1000000,
-                    help='Number of trials')
+parser.add_argument('--n', type=int, default=1000,
+                    help='Number of trials per mean signal')
 parser.add_argument('--index', type=int, default=1, help='Index of nova list')
 parser.add_argument('--spec', type=str, default='SPL', help='Spectrum, either single' \
                             +' power law (SPL) or power law with cutoff (EPL)')
+parser.add_argument('--display', default=False, action='store_true', help='Print results '\
+                        +'for debugging')
 args = parser.parse_args()
 
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
@@ -61,7 +63,26 @@ else:
 
 #FIGURE OUT SEASON?
 llh = initialize_llh(nova, sigma = sigma, season=season)
-results = llh.do_trials(args.n, src_ra = nova.ra, src_dec = nova.dec)
-bg_trials = {'TS': results['TS'], 'ns': results['nsignal']}
+inj = initialize_injector(nova, llh)
 
-np.save('/data/user/apizzuto/Nova/analysis_trials/bg/kent/index_{}_spec_{}_sigma_{}.npy'.format(args.index, args.spec, args.sigma), bg_trials)
+results = None
+nsigs = np.linspace(1, 20, 20)
+for nsig in nsigs:
+        result = llh.do_trials(args.n, src_ra = nova.ra, src_dec = nova.dec, injector = inj, mean_signal=int(nsig), poisson=True)
+        result = append_fields(result, 'mean_ninj', [nsig]*len(result), usemask=False)
+        result = append_fields(result, 'flux', [inj.mu2flux(int(nsig))]*len(result), usemask=False)
+        names = result.dtype.names
+        names = list(names)
+        names.remove('spectrum')
+        result = result[names]
+        if results == None:
+            results = result
+        else:
+            results = np.append(results, result)
+
+if args.display:
+    from tabulate import tabulate
+    headers = results.dtype.names
+    ttable = tabulate(results, headers, tablefmt = 'fancy_grid')
+    print(ttable)
+np.save('/data/user/apizzuto/Nova/analysis_trials/sensitivity/index_{}_spec_{}_sigma_{}.npy'.format(args.index, args.spec, args.sigma), results)
