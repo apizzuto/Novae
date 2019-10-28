@@ -16,128 +16,48 @@ import argparse
 import pickle
 
 #First, parse options to fix a time window. This script will calculate the 
-#passing fraction for all levels of injected flux/fluence for this window
 parser = argparse.ArgumentParser(description = 'Nova Random Forest Grid Search')
-parser.add_argument('--a', type=bool, required=True, help='include azimuth information')
 parser.add_argument('--s', type=bool, required=True, help='Standardize Data')
 parser.add_argument('--log', type=bool, required=True, help='Fit for log of separation')
 args = parser.parse_args()
 
-standardize = args.s
-includeAzi = args.a
 logSeparation = args.log
+standardize = args.s
 
+neutrinos = np.load('/data/user/apizzuto/Nova/RandomForests/IC86_2012-2018MC_with_dpsi_with_Nstring.npy')
+neutrinos_df = pd.DataFrame.from_dict(neutrinos)
+# IF JUST NUMU:
+neutrinos_df = neutrinos_df[np.abs(neutrinos_df['ptype']) == 14]
+# IF JUST CC
+#neutrinos_df = neutrinos_df[neutrinos_df['iscc'] == True]
 
+neutrinos_df['int_type'] = np.where(neutrinos_df['iscc'] == False, 'NC', 'CC')
+neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
+                                  'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
+                                  'trueDeltaLLH', 'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow'], axis = 'columns')
+old_names = neutrinos_df.columns
+new_names = [on.replace('_', ' ') for on in old_names]
+neutrinos_df.columns = new_names
 
-FileNames = ['/home/apizzuto/Nova/GRECO_nugen_numu_LE_with_PeglegCasc.h5', '/home/apizzuto/Nova/GRECO_nugen_numu_ME_with_PeglegCasc.h5', '/home/apizzuto/Nova/GRECO_genie_numu_with_PeglegCascade.h5']
-NFiles = [4879, 644, 735]
+neutrinos_df = neutrinos_df.replace([np.inf, -np.inf], np.nan).dropna(axis=0)
+scaled_nus = neutrinos_df.copy()
+if logSeparation:
+    scaled_nus['true dpsi'] = np.log10(neutrinos_df['true dpsi'])
+else:
+    scaled_nus['true dpsi'] = neutrinos_df['true dpsi']
+scaled_nus['monopod zen'] = np.cos(neutrinos_df['monopod zen'])
+scaled_nus['zen'] = np.cos(neutrinos_df['zen'])
+scaled_nus['pidMonopodLLH'] = np.log10(neutrinos_df['pidMonopodLLH'])
+scaled_nus['monopod pegleg dpsi'] = np.power(neutrinos_df['monopod pegleg dpsi'], 0.5)
+scaled_nus['pidLength'] = np.where(neutrinos_df['pidLength'] > 0., np.log10(neutrinos_df['pidLength']), 0.)
+scaled_nus = scaled_nus.drop(['int type'], axis = 'columns')
 
-#Some helpful functions to read in from h5 files and mask arrays
+neutrinos_df = scaled_nus.copy()
 
-def getTruth(neutrinoKey, weightKey):
-    trueDict = {}
-    for key in ['energy', 'zenith', 'azimuth', 'type', 
-                'OneWeight', 'NEvents', 'MaxEnergyLog', 
-                'MinEnergyLog', 'OneWeightbyNGen']:
-        trueDict[key] = np.array([])
-        
-    for i in range(3):
-        f = h5py.File(FileNames[i], 'r')
-        for item in ['energy', 'zenith', 'azimuth', 'type']:
-            trueDict[item] = np.append(trueDict[item], f[neutrinoKey][item])
-        for item in ['OneWeight', 'NEvents', 'MaxEnergyLog', 'MinEnergyLog']:
-            trueDict[item] = np.append(trueDict[item], f[weightKey][item])
-        trueDict['OneWeightbyNGen'] = np.append(trueDict['OneWeightbyNGen'], 
-                                                f[weightKey]['OneWeight'] / (f[weightKey]['NEvents'] * NFiles[i]) )
-    return trueDict
+feature_cols = list(neutrinos_df.keys())
+feature_cols.remove('true dpsi')
 
-def getRecos(recoName, recoFits):
-    recoDict = {}
-    for key in ['energy', 'zenith', 'azimuth',
-               'logl', 'rlogl']:
-        recoDict[key] = np.array([])
-        
-    recoVars = ['energy', 'zenith', 'azimuth']
-    recoParams = ['logl', 'rlogl']
-    
-    for i in range(3):
-        f = h5py.File(FileNames[i], 'r')
-        for item in recoVars:
-            recoDict[item] = np.append(recoDict[item], f[recoName][item])
-        for item in recoParams:
-            recoDict[item] = np.append(recoDict[item], f[recoFits][item])
-            
-    angularSeparation(recoDict, true)
-    return recoDict
-
-def angularSeparation(reco, truth):
-    reco['angErr'] = np.arccos(np.sin(reco['zenith'])*np.sin(truth['zenith']) +
-                        (np.cos(reco['zenith']) *np.cos(truth['zenith']) * np.cos(reco['azimuth'] - truth['azimuth'])) ) 
-
-def maskAllRecos():
-    mask = np.zeros_like(Pegleg_track['energy'])
-    for reco in [Pegleg_track, Pegleg_cascade, Monopod, true]:
-        mask += np.isnan(reco['energy'])
-        mask += np.isnan(reco['zenith'])
-        mask += np.isinf(reco['zenith'])
-        mask += np.isinf(reco['energy']) #get rid of this if energy = 0 is helpful
-    print np.unique(mask)
-    print mask
-    mask = map(bool, mask)
-    mask = [not x for x in mask]
-    for reco in [Pegleg_track, Pegleg_cascade, Monopod, true]:
-        for key in reco.keys():
-            reco[key] = reco[key][mask]
-
-
-true = getTruth('MCNeutrino', 'I3MCWeightDict')
-Pegleg_track = getRecos('Pegleg_Fit_MN_tol10Track', 'Pegleg_Fit_MN_tol10FitParams')
-Pegleg_cascade = getRecos('Pegleg_Fit_MN_tol10HDCasc', 'Monopod_bestFitParams')
-Monopod = getRecos('Monopod_best', 'Monopod_bestFitParams')
-maskAllRecos()
-
-
-allRecoDict = {}
-for key in Monopod.keys():
-    if "Monopod" in key:
-        continue
-    if "Pegleg" in key:
-        continue
-    if "delta" in key:
-        continue
-    newKey = r'Monopod_' + key
-    allRecoDict[newKey] = Monopod[key]
-for key in Pegleg_track.keys():
-    newKey = r'Pegleg_' + key
-    allRecoDict[newKey] = Pegleg_track[key]
-allRecoDict['trueEnergy'] = true['energy']
-allRecoDict['weight'] = true['OneWeightbyNGen']
-allRecoDict[r'deltaLLH'] = Monopod['logl'] - Pegleg_track['logl']
-df = pd.DataFrame.from_dict(allRecoDict)
-
-
-for key in df.keys():
-    if "energy" in key:
-        df[key] = np.log10(df[key])
-    if "zenith" in key:
-        df[key] = np.cos(df[key])
-    if "angErr" in key and logSeparation:
-        df[key] = np.log10(df[key])
-        
-df = df.replace([np.inf, -np.inf], np.nan) #Some of these result in log(0) -> -inf, so remask
-df = df.dropna(axis=0) 
-
-
-feature_cols = list(df.keys())
-feature_cols.remove('Monopod_angErr')
-feature_cols.remove('Pegleg_angErr')
-if not includeAzi:
-    feature_cols.remove('Monopod_azimuth')
-    feature_cols.remove('Pegleg_azimuth')
-feature_cols.remove('trueEnergy')
-feature_cols.remove('weight')
-
-X,y = df[feature_cols].values, df['Pegleg_angErr'].values
+X,y = neutrinos_df[feature_cols].values, neutrinos_df['true dpsi'].values
 
 X_train, X_test, y_train, y_test =  train_test_split(X, y, 
                                                      test_size=0.5, 
@@ -147,7 +67,6 @@ if standardize:
     stdsc = StandardScaler()
     X_train = stdsc.fit(X_train).transform(X_train)
     X_test = stdsc.transform(X_test)
-
 
 param_grid = {
 'n_estimators': [int(x) for x in np.linspace(10,100,10)],
