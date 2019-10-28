@@ -11,7 +11,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import GridSearchCV
 import argparse
 import pickle
 
@@ -69,16 +69,14 @@ if standardize:
     X_test = stdsc.transform(X_test)
 
 param_grid = {
-'n_estimators': [int(x) for x in np.linspace(10,100,10)],
+'n_estimators': [int(x) for x in np.unique(np.append(np.linspace(20,100,5), np.linspace(200, 1000, 5)))],
 'max_features': [int(x) for x in np.linspace(1, len(feature_cols), 5)],
-'max_depth': [int(x) for x in np.linspace(3,20,10)],
+'max_depth': [int(x) for x in np.linspace(4,20,5)],
 'min_samples_split': [100, 1000, 10000, 10000],
 'bootstrap': [True, False]
 }
 
 forest = RandomForestRegressor()
-
-#weight = df['weight'] * np.power(df['trueEnergy'], -2)
 
 rf_search = GridSearchCV(estimator = forest,
                         param_grid = param_grid,
@@ -88,7 +86,7 @@ rf_search = GridSearchCV(estimator = forest,
 
 rf_search.fit(X_train, y_train)
 
-outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_azimuth_{}_logSeparation_{}_standardize_{}'.format(includeAzi, logSeparation, standardize)
+outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_logSeparation_{}_standardize_{}'.format(logSeparation, standardize)
 
 pickle.dump(rf_search, open(outfile, 'wb'))
 
