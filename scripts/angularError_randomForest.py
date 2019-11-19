@@ -17,8 +17,13 @@ import pickle
 
 #First, parse options to fix a time window. This script will calculate the 
 parser = argparse.ArgumentParser(description = 'Nova Random Forest Grid Search')
-parser.add_argument('--s', type=bool, required=True, help='Standardize Data')
-parser.add_argument('--log', type=bool, required=True, help='Fit for log of separation')
+parser.add_argument('--s', default=False, action='store_true',
+                        help='Standardize Data')
+parser.add_argument('--log', default=False, action='store_true',
+                        help='Fit for log of separation')
+parser.add_argument('--boot', default=False, action='store_true',
+                        help='Bootsrap')
+parser.add_argument('--minsamp', type=int, required=True, help='Min samples split for random forest')
 args = parser.parse_args()
 
 logSeparation = args.log
@@ -48,8 +53,8 @@ else:
 scaled_nus['monopod zen'] = np.cos(neutrinos_df['monopod zen'])
 scaled_nus['zen'] = np.cos(neutrinos_df['zen'])
 scaled_nus['pidMonopodLLH'] = np.log10(neutrinos_df['pidMonopodLLH'])
-scaled_nus['monopod pegleg dpsi'] = np.power(neutrinos_df['monopod pegleg dpsi'], 0.5)
-scaled_nus['pidLength'] = np.where(neutrinos_df['pidLength'] > 0., np.log10(neutrinos_df['pidLength']), 0.)
+#scaled_nus['monopod pegleg dpsi'] = np.power(neutrinos_df['monopod pegleg dpsi'], 0.5)
+#scaled_nus['pidLength'] = np.where(neutrinos_df['pidLength'] > 0., np.log10(neutrinos_df['pidLength']), 0.)
 scaled_nus = scaled_nus.drop(['int type'], axis = 'columns')
 
 neutrinos_df = scaled_nus.copy()
@@ -69,11 +74,11 @@ if standardize:
     X_test = stdsc.transform(X_test)
 
 param_grid = {
-'n_estimators': [int(x) for x in np.unique(np.append(np.linspace(20,100,5), np.linspace(200, 1000, 5)))],
+'n_estimators': [int(x) for x in np.unique(np.append(np.linspace(20,100,5), np.linspace(200, 300, 2)))],
 'max_features': [int(x) for x in np.linspace(1, len(feature_cols), 5)],
-'max_depth': [int(x) for x in np.linspace(4,20,5)],
-'min_samples_split': [100, 1000, 10000, 10000],
-'bootstrap': [True, False]
+'max_depth': [int(x) for x in np.linspace(4,16,4)],
+'min_samples_split': [args.minsamp],
+'bootstrap': [args.boot]
 }
 
 forest = RandomForestRegressor()
@@ -86,7 +91,7 @@ rf_search = GridSearchCV(estimator = forest,
 
 rf_search.fit(X_train, y_train)
 
-outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_logSeparation_{}_standardize_{}'.format(logSeparation, standardize)
+outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_logSeparation_{}_standardize_{}_bootstrap_{}_minsamples_{}'.format(logSeparation, standardize, args.boot, args.minsamp)
 
 pickle.dump(rf_search, open(outfile, 'wb'))
 
