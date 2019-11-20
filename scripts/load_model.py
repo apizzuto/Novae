@@ -39,6 +39,11 @@ def load_model(minsamp = 100, logSep = True, standardize = True):
     best_model = cv.best_estimator_
     return best_model
 
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################
 def clean_data(path, logSep = True, standardize = True, 
                 pid = None, CC_only = False):
     r'''
@@ -94,6 +99,10 @@ def clean_data(path, logSep = True, standardize = True,
         stdsc = StandardScaler()
         X_train = stdsc.fit(X_train).transform(X_train)
         X_test = stdsc.transform(X_test)
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################
+#################### FIX THIS WHOLE FUNCTION ############################        
 
 
 

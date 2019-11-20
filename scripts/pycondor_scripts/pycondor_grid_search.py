@@ -22,7 +22,14 @@ job = pycondor.Job('Novae_random_forests','/home/apizzuto/Nova/scripts/angularEr
 			)
 for sep in [True, False]:
     for logS in [True, False]:
-        job.add_arg('--s={} --log={}'.format(sep, logS))
+        for boot in [True]:
+            for minsamp in [2, 10, 100, 1000, 10000, 100000][:1]:
+                mystr = '--boot'
+                if sep:
+                    mystr += ' --s'
+                if logS:
+                    mystr += ' --log'
+                job.add_arg(mystr + ' --minsamp={}'.format(minsamp))
 
 dagman = pycondor.Dagman('Novae_Grid_Search', submit=submit, verbose=2)
 dagman.add_job(job)

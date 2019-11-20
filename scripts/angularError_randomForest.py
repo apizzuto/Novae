@@ -76,7 +76,7 @@ if standardize:
 param_grid = {
 'n_estimators': [int(x) for x in np.unique(np.append(np.linspace(20,100,5), np.linspace(200, 300, 2)))],
 'max_features': [int(x) for x in np.linspace(1, len(feature_cols), 5)],
-'max_depth': [int(x) for x in np.linspace(4,16,4)],
+'max_depth': [int(x) for x in np.linspace(16,64,4)],
 'min_samples_split': [args.minsamp],
 'bootstrap': [args.boot]
 }
@@ -91,7 +91,7 @@ rf_search = GridSearchCV(estimator = forest,
 
 rf_search.fit(X_train, y_train)
 
-outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_logSeparation_{}_standardize_{}_bootstrap_{}_minsamples_{}'.format(logSeparation, standardize, args.boot, args.minsamp)
+outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_increased_depth_logSeparation_{}_standardize_{}_bootstrap_{}_minsamples_{}'.format(logSeparation, standardize, args.boot, args.minsamp)
 
 pickle.dump(rf_search, open(outfile, 'wb'))
 

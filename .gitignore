@@ -1,2 +1,5 @@
-scripts/*.pyc
-notebooks/.ipynb_checkpoints/*
+*checkpoints
+notebook/*checkpoints*
+notebook/*Untitled*
+scripts/kent_scripts/
+data/
