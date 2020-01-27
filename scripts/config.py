@@ -43,8 +43,8 @@ exp_fields = ('run', 'event', 'subevent', 'time', 'azi', 'zen', 'ra', 'dec', 'an
 mc_fields = ('run', 'event', 'subevent', 'time', 'azi', 'zen', 'ra', 'dec', 'angErr', 'logE', 'trueRa', 'trueDec', 'trueE', 'ow')
 
 def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True, 
-                        season = "IC86_2012", ncpu = 1, sigma = 30. * np.pi / 180., perfect_scale = 1.
-                        verbose=True):
+                        season = "IC86_2012", ncpu = 1, scale=None,
+                        verbose=True, only_low_en = None, only_small_sigma = None, pull_corr=False):
     r''' Initializes a point source llh
 
     Parameters:
@@ -61,7 +61,7 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
 
     ###################### BEGIN DATASET ######################
     t0 = time.time()
-    
+
     if dataset != mlarson_path:
         sample = dataset
         name = season
@@ -70,21 +70,15 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
         energy_bins = Datasets[sample].energy_bins(name)
         grl         = Datasets[sample].grl(name)
     else:
-        exps = sorted(glob(mlarson_path + '*.data_with_angErr.npy'))
+        pc_str = 'pull_corr_numu/' if pull_corr else ''
+        exps = sorted(glob(mlarson_path + pc_str  + '*.data*.npy'))
+        print exps
         exp = np.load(exps[0])
         for e in exps[1:]:
             exp = np.append(exp, np.load(e))
-        #exp = np.load(mlarson_path + season + '.data_with_angErr.npy')
-        mc = np.load(mlarson_path + 'IC86_2012.numu_with_angErr.npy')
-        #if sigma == 'perfect':
-        #    deltapsi = deltaPsi(mc['dec'], mc['ra'], mc['trueDec'], mc['trueRa'])
-            #exp['angErr'] = 30. * np.pi / 180.
-        #    mc['angErr'] = deltapsi / 1.177 * perfect_scale #conversion factor from sigma to median
-        #    mc['angErr'] *= np.power(10., np.random.randn(len(mc['angErr'])) / 3. )
-        #    exp['angErr'] = np.random.choice(mc['angErr'], size = len(exp))
-        #else:
-        #    exp['angErr'] = sigma
-        #    mc['angErr'] = sigma
+        mcfile = glob(mlarson_path + pc_str + 'IC86_2012.numu*.npy')[0]
+        mc = np.load(mcfile)
+        
         grls = sorted(glob(mlarson_path + 'GRL/*.data.npy'))
         grl = np.load(grls[0])
         for g in grls[1:]:
@@ -100,15 +94,25 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
     mc = fields_view(mc, mc_fields)
     mc = np.rec.fromrecords(mc, formats = ['<i8','<i8','<i8','<f8','<f4','<f4','<f4','<f4','<f4','<f4','<f4','<f4','<f4','<f4'], names=mc.dtype.names)
     exp = np.rec.fromrecords(exp, formats = ['<i8','<i8','<i8','<f8','<f4','<f4','<f4','<f4','<f4','<f4'], names=exp.dtype.names)
-    #print(exp['angErr'][:50])
-    #print(mc['angErr'][:50])
 
-    factor = 1.0
-    exp['angErr'] *= factor
-    mc['angErr'] *= factor
+    #I PROBABLY NEED TO FIX THINGS ABOUT RATES IN THE GRL IF I'M CUTTING OUT EVENTS
+    if only_low_en is not None:
+        start_size = float(len(exp['logE']))
+        exp = exp[exp['logE'] > float(only_low_en)]
+        mc = mc[mc['logE'] > float(only_low_en)]
+        grl['events'] = (grl['events']*len(exp['logE']) / start_size).astype(int)
 
-    #exp['angErr'] = np.radians(90.)
-    #mc['angErr'] = np.radians(90.)
+    if only_small_sigma is not None:
+        start_size = float(len(exp['logE']))
+        exp = exp[exp['angErr'] < float(only_small_sigma)]
+        mc = mc[mc['angErr'] < float(only_small_sigma)]
+        grl['events'] = (grl['events']*len(exp['logE']) / start_size).astype(int)
+
+
+    if scale is not None:
+        exp['angErr'] *= scale
+        mc['angErr'] *= scale
+
     ##################### BEGIN LIKELIHOOD MODELS #####################
     if fit_gamma:
         if verbose:
