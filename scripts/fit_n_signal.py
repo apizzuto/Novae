@@ -26,6 +26,7 @@ parser.add_argument('--scale', default=1., type=float, help='Scale errors '\
 parser.add_argument('--lowE', default=None, help='logE cut')
 parser.add_argument('--maxSigma', default=None, help='maximum assigned error')
 parser.add_argument('--pull', action='store_true', default=False, help='Pull correct')
+parser.add_argument('--fixed', action='store_true', default=False, help='Fix gamma in likelihood')
 args = parser.parse_args()
 
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
@@ -58,10 +59,11 @@ if season == None:
     print("No valid GRECO data for nova {}".format(nova.name))
     exit()
 
+fit_gamma = not args.fixed
 #FIGURE OUT SEASON?
 scale = args.scale if args.scale != 1. else None
 llh = initialize_llh(nova, season=season, scale=scale, only_low_en=args.lowE, 
-                    only_small_sigma=args.maxSigma, pull_corr=args.pull)
+                    only_small_sigma=args.maxSigma, pull_corr=args.pull, fit_gamma = fit_gamma)
 inj = initialize_injector(nova, llh)
 print('Declination: {:.2f} \t Index: {}'.format(nova.dec*180. / np.pi, nova.gamma))
 
@@ -72,8 +74,12 @@ for nsig in nsigs:
         ni, sample = inj.sample(nova.ra, nsig, poisson=False)
         val =  llh.scan(nova.ra, nova.dec, scramble = True, seed=jjj, inject = sample,
                         time_mask = [deltaT / 2. / 86400., nova.center_time + (nova.time_sigma / 2.)])
-        TS.append(val['TS'][0]), ns.append(val['nsignal'][0]), gamma.append(val['gamma'][0])
+        TS.append(val['TS'][0]), ns.append(val['nsignal'][0])
         mean_ninj.append(nsig), ninj.append(val['n_inj'][0]), flux.append(inj.mu2flux(nsig))
+        if fit_gamma:
+            gamma.append(val['gamma'][0])
+        else:
+            gamma.append(nova.gamma)
 
 sig_trials = {'TS': TS, 'ns': ns, 'gamma': gamma, 'mean_ninj': mean_ninj, 
                 'ninj': ninj, 'flux': flux}
@@ -85,20 +91,21 @@ if args.display:
     ttable = tabulate(sig_trials, headers, tablefmt = 'fancy_grid')
     print(ttable)
 
-if scale is None and args.maxSigma is None and args.lowE is None and not args.pull:
+if scale is None and args.maxSigma is None and args.lowE is None and not args.pull and fit_gamma:
     sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, args.index, args.spec))
 elif args.pull:
     print('pull corrcted')
     add_str = 'scale_{:.2f}_'.format(scale) if scale is not None else ''
     add_str += 'lowE_{:.2f}_'.format(args.lowE) if args.lowE is not None else ''
     add_str += 'sigma_{:.2f}_'.format(args.maxSigma) if args.maxSigma is not None else ''
+    add_str += 'fit_gamma_{}_'.format(fit_gamma)
     sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/pull/{}deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(add_str, deltaT, args.index, args.spec))
 elif scale is not None:
     print('scaled option')
-    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/scaled/scale_{:.2f}_deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(scale, deltaT, args.index, args.spec))
+    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/scaled/fit_gamma_{}_scale_{:.2f}_deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(fit_gamma, scale, deltaT, args.index, args.spec))
 elif args.maxSigma is not None:
     print('maxSigma option')
-    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/cuts/sigma_{:.2f}_deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(float(args.maxSigma), deltaT, args.index, args.spec))
+    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/cuts/fit_gamma_{}_sigma_{:.2f}_deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(fit_gamma, float(args.maxSigma), deltaT, args.index, args.spec))
 else:
     print('Energy cut option')
-    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/cuts/lowE_{:.2f}_deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(float(args.lowE), deltaT, args.index, args.spec))
+    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/cuts/fit_gamma_{}_lowE_{:.2f}_deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(fit_gamma, float(args.lowE), deltaT, args.index, args.spec))

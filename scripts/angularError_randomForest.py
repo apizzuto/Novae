@@ -17,8 +17,9 @@ import pickle
 
 #First, parse options to fix a time window. This script will calculate the 
 parser = argparse.ArgumentParser(description = 'Nova Random Forest Grid Search')
-parser.add_argument('--s', default=False, action='store_true',
-                        help='Standardize Data')
+parser.add_argument('--infile', type=str, required=True, help='Numpy file to read in')
+#parser.add_argument('--s', default=False, action='store_true',
+#                        help='Standardize Data')
 parser.add_argument('--log', default=False, action='store_true',
                         help='Fit for log of separation')
 parser.add_argument('--boot', default=False, action='store_true',
@@ -27,9 +28,10 @@ parser.add_argument('--minsamp', type=int, required=True, help='Min samples spli
 args = parser.parse_args()
 
 logSeparation = args.log
-standardize = args.s
+#standardize = args.s
 
-neutrinos = np.load('/data/user/apizzuto/Nova/RandomForests/IC86_2012-2018MC_with_dpsi_with_Nstring.npy')
+neutrinos = np.load(args.infile)
+#neutrinos = np.load('/data/user/apizzuto/Nova/RandomForests/IC86_2012-2018MC_with_dpsi_with_Nstring.npy')
 neutrinos_df = pd.DataFrame.from_dict(neutrinos)
 # IF JUST NUMU:
 neutrinos_df = neutrinos_df[np.abs(neutrinos_df['ptype']) == 14]
@@ -39,7 +41,9 @@ neutrinos_df = neutrinos_df[np.abs(neutrinos_df['ptype']) == 14]
 neutrinos_df['int_type'] = np.where(neutrinos_df['iscc'] == False, 'NC', 'CC')
 neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
                                   'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
-                                  'trueDeltaLLH', 'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow'], axis = 'columns')
+                                  #'trueDeltaLLH', 
+                                    'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow',
+                                    'conv', 'prompt', 'astro'], axis = 'columns')
 old_names = neutrinos_df.columns
 new_names = [on.replace('_', ' ') for on in old_names]
 neutrinos_df.columns = new_names
@@ -68,15 +72,17 @@ X_train, X_test, y_train, y_test =  train_test_split(X, y,
                                                      test_size=0.5, 
                                                      random_state=1) 
 
-if standardize:
-    stdsc = StandardScaler()
-    X_train = stdsc.fit(X_train).transform(X_train)
-    X_test = stdsc.transform(X_test)
+#Either need to weight appropriately or fit based on training sample,
+#so this option isn't really used
+#if standardize:
+#    stdsc = StandardScaler()
+#    X_train = stdsc.fit(X_train).transform(X_train)
+#    X_test = stdsc.transform(X_test)
 
 param_grid = {
 'n_estimators': [int(x) for x in np.unique(np.append(np.linspace(20,100,5), np.linspace(200, 300, 2)))],
 'max_features': [int(x) for x in np.linspace(1, len(feature_cols), 5)],
-'max_depth': [int(x) for x in np.linspace(16,64,4)],
+'max_depth': [4, 6, 8, 10, 12, 14, 16, 32],
 'min_samples_split': [args.minsamp],
 'bootstrap': [args.boot]
 }
@@ -91,7 +97,7 @@ rf_search = GridSearchCV(estimator = forest,
 
 rf_search.fit(X_train, y_train)
 
-outfile = '/data/user/apizzuto/Nova/RandomForests/GridSearchResults_increased_depth_logSeparation_{}_standardize_{}_bootstrap_{}_minsamples_{}'.format(logSeparation, standardize, args.boot, args.minsamp)
+outfile = '/data/user/apizzuto/Nova/RandomForests/v2.2/GridSearchResults_logSeparation_{}_bootstrap_{}_minsamples_{}'.format(logSeparation, args.boot, args.minsamp)
 
 pickle.dump(rf_search, open(outfile, 'wb'))
 

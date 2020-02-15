@@ -11,10 +11,10 @@ sys.path.append(base_path)
 from config import *
 from Novae import Nova
 
-parser = argparse.ArgumentParser(description='Fast Response Analysis')
-parser.add_argument('--sigma', type=str, default = '30',
-                    help='Assigned angular uncertainty in degrees, or "RandomForest"')
-parser.add_argument('--n', type=int, default=1000000,
+parser = argparse.ArgumentParser(description='Novae background')
+parser.add_argument('--deltaT', type=float, default = 1000.,
+                    help='Time window in seconds')
+parser.add_argument('--n', type=int, default=100000,
                     help='Number of trials')
 parser.add_argument('--index', type=int, default=1, help='Index of nova list')
 parser.add_argument('--spec', type=str, default='SPL', help='Spectrum, either single' \
@@ -24,18 +24,22 @@ args = parser.parse_args()
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
 df = df.sort_values('Start Time (gamma ray)')
 
+deltaT = args.deltaT
+
 novae = []
 seasons = []
 if args.spec == 'EPL':
     for index, row in df.iterrows():
-        a = Nova(row['Name'], -1*row['EPL gamma'], np.radians(row['RA (Deg)']), np.radians(row['Dec. (Deg)']), 
-                row['Start Time (gamma ray)'], row['Duration (gamma ray)'], flux_norm=row['EPL flux']*1e-7, cutoff = row['EPL cutoff '])
+        a = Nova(row['Name'], row['EPL gamma'], np.radians(row['RA (Deg)']), np.radians(row['Dec. (Deg)']), 
+                row['Start Time (gamma ray)'], deltaT / 86400., #row['Duration (gamma ray)'],
+                 flux_norm=row['EPL flux']*1e-7, cutoff = row['EPL cutoff '])
         novae.append(a)
         seasons.append(row['GRECO season'])
 elif args.spec == 'SPL':
     for index, row in df.iterrows():
-        a = Nova(row['Name'], -1.*row['SPL gamma'], np.radians(row['RA (Deg)']), np.radians(row['Dec. (Deg)']), 
-                row['Start Time (gamma ray)'], row['Duration (gamma ray)'], flux_norm=row['SPL flux']*1e-7, cutoff = None)
+        a = Nova(row['Name'], row['SPL gamma'], np.radians(row['RA (Deg)']), np.radians(row['Dec. (Deg)']), 
+                row['Start Time (gamma ray)'], deltaT / 86400., #row['Duration (gamma ray)'],
+                     flux_norm=row['SPL flux']*1e-7, cutoff = None)
         novae.append(a)
         seasons.append(row['GRECO season'])
 else:
@@ -48,20 +52,12 @@ if season == None:
     print("No valid GRECO data for nova {}".format(nova.name))
     exit()
 
-if args.sigma == 'perfect':
-    sigma = 'perfect'
-elif args.sigma == 'RandomForest':
-    raise ValueError("I still haven't implemented this option")
-else:
-    try:
-        sigma = float(args.sigma) * np.pi / 180.
-    except:
-        print('Bad sigma argument, using 30 degrees')
-        sigma = 30. * np.pi / 180.
-
 #FIGURE OUT SEASON?
-llh = initialize_llh(nova, sigma = sigma, season=season)
-results = llh.do_trials(args.n, src_ra = nova.ra, src_dec = nova.dec)
-bg_trials = {'TS': results['TS'], 'ns': results['nsignal']}
-
-np.save('/data/user/apizzuto/Nova/analysis_trials/bg/kent/index_{}_spec_{}_sigma_{}.npy'.format(args.index, args.spec, args.sigma), bg_trials)
+llh = initialize_llh(nova, season=season)
+TS, ns, gamma, = [], [], []
+for jjj in range(args.n):
+    val =  llh.scan(nova.ra,nova.dec, scramble = True, seed=jjj, 
+                    time_mask = [deltaT / 2. / 86400., nova.center_time + (nova.time_sigma / 2.)])
+    TS.append(val['TS'][0]), ns.append(val['nsignal'][0]), gamma.append(val['gamma'][0])
+bg_trials = {'TS': TS, 'ns': ns, 'gamma': gamma}
+np.save('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, args.index, args.spec), bg_trials)

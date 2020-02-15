@@ -72,7 +72,6 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
     else:
         pc_str = 'pull_corr_numu/' if pull_corr else ''
         exps = sorted(glob(mlarson_path + pc_str  + '*.data*.npy'))
-        print exps
         exp = np.load(exps[0])
         for e in exps[1:]:
             exp = np.append(exp, np.load(e))
@@ -114,6 +113,7 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
         mc['angErr'] *= scale
 
     ##################### BEGIN LIKELIHOOD MODELS #####################
+    print fit_gamma
     if fit_gamma:
         if verbose:
             print "Fitting gamma"

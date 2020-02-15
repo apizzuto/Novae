@@ -19,10 +19,10 @@ from numpy.lib.recfunctions import append_fields
 
 neutrinos = np.load(args.infile)
 #Next few lines because monopod reco angles are swapped in original MC file
-tmp_azi = neutrinos['monopod_zen'].copy()
-tmp_zen = neutrinos['monopod_azi'].copy()
-neutrinos['monopod_zen'] = tmp_zen
-neutrinos['monopod_azi'] = tmp_azi
+#tmp_azi = neutrinos['monopod_zen'].copy()
+#tmp_zen = neutrinos['monopod_azi'].copy()
+#neutrinos['monopod_zen'] = tmp_zen
+#neutrinos['monopod_azi'] = tmp_azi
 
 mzens = neutrinos['monopod_zen'].astype(float)
 mazis = neutrinos['monopod_azi'].astype(float)
