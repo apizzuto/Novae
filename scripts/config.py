@@ -133,14 +133,14 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
 
     if only_small_sigma is not None:
         start_size = float(len(exp['logE']))
-        exp = exp[exp['angErr'] < float(only_small_sigma)]
-        mc = mc[mc['angErr'] < float(only_small_sigma)]
+        exp = exp[exp['sigma'] < float(only_small_sigma)]
+        mc = mc[mc['sigma'] < float(only_small_sigma)]
         grl['events'] = (grl['events']*len(exp['logE']) / start_size).astype(int)
 
 
     if scale is not None:
-        exp['angErr'] *= scale
-        mc['angErr'] *= scale
+        exp['sigma'] *= scale
+        mc['sigma'] *= scale
 
     ##################### BEGIN LIKELIHOOD MODELS #####################
     print fit_gamma
