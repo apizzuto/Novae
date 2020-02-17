@@ -9,7 +9,7 @@ n_bins = 50
 delta_cos_theta = 0.1
 
 #mlarson_path = '/home/mlarson/GRECO/version-001-p00/IC86_2012_mc.npy'
-mlarson_path = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/IC86_2012.numu.npy'
+mlarson_path = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/IC86_2012.numu_with_angErr.npy'
 
 def mids(arr):
     return arr[:-1] + (np.diff(arr) / 2.)

@@ -29,10 +29,33 @@ import skylab
 print skylab.__file__
 
 #mlarson_path = '/home/mlarson/GRECO/version-001-p00/'
-mlarson_path = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/'
+mlarson_path = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
 
 GeV = 1.
 TeV = 1000. * GeV
+
+def rename_fields(data, subs):
+    r"""Substitute data field names for new names
+
+    Parameters
+    ----------
+    data : structured array
+        Structured data array with original field names
+    subs : list
+        List of (name, new name) tuples
+
+    Returns
+    -------
+    data : structured array
+        Structured data array with new field names
+    """
+    dnames = list(data.dtype.names)
+    for name, rename in subs:
+        dnames[dnames.index(name)] = rename
+    data.dtype.names = tuple(dnames)
+    return data
+
+
 
 def fields_view(array, fields):
     return array.getfield(np.dtype(
@@ -71,7 +94,7 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
         grl         = Datasets[sample].grl(name)
     else:
         pc_str = 'pull_corr_numu/' if pull_corr else ''
-        exps = sorted(glob(mlarson_path + pc_str  + '*.data*.npy'))
+        exps = sorted(glob(mlarson_path + pc_str  + '*.data_with_angErr.npy'))
         exp = np.load(exps[0])
         for e in exps[1:]:
             exp = np.append(exp, np.load(e))
@@ -93,6 +116,13 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
     mc = fields_view(mc, mc_fields)
     mc = np.rec.fromrecords(mc, formats = ['<i8','<i8','<i8','<f8','<f4','<f4','<f4','<f4','<f4','<f4','<f4','<f4','<f4','<f4'], names=mc.dtype.names)
     exp = np.rec.fromrecords(exp, formats = ['<i8','<i8','<i8','<f8','<f4','<f4','<f4','<f4','<f4','<f4'], names=exp.dtype.names)
+
+    if "angErr" in exp.dtype.names:
+        subs = [('angErr', 'sigma'),
+                ('azi', 'azimuth'),
+                ('zen', 'zenith')]
+        exp = rename_fields(exp, subs)
+        mc = rename_fields(mc, subs)
 
     #I PROBABLY NEED TO FIX THINGS ABOUT RATES IN THE GRL IF I'M CUTTING OUT EVENTS
     if only_low_en is not None:
