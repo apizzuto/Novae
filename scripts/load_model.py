@@ -9,7 +9,7 @@ df_feature_cols = ['nstring', 'nchannel', 'zen', 'logE', 'cascade energy',
          'monopod zen', 'pidDeltaLLH', 'pidPeglegLLH', 'pidMonopodLLH',
          'pidLength', 'monopod pegleg dpsi']
 
-model_path = '/data/user/apizzuto/Nova/RandomForests/'
+model_path = '/data/user/apizzuto/Nova/RandomForests/v2.2/'
 
 def load_model(minsamp = 100, logSep = True, standardize = False):
     r'''
@@ -30,7 +30,6 @@ def load_model(minsamp = 100, logSep = True, standardize = False):
     '''
     cv = pickle.load(open(model_path +  
         'GridSearchResults_logSeparation_{}'.format(logSep) + \
-        '_standardize_{}'.format(standardize) + \
         '_bootstrap_True_minsamples_{}'.format(minsamp)))
     best_model = cv.best_estimator_
     return best_model
@@ -59,9 +58,14 @@ def clean_monte_carlo(path, logSep = True, standardize = False,
         neutrinos_df = neutrinos_df[np.abs(neutrinos_df['ptype']) == pid]
     #if CC_only:
     neutrinos_df['int_type'] = np.where(neutrinos_df['iscc'] == False, 'NC', 'CC')
+    #neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
+    #                              'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
+    #                              'trueDeltaLLH', 'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow'], axis = 'columns')
     neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
-                                  'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
-                                  'trueDeltaLLH', 'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow'], axis = 'columns')
+                                          'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
+                                          #'trueDeltaLLH', 
+                                          'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow',
+                                          'conv', 'astro', 'prompt'], axis = 'columns')
     old_names = neutrinos_df.columns
     new_names = [on.replace('_', ' ') for on in old_names]
     neutrinos_df.columns = new_names

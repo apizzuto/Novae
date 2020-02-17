@@ -16,12 +16,12 @@ infiles = glob(args.infiles)
 for infile in infiles:
     events = np.load(infile)
 
-    if np.max(events['monopod_zen']) > np.max(events['monopod_azi']):
-        #Next few lines because monopod reco angles are swapped in original MC file
-        tmp_azi = events['monopod_zen'].copy()
-        tmp_zen = events['monopod_azi'].copy()
-        events['monopod_zen'] = tmp_zen
-        events['monopod_azi'] = tmp_azi
+    #if np.max(events['monopod_zen']) > np.max(events['monopod_azi']):
+    #    #Next few lines because monopod reco angles are swapped in original MC file
+    #    tmp_azi = events['monopod_zen'].copy()
+    #    tmp_zen = events['monopod_azi'].copy()
+    #    events['monopod_zen'] = tmp_zen
+    #    events['monopod_azi'] = tmp_azi
 
     monopod_ra, monopod_dec = astro.dir_to_equa(events['monopod_zen'].astype(float), 
                         events['monopod_azi'].astype(float), events['time'].astype(float))
