@@ -20,16 +20,13 @@ job = pycondor.Job('Novae_random_forests','/home/apizzuto/Nova/scripts/angularEr
             request_cpus=5,
 			extra_lines= ['should_transfer_files = YES', 'when_to_transfer_output = ON_EXIT', 'Requirements =  (Machine != "node128.icecube.wisc.edu")']
 			)
-for sep in [True, False]:
-    for logS in [True, False]:
-        for boot in [True]:
-            for minsamp in [2, 10, 100, 1000, 10000, 100000][:1]:
-                mystr = '--boot'
-                if sep:
-                    mystr += ' --s'
-                if logS:
-                    mystr += ' --log'
-                job.add_arg(mystr + ' --minsamp={}'.format(minsamp))
+for logS in [True, False]:
+    for boot in [True]:
+        for minsamp in [10, 100, 1000, 10000, 100000]:
+            mystr = '--boot'
+            if logS:
+                mystr += ' --log'
+            job.add_arg(mystr + ' --minsamp={} --infile=/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/IC86_2012.numu_with_delta_psi.npy'.format(minsamp))
 
 dagman = pycondor.Dagman('Novae_Grid_Search', submit=submit, verbose=2)
 dagman.add_job(job)

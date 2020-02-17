@@ -16,14 +16,14 @@ job = pycondor.Job('sensitivitytrials_novae_greco','/home/apizzuto/Nova/scripts/
             getenv=True,
             universe='vanilla',
 			verbose=2, 
-			request_memory=8000,
+			request_memory=2000,
 			extra_lines= ['should_transfer_files = YES', 'when_to_transfer_output = ON_EXIT', 'Requirements =  (Machine != "node128.icecube.wisc.edu")']
 			)
 #for sigma in ['1', '10', '20', '30', '45', '90']:
-for sigma in ['perfect']:
+for deltaT in np.logspace(1., 7., 7):
     for index in range(15):
         for spec in ['SPL', 'EPL']:
-    		job.add_arg('--sigma={} --index={} --spec={} --n=1000'.format(sigma, index, spec))
+    		job.add_arg('--deltaT={} --index={} --spec={} --n=1000'.format(deltaT, index, spec))
 
 dagman = pycondor.Dagman('Skylab_Novae_sensitivity_trials', submit=submit, verbose=2)
 dagman.add_job(job)
