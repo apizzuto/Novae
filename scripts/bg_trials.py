@@ -19,6 +19,7 @@ parser.add_argument('--n', type=int, default=100000,
 parser.add_argument('--index', type=int, default=1, help='Index of nova list')
 parser.add_argument('--spec', type=str, default='SPL', help='Spectrum, either single' \
                             +' power law (SPL) or power law with cutoff (EPL)')
+parser.add_argument('--display', default=False, action='store_true')
 args = parser.parse_args()
 
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
@@ -60,4 +61,12 @@ for jjj in range(args.n):
                     time_mask = [deltaT / 2. / 86400., nova.center_time + (nova.time_sigma / 2.)])
     TS.append(val['TS'][0]), ns.append(val['nsignal'][0]), gamma.append(val['gamma'][0])
 bg_trials = {'TS': TS, 'ns': ns, 'gamma': gamma}
+
+if args.display:
+    from tabulate import tabulate
+    bg_table = pd.DataFrame(bg_trials)
+    headers = bg_table.columns
+    ttable = tabulate(bg_table, headers, tablefmt = 'fancy_grid')
+    print(ttable)
+
 np.save('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, args.index, args.spec), bg_trials)

@@ -27,12 +27,12 @@ def find_nearest_idx(array, value):
     return idx
 
 def pass_vs_inj(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, with_err = True, trim=-1):
-    print("YO WHAT UP")
-    #bg_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra), allow_pickle=True).item()
-    #bg_trials = bg_trials['TS']
-    signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra))
+    #print("YO WHAT UP")
+    bg_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra), allow_pickle=True).item()
+    bg_trials = bg_trials['TS']
+    signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, index, spectra))
     #signal_trials = signal_trials[signal_trials['gamma'] == gamma]
-    bg_thresh = 0.0#np.percentile(bg_trials, threshold * 100.)
+    bg_thresh = np.percentile(bg_trials, threshold * 100.)
     signal_fluxes, signal_indices = np.unique(signal_trials['mean_ninj'], return_index=True)
     signal_indices = np.append(signal_indices, len(signal_trials))
     if trim != -1 and trim < 0:
@@ -81,7 +81,7 @@ def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns
         if fit_dict['ls'] == '-':
             ax.axhline(0.9, color = palette[-1], linewidth = 0.3, linestyle = '-.')
             ax.axvline(fit_dict['sens'], color = palette[-1], linewidth = 0.3, linestyle = '-.')
-            ax.text(5, 0.5, r'Sens. = {:.2f}'.format(fit_dict['sens']))
+            ax.text(2.5, 0.5, r'Sens. = {:.2f}'.format(fit_dict['sens']))
     ax.errorbar(signal_fluxes, passing, yerr=errs, capsize = 3, linestyle='', marker = 's', markersize = 2)
     ax.legend(loc=4, fontsize = fontsize)
     ax.set_ylim(0.0, 1.05)

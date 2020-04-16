@@ -179,7 +179,8 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
         print("LLH Initialization took {} seconds\n\n".format(time.time() - t0))
     return llh
 
-def initialize_injector(nova, llh, seed=123, verbose=True):
+def initialize_injector(nova, llh, seed=123, verbose=True, inj_e_range=(0., np.inf),
+        fixed_inj_gamma = None):
     r'''Method to make relevant injector in Skylab, done for analysis
     checks as well as for calculating sensitivities
 
@@ -192,6 +193,8 @@ def initialize_injector(nova, llh, seed=123, verbose=True):
     inj: Skylab injector object'''
     if verbose:
         print("Initializing Point Source Injector")
-    inj = PointSourceInjector(gamma = nova.gamma, E0 = 1., Ecut = nova.cutoff) 
+    inj_gamma = nova.gamma if fixed_inj_gamma is None else fixed_inj_gamma
+    inj_cut = nova.cutoff if fixed_inj_gamma is None else None
+    inj = PointSourceInjector(gamma = inj_gamma, E0 = 1., Ecut = inj_cut, e_range=inj_e_range) 
     inj.fill(nova.dec, llh.exp, llh.mc, llh.livetime, temporal_model=llh.temporal_model)
     return inj
