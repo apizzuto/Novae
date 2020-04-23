@@ -17,6 +17,7 @@ ytick.right : True
 xtick.top : True
 axes.grid : True
 axes.grid.which : major
+axes.linewidth: 1.5
 grid.color : lightgrey
 grid.alpha : 0.4
 grid.linewidth : 0.75

@@ -19,7 +19,7 @@ job = pycondor.Job('backgroundtrials_novae_greco','/home/apizzuto/Nova/scripts/b
 			request_memory=3000,
 			extra_lines= ['should_transfer_files = YES', 'when_to_transfer_output = ON_EXIT', 'Requirements =  (Machine != "node128.icecube.wisc.edu")']
 			)
-for deltaT in np.logspace(1., 7., 7):
+for deltaT in np.logspace(-1, 7., 17):
     for index in range(16):
         for spec in ['SPL', 'EPL']:
     		job.add_arg('--deltaT={} --index={} --spec={} --n=100000'.format(deltaT, index, spec))

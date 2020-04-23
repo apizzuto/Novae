@@ -61,7 +61,7 @@ print(inj.mu2flux(5))
 
 
 TS, ns, gamma, mean_ninj, ninj, flux = [], [], [], [], [], []
-nsigs = np.linspace(1, 20, 20)
+nsigs = np.unique(np.append(np.linspace(1, 20, 20), np.linspace(20., 100., 9)))
 for nsig in nsigs:
     for jjj in range(args.n):
         ni, sample = inj.sample(nova.ra, nsig, poisson=True)

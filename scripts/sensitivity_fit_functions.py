@@ -26,11 +26,25 @@ def find_nearest_idx(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def pass_vs_inj(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, with_err = True, trim=-1):
+def num_evs_to_flux(N, ind, deltaT, spectra='SPL', differential=False, lowE=1e0):
+    if not differential:
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, ind, spectra), allow_pickle=True)
+    else:
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(deltaT, ind, spectra, lowE, lowE*10.), allow_pickle=True)
+    fls = signal_trials['flux'][signal_trials['mean_ninj'] == 1.]
+    fl_conv = np.median(fls)
+    return N * fl_conv
+
+
+def pass_vs_inj(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, 
+                    with_err = True, trim=-1, differential=False, lowE=1e0):
     #print("YO WHAT UP")
     bg_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra), allow_pickle=True).item()
     bg_trials = bg_trials['TS']
-    signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, index, spectra))
+    if not differential:
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, index, spectra), allow_pickle=True)
+    else:
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(deltaT, index, spectra, lowE, lowE*10.), allow_pickle=True)
     #signal_trials = signal_trials[signal_trials['gamma'] == gamma]
     bg_thresh = np.percentile(bg_trials, threshold * 100.)
     signal_fluxes, signal_indices = np.unique(signal_trials['mean_ninj'], return_index=True)
@@ -53,7 +67,8 @@ def pass_vs_inj(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = Tru
         errs = np.maximum(errs, bound_case_sigma)
         return signal_fluxes, passing, errs
     
-def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, with_err = True, trim=-1, ax = None, p0 = None, fontsize = 16):
+def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, with_err = True, trim=-1, ax = None, 
+            p0 = None, fontsize = 16, legend=True):
     signal_fluxes, passing, errs = pass_vs_inj(index, spectra=spectra, deltaT=deltaT, threshold=threshold, in_ns=in_ns, with_err=with_err, trim=trim)
     fits, plist = [], []
     try:
@@ -68,8 +83,9 @@ def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns
         #print("at least one fit failed")
     #Find best fit of the three, make it look different in plot
     plist = np.array(plist)
-    best_fit_ind= np.argmax(plist)
-    fits[best_fit_ind]['ls'] = '-'
+    if len(plist) > 0:
+        best_fit_ind= np.argmax(plist)
+        fits[best_fit_ind]['ls'] = '-'
     
     if ax==None:
         fig, ax = plt.subplots()
@@ -81,13 +97,17 @@ def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns
         if fit_dict['ls'] == '-':
             ax.axhline(0.9, color = palette[-1], linewidth = 0.3, linestyle = '-.')
             ax.axvline(fit_dict['sens'], color = palette[-1], linewidth = 0.3, linestyle = '-.')
-            ax.text(2.5, 0.5, r'Sens. = {:.2f}'.format(fit_dict['sens']))
+            ax.text(2.5, 0.5, r'Sens. = {:.2f}'.format(fit_dict['sens']), fontsize=fontsize)
     ax.errorbar(signal_fluxes, passing, yerr=errs, capsize = 3, linestyle='', marker = 's', markersize = 2)
-    ax.legend(loc=4, fontsize = fontsize)
+    if legend:
+        ax.legend(loc=4, fontsize = fontsize)
     ax.set_ylim(0.0, 1.05)
     
-def calc_sensitivity(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, with_err = True, trim=-1, p0=None):
-    signal_fluxes, passing, errs = pass_vs_inj(index, spectra, deltaT=deltaT, threshold=threshold, in_ns=in_ns, with_err=with_err, trim=trim)
+def calc_sensitivity(index, spectra='SPL', deltaT=1000., threshold = 0.5, 
+        in_ns = True, with_err = True, trim=-1, p0=None, differential = False, lowE=1e0):
+    signal_fluxes, passing, errs = pass_vs_inj(index, spectra=spectra, deltaT=deltaT, threshold=threshold, 
+                                        in_ns=in_ns, with_err=with_err, trim=trim, differential=differential, 
+                                        lowE = lowE)
     fits, plist = [], []
     try:
         fits.append(sensitivity_fit(signal_fluxes, passing, errs, chi2cdf, p0=p0))
@@ -100,8 +120,11 @@ def calc_sensitivity(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns 
         pass
     #Find best fit of the three, make it look different in plot
     plist = np.array(plist)
-    best_fit_ind= np.argmax(plist)
-    return fits[best_fit_ind]
+    try:
+        best_fit_ind = np.argmax(plist)
+        return fits[best_fit_ind]
+    except:
+        return None
     
 def sensitivity_fit(signal_fluxes, passing, errs, fit_func, p0 = None, conf_lev = 0.9):
     try:

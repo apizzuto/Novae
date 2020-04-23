@@ -65,7 +65,7 @@ inj = initialize_injector(nova, llh, inj_e_range=(inj_low_E, inj_high_E), fixed_
 
 
 TS, ns, gamma, mean_ninj, ninj, flux = [], [], [], [], [], []
-nsigs = np.linspace(1, 20, 20)
+nsigs = np.unique(np.append(np.linspace(1, 20, 20), np.linspace(20., 100., 9)))
 for nsig in nsigs:
     for jjj in range(args.n):
         ni, sample = inj.sample(nova.ra, nsig, poisson=True)
