@@ -3,3 +3,8 @@ notebook/*checkpoints*
 notebook/*Untitled*
 scripts/kent_scripts/
 data/
+Upgrade_MC/
+effective_areas_Ali.txt
+models/
+scripts/optical_novae/
+scripts/mprofile*
