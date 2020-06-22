@@ -26,25 +26,27 @@ def find_nearest_idx(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def num_evs_to_flux(N, ind, deltaT, spectra='SPL', differential=False, lowE=1e0):
+def num_evs_to_flux(N, ind, deltaT, spectra='SPL', differential=False, lowE=1e0, all_flavor=True):
+    flavor_str = 'all_flavor/' if all_flavor else ''
     if not differential:
-        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, ind, spectra), allow_pickle=True)
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/{}deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(flavor_str, deltaT, ind, spectra), allow_pickle=True)
     else:
-        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(deltaT, ind, spectra, lowE, lowE*10.), allow_pickle=True)
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/{}deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(flavor_str, deltaT, ind, spectra, lowE, lowE*10.), allow_pickle=True)
     fls = signal_trials['flux'][signal_trials['mean_ninj'] == 1.]
     fl_conv = np.median(fls)
     return N * fl_conv
 
 
 def pass_vs_inj(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, 
-                    with_err = True, trim=-1, differential=False, lowE=1e0):
+                    with_err = True, trim=-1, differential=False, lowE=1e0, all_flavor=True):
     #print("YO WHAT UP")
+    flavor_str = 'all_flavor/' if all_flavor else ''
     bg_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra), allow_pickle=True).item()
     bg_trials = bg_trials['TS']
     if not differential:
-        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, index, spectra), allow_pickle=True)
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/{}deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(flavor_str, deltaT, index, spectra), allow_pickle=True)
     else:
-        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(deltaT, index, spectra, lowE, lowE*10.), allow_pickle=True)
+        signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/{}deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(flavor_str, deltaT, index, spectra, lowE, lowE*10.), allow_pickle=True)
     #signal_trials = signal_trials[signal_trials['gamma'] == gamma]
     bg_thresh = np.percentile(bg_trials, threshold * 100.)
     signal_fluxes, signal_indices = np.unique(signal_trials['mean_ninj'], return_index=True)
@@ -68,8 +70,8 @@ def pass_vs_inj(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = Tru
         return signal_fluxes, passing, errs
     
 def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns = True, with_err = True, trim=-1, ax = None, 
-            p0 = None, fontsize = 16, legend=True):
-    signal_fluxes, passing, errs = pass_vs_inj(index, spectra=spectra, deltaT=deltaT, threshold=threshold, in_ns=in_ns, with_err=with_err, trim=trim)
+            p0 = None, fontsize = 16, legend=True, all_flavor=True):
+    signal_fluxes, passing, errs = pass_vs_inj(index, spectra=spectra, deltaT=deltaT, threshold=threshold, in_ns=in_ns, with_err=with_err, trim=trim, all_flavor=all_flavor)
     fits, plist = [], []
     try:
         fits.append(sensitivity_fit(signal_fluxes, passing, errs, chi2cdf, p0=p0))
@@ -104,10 +106,10 @@ def sensitivity_curve(index, spectra='SPL', deltaT=1000., threshold = 0.5, in_ns
     ax.set_ylim(0.0, 1.05)
     
 def calc_sensitivity(index, spectra='SPL', deltaT=1000., threshold = 0.5, 
-        in_ns = True, with_err = True, trim=-1, p0=None, differential = False, lowE=1e0):
+        in_ns = True, with_err = True, trim=-1, p0=None, differential = False, lowE=1e0, all_flavor=True):
     signal_fluxes, passing, errs = pass_vs_inj(index, spectra=spectra, deltaT=deltaT, threshold=threshold, 
                                         in_ns=in_ns, with_err=with_err, trim=trim, differential=differential, 
-                                        lowE = lowE)
+                                        lowE = lowE, all_flavor=all_flavor)
     fits, plist = [], []
     try:
         fits.append(sensitivity_fit(signal_fluxes, passing, errs, chi2cdf, p0=p0))
@@ -145,10 +147,11 @@ def sensitivity_fit(signal_fluxes, passing, errs, fit_func, p0 = None, conf_lev 
             'dof': dof, 'xfit': xfit, 'yfit': yfit, 
             'name': name, 'pval':pval, 'ls':'--', 'sens': sens}
 
-def pvals_for_signal(index, spectra='SPL', deltaT=1000., ns = 1, sigma_units = False):
+def pvals_for_signal(index, spectra='SPL', deltaT=1000., ns = 1, sigma_units = False, all_flavor=True):
+    flavor_str = 'all_flavor/' if all_flavor else ''
     bg_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/bg/kent/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra), allow_pickle=True).item()
     bg_trials = bg_trials['TS']
-    signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/deltaT_{:.1e}_index_{}_spec_{}.npy'.format(deltaT, index, spectra))
+    signal_trials = np.load('/data/user/apizzuto/Nova/analysis_trials/sensitivity/{}deltaT_{:.1e}_index_{}_spec_{}.npy'.format(flavor_str, deltaT, index, spectra))
     signal_trials = signal_trials[signal_trials['n_inj'] == ns]
     #print(len(bg_trials['TS']))
     pvals = [100. - sp.stats.percentileofscore(bg_trials, ts, kind='strict') for ts in signal_trials['TS']]

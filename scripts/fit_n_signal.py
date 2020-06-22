@@ -27,6 +27,7 @@ parser.add_argument('--lowE', default=None, help='logE cut')
 parser.add_argument('--maxSigma', default=None, help='maximum assigned error')
 parser.add_argument('--pull', action='store_true', default=False, help='Pull correct')
 parser.add_argument('--fixed', action='store_true', default=False, help='Fix gamma in likelihood')
+parser.add_argument('--allflavor', default=False, action='store_true', help='Include nue nutau')
 args = parser.parse_args()
 
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
@@ -63,7 +64,8 @@ fit_gamma = not args.fixed
 #FIGURE OUT SEASON?
 scale = args.scale if args.scale != 1. else None
 llh = initialize_llh(nova, season=season, scale=scale, only_low_en=args.lowE, 
-                    only_small_sigma=args.maxSigma, pull_corr=args.pull, fit_gamma = fit_gamma)
+                    only_small_sigma=args.maxSigma, pull_corr=args.pull, fit_gamma = fit_gamma,
+                    all_flavor = args.allflavor)
 inj = initialize_injector(nova, llh)
 print('Declination: {:.2f} \t Index: {}'.format(nova.dec*180. / np.pi, nova.gamma))
 
@@ -91,8 +93,9 @@ if args.display:
     ttable = tabulate(sig_trials, headers, tablefmt = 'fancy_grid')
     print(ttable)
 
+flavor_str = 'all_flavor/' if args.allflavor else ''
 if scale is None and args.maxSigma is None and args.lowE is None and not args.pull and fit_gamma:
-    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(deltaT, args.index, args.spec))
+    sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/fits/{}deltaT_{:.1e}_index_{}_spec_{}.pkl'.format(flavor_str, deltaT, args.index, args.spec))
 elif args.pull:
     print('pull corrcted')
     add_str = 'scale_{:.2f}_'.format(scale) if scale is not None else ''

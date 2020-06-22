@@ -23,7 +23,7 @@ job = pycondor.Job('sensitivitytrials_novae_greco','/home/apizzuto/Nova/scripts/
 for deltaT in np.logspace(-1, 7., 17):
     for index in range(15):
         for spec in ['SPL', 'EPL']:
-    		job.add_arg('--deltaT={} --index={} --spec={} --n=1000'.format(deltaT, index, spec))
+    		job.add_arg('--deltaT={} --index={} --spec={} --n=1000 --allflavor'.format(deltaT, index, spec))
 
 dagman = pycondor.Dagman('Skylab_Novae_sensitivity_trials', submit=submit, verbose=2)
 dagman.add_job(job)
