@@ -67,7 +67,8 @@ mc_fields = ('run', 'event', 'subevent', 'time', 'azi', 'zen', 'ra', 'dec', 'ang
 
 def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True, 
                         season = "IC86_2012", ncpu = 1, scale=None,
-                        verbose=True, only_low_en = None, only_small_sigma = None, pull_corr=False):
+                        verbose=True, only_low_en = None, only_small_sigma = None, pull_corr=False,
+                        all_flavor=False):
     r''' Initializes a point source llh
 
     Parameters:
@@ -98,8 +99,14 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
         exp = np.load(exps[0])
         for e in exps[1:]:
             exp = np.append(exp, np.load(e))
-        mcfile = glob(mlarson_path + pc_str + 'IC86_2012.numu*.npy')[0]
-        mc = np.load(mcfile)
+        if all_flavor:
+            mcfiles = glob(mlarson_path + pc_str + 'IC86_2012.nu*_with_angErr.npy')
+            mc = np.load(mcfiles[0])
+            for flav in mcfiles[1:]:
+                mc = np.concatenate((mc, np.load(flav)))
+        else:
+            mcfile = glob(mlarson_path + pc_str + 'IC86_2012.numu*.npy')[0]
+            mc = np.load(mcfile)
         
         grls = sorted(glob(mlarson_path + 'GRL/*.data.npy'))
         grl = np.load(grls[0])

@@ -24,6 +24,7 @@ parser.add_argument('--deltaLogE', type=float, default=1., help='Width in log sp
                         +' energy interval')
 parser.add_argument('--display', default=False, action='store_true', help='Print results '\
                         +'for debugging')
+parser.add_argument('--allflavor', default=False, action='store_true', help='Include nue nutau')
 args = parser.parse_args()
 
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
@@ -60,7 +61,7 @@ if season == None:
 inj_low_E = 10.**args.lowE
 inj_high_E = inj_low_E * (10.**args.deltaLogE)
 #FIGURE OUT SEASON?
-llh = initialize_llh(nova, season=season)
+llh = initialize_llh(nova, season=season, all_flavor=args.allflavor)
 inj = initialize_injector(nova, llh, inj_e_range=(inj_low_E, inj_high_E), fixed_inj_gamma=2.0)
 
 
@@ -84,4 +85,5 @@ if args.display:
     ttable = tabulate(sig_trials, headers, tablefmt = 'fancy_grid')
     print(ttable)
 
-sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(deltaT, args.index, args.spec, inj_low_E, inj_high_E))
+flavor_str = 'all_flavor/' if args.allflavor else ''
+sig_trials.to_pickle('/data/user/apizzuto/Nova/analysis_trials/differential_sensitivity/{}deltaT_{:.1e}_index_{}_spec_{}_lowE_{:.1e}_highE_{:.1e}.pkl'.format(flavor_str, deltaT, args.index, args.spec, inj_low_E, inj_high_E))

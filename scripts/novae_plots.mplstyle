@@ -3,7 +3,7 @@ text.latex.unicode : True
 mathtext.rm : Times New Roman
 mathtext.it : Times New Roman:italic
 mathtext.bf : Times New Roman:bold
-mathtext.fontset: cm
+mathtext.fontset: stix
 xtick.labelsize : 16
 ytick.labelsize : 16
 xtick.major.size : 5
