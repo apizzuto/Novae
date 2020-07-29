@@ -26,7 +26,7 @@ from skylab.spectral_models import PowerLaw
 from skylab.temporal_models import BoxProfile, TemporalModel
 
 import skylab
-print skylab.__file__
+#print(skylab.__file__)
 
 #mlarson_path = '/home/mlarson/GRECO/version-001-p00/'
 mlarson_path = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
@@ -150,17 +150,17 @@ def initialize_llh(nova, scramble=True, dataset = mlarson_path, fit_gamma = True
         mc['sigma'] *= scale
 
     ##################### BEGIN LIKELIHOOD MODELS #####################
-    print fit_gamma
+    #print(fit_gamma)
     if fit_gamma:
         if verbose:
-            print "Fitting gamma"
+            print("Fitting gamma")
         llh_model = EnergyLLH(twodim_bins=[energy_bins, sinDec_bins],   # energy and sin(dec) binnings
                             allow_empty=True,                           # allow empty bins.
                             seed=2.5,
                             bounds = [1., 5.])
     else:
         if verbose:
-            print "not fitting gamma"
+            print("not fitting gamma")
         llh_model = EnergyLLH(twodim_bins=[energy_bins, sinDec_bins],   # energy and sin(dec) binnings
                             allow_empty=True,                           # allow empty bins.
                             spectrum = PowerLaw(A=1, gamma=nova.gamma, E0=1., Ecut = nova.cutoff))
