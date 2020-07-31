@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import numpy as np
 from scipy import stats
 import pandas as pd
@@ -91,7 +93,7 @@ tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, inj_conf={'flux': cy.hyp.
 beta = 0.9
 
 result = tr.find_n_sig(bg.median(), beta, 
-                       batchsize=50,
+                       batch_size=250,
                        n_sig_step=5,
                        max_batch_size=0, 
                        logging=True, 
