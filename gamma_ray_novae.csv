@@ -1,0 +1,20 @@
+﻿Name,RA,Dec,Start Time,Stop Time,Flux,Index,Cutoff,Links,Notes
+V407 Cyg,315.5409,45.77576,55265,55287,3.47,1.27,2,Anna,Location from SIMBAD
+V1324 Sco,267.7246252,-32.6225246,56093,56110,4.4,1.92,7.7,Anna,
+V959 Mon,99.91142,5.89778,56097,56119,2.64,1.5,1.3,Anna,
+V339 Del,305.8778603,20.7677159,56520,56547,1.45,1.68,3,Anna,
+V1369 Cen,208.6890121,-59.15115834,56631,56670,2.51,2,2,Anna,
+V5668 Sgr,279.2375,-28.92833,57102,57157,0.61,2.11,-,Anna,
+V679 Car,168.4742,-61.23,54801.99999,54836.99998,1.9,1.3,2.6,Anna (candidate),
+V1535 Sco,255.8590443,-35.071616,57063.99997,57070.99997,1,2.3,-,Anna (candidate),
+V5856 Sgr,275.21771,-28.37003,57700,57709,5.4,1.86,5.9,Nova outburst powered by shocks https://arxiv.org/pdf/1709.00763.pdf,ASASSN-16ma
+V906 Car,159.0642757,-59.5982585,58216,58239,12.2,1.76,5.9,Direct evidence for shock-powered optical https://arxiv.org/pdf/2004.05562.pdf,Fermi-LAT was offline during the first 23 days of the nova eruption
+V745 Sco,268.8426139,-33.2495996,56694,56695,3,2.2,-,http://www.astronomerstelegram.org/?read=5879,Index assumed
+V407 Lup,232.25758,-44.828,57657,57661,1.8,2.2,-,http://www.astronomerstelegram.org/?read=9594,Index assumed
+V5855 Sgr,272.61788,-27.4997,57689,57697,2.96,2.26,-,Nelson et al. NuSTAR https://arxiv.org/abs/1901.00030,
+V549 Vel,132.623429,-47.757867,58050,58070,0.8,1.9,-,http://www.astronomerstelegram.org/?read=10977,
+V357 Mus,171.55083 ,-65.519,58129,58136,2.4,2.2,-,http://www.astronomerstelegram.org/?read=11201,Index assumed
+V392 Per,70.83903964,47.3571858,58238,58239,8.9,1.9,-,http://www.astronomerstelegram.org/?read=11590,
+V3890 Sgr,277.6803671,-24.01915238,58718,58739,1.2,2.2,-,http://www.astronomerstelegram.org/?read=13114,Index assumed
+V1707 Sco,264.2899,-35.1725,58740,58744,2.3,2,-,http://www.astronomerstelegram.org/?read=13116,
+MGAB-V207,59.623167,-54.778111,59040,59045,5,2.1,-,http://www.astronomerstelegram.org/?read=13868,"Flux at 2e-7 on 7/10, non-detection on 7/11, then 5-7e-7 on 7/12 through 7/15"
