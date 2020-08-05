@@ -28,6 +28,11 @@ for nova_num in range(len(gamma_df)):
             for cut in [0.0, 1.0]:
                 job.add_arg('--nova_num={} --deltaT={} --index={} --minLogE={} --allflavor'.format(nova_num, deltaT, gamma, cut))
 
+for nova_num in range(len(gamma_df)):
+    for gamma in [2.0, 2.5, 3.0]:
+        for cut in [0.0, 1.0]:
+            job.add_arg('--nova_num={} --deltaT={} --index={} --minLogE={} --allflavor --full_gamma_time'.format(nova_num, deltaT, gamma, cut))
+
 dagman = pycondor.Dagman('Skylab_Novae_sensitivity_trials', submit=submit, verbose=2)
 dagman.add_job(job)
 dagman.build_submit()

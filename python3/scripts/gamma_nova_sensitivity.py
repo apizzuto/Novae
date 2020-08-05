@@ -24,8 +24,8 @@ parser.add_argument('--deltaT', type=float, default = 1000.,
 parser.add_argument('--index', type=float, default=1, help='Spectral Index')
 parser.add_argument('--minLogE', type=float, default=None, help='Cut on the minimum reco energy')
 parser.add_argument('--nova_num', type=int, help="Which nova from the list to use")
-parser.add_argument('--ntrials_bg', type=int, default=5000, help="Number of background trials")
-parser.add_argument('--ntrials_sig', type=int, default=200, help='Number of trials per signal strength')
+parser.add_argument('--ntrials_bg', type=int, default=10000, help="Number of background trials")
+parser.add_argument('--ntrials_sig', type=int, default=500, help='Number of trials per signal strength')
 parser.add_argument('--full_gamma_time', action='store_true', default=False,
                         help="Raise if you want to use the full gamma ray time window")
 parser.add_argument('--disc_n_sigma', type=float, default=3., help="Number of sigma for disc. pot")
@@ -155,7 +155,8 @@ result['settings'] = args
 result['source_info'] = {'ra': ra, 'dec': dec, 'name': name, 'mjd_start': mjd_start, 'mjd_stop': mjd_stop}
 
 add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
-output_loc = f"/data/user/apizzuto/Nova/csky_trials/nova_{nova_ind}_{name}_delta_t_{delta_t:.2e}_{add_str}gamma_{args.index}_allflavor_{args.allflavor}_trials.pkl"
+delta_t_str = f"{delta_t:.2e}" if not args.full_gamma_time else "full_gamma_time"
+output_loc = f"/data/user/apizzuto/Nova/csky_trials/nova_{nova_ind}_{name}_delta_t_{delta_t_str}_{add_str}gamma_{args.index}_allflavor_{args.allflavor}_trials.pkl"
 
 with open(output_loc, 'wb') as f:
     pickle.dump(result, f)
