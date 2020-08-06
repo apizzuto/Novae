@@ -1,4 +1,21 @@
+import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+import pandas as pd
+import astropy as ap
+import pickle
+import scipy as sp
+import mpmath
+import seaborn as sns
+from matplotlib.lines import Line2D
+
+import histlite as hl
+import csky as cy
+
+from glob import glob
+mpl.style.use('/home/apizzuto/Nova/python3/scripts/novae_plots.mplstyle')
+gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+
 
 class StackingPlots():
     r'''Helper class to make analysis plots for the
@@ -38,6 +55,8 @@ class GammaCatalog():
         self.names = names
         self.dpi = kwargs.pop('dpi', 150)
         self.sens_col = kwargs.pop('sens_col', sns.xkcd_rgb['light navy blue'])
+        self.savefigs = kwargs.pop('save', False)
+        self.savepath = kwargs.pop(output, '/data/user/apizzuto/Nova/plots/')
         
     def sensitivity_vs_time(self, **kwargs):
         fig, ax = plt.subplots(dpi=self.dpi)
@@ -104,6 +123,12 @@ class GammaCatalog():
         else:
             title = ''
         ax.set_title(title)
+        if self.savefigs:
+            sens_str = 'sensitivity' if not discovery else 'discovery'
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'{sens_str}_vs_time_gamma_{spec:.1f}_allflavor_{self.all_flavor}_minloge_{self.min_log_e:.1f}.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
     
     def background_ts_panel(self, **kwargs):
         fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
