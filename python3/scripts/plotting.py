@@ -9,10 +9,243 @@ class StackingPlots():
 
 class GammaCatalog():
     r'''Helper class to make analysis plots for the
-    individually gamma-ray novae'''
+    individually gamma-ray novae
+    Warning: initializing this class will eat up like
+    0.5 GB of memory
+    '''
 
     def __init__(self, **kwargs):
-        pass
+        self.all_flavor = kwargs.pop('allflavor', True)
+        self.spec_ind = kwargs.pop('index', [2., 2.5, 3.0])
+        if type(self.spec_ind) is float:
+            self.spec_ind = [self.spec_ind]
+        self.min_log_e = kwargs.pop('min_log_e', 0.)
+        self.verbose = kwargs.pop('verbose', False)
+        self.fontsize = kwargs.pop
+        self.fontsize = kwargs.pop('fontsize', 16)
+        self.gamma_colors = {2.0: 'C0', 2.5: 'C1', 3.0: 'C2'}
+        self.central_90 = {2.0: (23.26, 4430.12), 2.5: (8.69, 1594.00), 
+                           3.0: (4.76, 419.32)}
+        
+        gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+        names = gamma_df['Name']
+        delta_ts = np.logspace(1., 6.5, 12)
+        self.delta_ts = delta_ts
+        all_novae = {name: {delta_t: GammaRayNova(name, delta_t=delta_t, **kwargs) for delta_t in delta_ts}
+                             for name in gamma_df['Name']}
+        self.all_novae = all_novae
+        self.full_time_novae = {name: GammaRayNova(name, **kwargs) for name in gamma_df['Name']}
+        self.names = names
+        self.dpi = kwargs.pop('dpi', 150)
+        self.sens_col = kwargs.pop('sens_col', sns.xkcd_rgb['light navy blue'])
+        
+    def sensitivity_vs_time(self, **kwargs):
+        fig, ax = plt.subplots(dpi=self.dpi)
+        spec = kwargs.pop('gamma', 2.)
+        discovery = kwargs.pop('discovery', False)
+        sens = {}; good_ts = {};
+        disc = {}
+        for name in self.names:
+            sens[name] = []; good_ts[name] = []
+            disc[name] = []
+            for delta_t in self.delta_ts:
+                try:
+                    if not discovery:
+                        sens[name].append(self.all_novae[name][delta_t].sensitivity_trials[spec]['E2dNdE'])
+                    good_ts[name].append(delta_t)
+                    if discovery:
+                        disc[name].append(self.all_novae[name][delta_t].discovery_trials[spec]['E2dNdE'])
+                except Exception as e:
+                    if self.verbose:
+                        print(e)
+            good_ts[name] = np.array(good_ts[name])
+            if discovery:
+                disc[name] = np.array(disc[name])
+            else:
+                sens[name] = np.array(sens[name])
+
+        for name in sens.keys():
+            try:
+                if discovery:
+                    ax.plot(good_ts[name], disc[name], color = self.sens_col,
+                           ls = '--')
+                else:
+                    ax.plot(good_ts[name], sens[name], color = self.sens_col)
+                if 'annotate' in kwargs.keys():
+                    if kwargs['annotate'] and len(good_ts[name] > 0):
+                        if discovery:
+                            plt.annotate(name, (good_ts[name][-1], disc[name][-1]))
+                        else:
+                            plt.annotate(name, (good_ts[name][-1], sens[name][-1]))
+                if discovery:
+                    ax.scatter(self.full_time_novae[name].delta_t, 
+                          self.full_time_novae[name].discovery_trials[spec]['E2dNdE'],
+                          marker='^', s=20, color=sns.xkcd_rgb['almost black'],
+                          zorder=20)
+                else:
+                    ax.scatter(self.full_time_novae[name].delta_t, 
+                          self.full_time_novae[name].sensitivity_trials[spec]['E2dNdE'],
+                          marker='*', s=20, color=sns.xkcd_rgb['almost black'],
+                          zorder=20)
+            except Exception as e:
+                if self.verbose:
+                    print(e)
+
+        ax.loglog()
+        ax.set_xlim(8e0, 1e8)
+        ax.set_xlabel(r"$\Delta T$ (s)")
+        ax.set_ylabel(r"$E^2 \frac{dN}{dE} @ 1$ TeV (TeV cm$^{-2}$)")
+        if spec == 2.:
+            title = r"$\frac{dN}{dE} \propto E^{-2}$"
+        elif spec == 2.5:
+            title = r"$\frac{dN}{dE} \propto E^{-2.5}$"
+        elif spec == 3.0:
+            title = r"$\frac{dN}{dE} \propto E^{-3}$"
+        else:
+            title = ''
+        ax.set_title(title)
+    
+    def background_ts_panel(self, **kwargs):
+        fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
+                                figsize=(16,10), sharey=True, sharex=True)
+        plt.subplots_adjust(hspace=0.05, wspace=0.05)
+        axs = np.ravel(aaxs)
+        used_axs = []
+        if 'delta_t' in kwargs.keys():
+            delta_t = kwargs['delta_t']
+            ii = 0
+            for name in self.names:
+                ax = axs[ii]
+                try:
+                    self.all_novae[name][delta_t].background_ts_plot(ax=ax, label_axes=False)
+                    used_axs.append(ax)
+                    ii += 1
+                except:
+                    pass
+            title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
+        else:
+            ii = 0
+            for name in self.names:
+                ax = axs[ii]
+                try:
+                    self.full_time_novae[name].background_ts_plot(ax=ax, label_axes=False)
+                    used_axs.append(ax)
+                    ii += 1
+                except:
+                    pass
+            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+        for ax in axs:
+            if ax not in used_axs:
+                ax.set_visible(False)
+        for ax in aaxs[-1]:
+            if ax in used_axs:
+                ax.set_xlabel('TS', fontsize=self.fontsize)
+        for ax in aaxs[:,0]:
+            if ax in used_axs:
+                ax.set_ylabel('Number of Trials', fontsize=self.fontsize)
+        fig.suptitle(title, y=0.92) 
+    
+    def ns_fitting_panel(self, **kwargs):
+        fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
+                                figsize=(16,10), sharey=True, sharex=True)
+        plt.subplots_adjust(hspace=0.05, wspace=0.05)
+        spec = kwargs.pop('gamma', 2.)
+        axs = np.ravel(aaxs)
+        used_axs = []
+        if 'delta_t' in kwargs.keys():
+            delta_t = kwargs['delta_t']
+            ii = 0
+            for name in self.names:
+                ax = axs[ii]
+                try:
+                    self.all_novae[name][delta_t].ns_fit_bias_plot(ax=ax, label_axes=False, gamma=spec)
+                    used_axs.append(ax)
+                    ii += 1
+                except:
+                    pass
+            title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
+        else:
+            ii = 0
+            for name in self.names:
+                ax = axs[ii]
+                try:
+                    self.full_time_novae[name].ns_fit_bias_plot(ax=ax, label_axes=False, gamma=spec)
+                    used_axs.append(ax)
+                    ii += 1
+                except:
+                    pass
+            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+        for ax in axs:
+            if ax not in used_axs:
+                ax.set_visible(False)
+        for ax in aaxs[-1]:
+            if ax in used_axs:
+                ax.set_xlabel(r'$n_\mathrm{inj}$', fontsize=self.fontsize)
+        for ax in aaxs[:,0]:
+            if ax in used_axs:
+                ax.set_ylabel(r'$\hat{n_s}$', fontsize=self.fontsize)
+        fig.suptitle(title, y=0.92)
+    
+    def gamma_fitting_panel(self, **kwargs):
+        fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
+                                figsize=(16,10), sharey=True, sharex=True)
+        plt.subplots_adjust(hspace=0.05, wspace=0.05)
+        axs = np.ravel(aaxs)
+        used_axs = []
+        if 'delta_t' in kwargs.keys():
+            delta_t = kwargs['delta_t']
+            ii = 0
+            for name in self.names:
+                ax = axs[ii]
+                try:
+                    self.all_novae[name][delta_t].gamma_fit_bias_plot(ax=ax, label_axes=False)
+                    used_axs.append(ax)
+                    ii += 1
+                except:
+                    pass
+            title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
+        else:
+            ii = 0
+            for name in self.names:
+                ax = axs[ii]
+                try:
+                    self.full_time_novae[name].gamma_fit_bias_plot(ax=ax, label_axes=False)
+                    used_axs.append(ax)
+                    ii += 1
+                except:
+                    pass
+            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+        for ax in axs:
+            if ax not in used_axs:
+                ax.set_visible(False)
+        for ax in aaxs[-1]:
+            if ax in used_axs:
+                ax.set_xlabel(r'$n_\mathrm{inj}$', fontsize=self.fontsize)
+        for ax in aaxs[:,0]:
+            if ax in used_axs:
+                ax.set_ylabel(r'$\hat{\gamma}$', fontsize=self.fontsize)
+        fig.suptitle(title, y=0.92)
+    
+    def compare_photon_to_nus(self, **kwargs):
+        fig, ax = plt.subplots(dpi=self.dpi)
+        if not 'delta_t' in kwargs:
+            for name in self.names:
+                try:
+                    self.full_time_novae[name].compare_sens_to_photons(ax=ax)
+                except:
+                    if self.verbose:
+                        print(f"No sensitivity for nova {name}")
+            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+        else:
+            delta_t = kwargs['delta_t']
+            for name in self.names:
+                try:
+                    self.all_novae[name][delta_t].compare_sens_to_photons(ax=ax)
+                except:
+                    if self.verbose:
+                        print(f"No sensitivity for nova {name}")
+            title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
+        ax.set_title(title)
 
 class GammaRayNova():
     r'''Holds information about analysis for 
