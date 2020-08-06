@@ -7,7 +7,7 @@ class StackingPlots():
     def __init__(self, **kwargs):
         pass
 
-class CatalogPlot():
+class GammaCatalog():
     r'''Helper class to make analysis plots for the
     individually gamma-ray novae'''
 
@@ -17,8 +17,29 @@ class CatalogPlot():
 class GammaRayNova():
     r'''Holds information about analysis for 
     individual gamma-ray novae'''
-    def __init__(self, name, delta_t, **kwargs):
-        self.delta_t = delta_t
+    def __init__(self, name, **kwargs):
+        if 'delta_t' in kwargs.keys():
+            self.full_time = False
+        else:
+            self.full_time = True
+        if self.full_time:
+            try:
+                delta_t = gamma_df[gamma_df['Name'] == name]['Stop Time'] - \
+                            gamma_df[gamma_df['Name'] == name]['Start Time']
+                delta_t = delta_t.values[0] * 86400.
+            except NameError:
+                gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+                delta_t = gamma_df[gamma_df['Name'] == name]['Stop Time'] - \
+                            gamma_df[gamma_df['Name'] == name]['Start Time']
+                delta_t = delta_t.values[0] * 86400.
+            self.delta_t = delta_t
+            self.delta_t_str = "full_gamma_time"
+        else:
+            try:
+                self.delta_t = kwargs['delta_t']
+                self.delta_t_str = f"{self.delta_t:.2e}"
+            except:
+                print('Must either enter a time window or use default full gamma-ray duration')
         self.name = name
         self.all_flavor = kwargs.pop('allflavor', True)
         self.spec_ind = kwargs.pop('index', [2., 2.5, 3.0])
@@ -32,7 +53,7 @@ class GammaRayNova():
             self.discovery_trials = {}
             self.fitting_trials = {}
             for ind in self.spec_ind:
-                trials_path = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t:.2e}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
+                trials_path = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t_str}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
                 trials_f = glob(trials_path)[0]
                 with open(trials_f, 'rb') as f:
                     nova_trials = pickle.load(f)
@@ -65,7 +86,7 @@ class GammaRayNova():
         ts = np.linspace(.1, h.range[0][1], 100)
         ax.plot(ts, norm * bg.pdf(ts))
         ax.semilogy(nonposy='clip')
-        ax.set_ylim(3e-3, bg.n_total*1.5)
+        ax.set_ylim(1e-1, bg.n_total*1.5)
         ax.text(20, 6e2, self.name.replace('_', ' ') + '\n' + r'$\delta={:.0f}$'.format(self.dec*180./np.pi), 
                 ha='right', va='center', fontsize=self.fontsize)
         if label_axes:
@@ -129,6 +150,16 @@ class GammaRayNova():
         if ax is None:
             fig, ax = plt.subplots()
         ens = np.logspace(-1., 3., 500)
+        
+        handles = []
+        for spec in self.spec_ind:
+            nu_sens_spec = np.power(ens, -spec)*self.sensitivity_trials[spec]['E2dNdE']*1e3*(1e-3)**(2.-spec)
+            en_msk = (ens > self.central_90[spec][0]) & (ens < self.central_90[spec][1])
+            ax.plot(ens[en_msk], nu_sens_spec[en_msk]*ens[en_msk]**2,
+                   color=self.gamma_colors[spec], lw = 1.5, zorder=5*(5.-spec))
+            handles.append(Line2D([0], [0], color=self.gamma_colors[spec], 
+                                  lw=1.5, label=r"$\gamma = $" + f" {spec:.1f}"))
+            
         photon_norm = self.calc_flux_norm(gamma, cutoff, integrated_norm)
         if np.isinf(cutoff):
             photon_flux = photon_norm * np.power(ens, -gamma)
@@ -138,24 +169,14 @@ class GammaRayNova():
         ax.plot(ens, photon_flux* ens**2. * self.delta_t, 
                 color=sns.xkcd_rgb['battleship grey'], alpha=0.7)
         
-        ######## CONVERT TO NEUTRINO EXPECTATION?
-        
-        handles = []
-        for spec in self.spec_ind:
-            nu_sens_spec = np.power(ens, -spec)*self.sensitivity_trials[spec]['E2dNdE']*1e3*(1e-3)**(2.-spec)
-            en_msk = (ens > self.central_90[spec][0]) & (ens < self.central_90[spec][1])
-            ax.plot(ens[en_msk], nu_sens_spec[en_msk]*ens[en_msk]**2,
-                   color=self.gamma_colors[spec], lw = 1.0)
-            handles.append(Line2D([0], [0], color=self.gamma_colors[spec], 
-                                  lw=1.5, label=r"$\gamma = $" + f" {spec:.1f}"))
         ax.loglog()
-        ax.set_ylim(1e-3, 3e4)
+        ax.set_ylim(1e-4, 3e4)
         ax.set_xlim(1e-1, 1e3)
         if label_axes:
             ax.set_xlabel(r"$E$ (GeV)", fontsize=self.fontsize)
             ax.set_ylabel(r"$E^2 \frac{dN}{dE}$ (GeV cm$^{-2}$)", fontsize = self.fontsize)
             
-        ax.legend(handles=handles, frameon=False)
+        ax.legend(handles=handles, frameon=False, loc=2)
         
     def calc_flux_norm(self, gamma, cutoff, norm):
         r'''Fermi fluxes are reported in terms of integral fluxes
