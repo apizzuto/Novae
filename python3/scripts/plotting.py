@@ -1,6 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+try:
+    mpl.use('agg')
+except:
+    pass
+import matplotlib.pyplot as plt
 import pandas as pd
 import astropy as ap
 import pickle
@@ -132,7 +136,7 @@ class GammaCatalog():
     
     def background_ts_panel(self, **kwargs):
         if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
-            fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
+            fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
                                     figsize=(16,10), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         axs = np.ravel(aaxs)
@@ -182,7 +186,7 @@ class GammaCatalog():
 
     def ns_fitting_panel(self, **kwargs):
         if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
-            fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
+            fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
                                     figsize=(16,10), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         spec = kwargs.pop('gamma', 2.)
