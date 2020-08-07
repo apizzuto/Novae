@@ -56,7 +56,7 @@ class GammaCatalog():
         self.dpi = kwargs.pop('dpi', 150)
         self.sens_col = kwargs.pop('sens_col', sns.xkcd_rgb['light navy blue'])
         self.savefigs = kwargs.pop('save', False)
-        self.savepath = kwargs.pop(output, '/data/user/apizzuto/Nova/plots/')
+        self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
         
     def sensitivity_vs_time(self, **kwargs):
         fig, ax = plt.subplots(dpi=self.dpi)
@@ -131,8 +131,9 @@ class GammaCatalog():
                             dpi=self.dpi, bbox_inches='tight')
     
     def background_ts_panel(self, **kwargs):
-        fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
-                                figsize=(16,10), sharey=True, sharex=True)
+        if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
+            fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
+                                    figsize=(16,10), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         axs = np.ravel(aaxs)
         used_axs = []
@@ -168,11 +169,21 @@ class GammaCatalog():
         for ax in aaxs[:,0]:
             if ax in used_axs:
                 ax.set_ylabel('Number of Trials', fontsize=self.fontsize)
-        fig.suptitle(title, y=0.92) 
-    
+        if not 'omit_title' in kwargs.keys():
+            fig.suptitle(title, y=0.92, fontsize=self.fontsize) 
+        elif not kwargs['omit_title']:
+            fig.suptitle(title, y=0.92, fontsize=self.fontsize) 
+        if self.savefigs:
+            delta_t_str = f"delta_t_{delta_t:.2e}" if 'delta_t' in kwargs.keys() else 'full_gamma_time'
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'background_ts_panel_{delta_t_str}_allflavor_{self.all_flavor}_minloge_{self.min_log_e:.1f}.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
+
     def ns_fitting_panel(self, **kwargs):
-        fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
-                                figsize=(16,10), sharey=True, sharex=True)
+        if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
+            fig, aaxs = plt.subplots(nrows=4, ncols=5, dpi=self.dpi,
+                                    figsize=(16,10), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         spec = kwargs.pop('gamma', 2.)
         axs = np.ravel(aaxs)
@@ -209,11 +220,21 @@ class GammaCatalog():
         for ax in aaxs[:,0]:
             if ax in used_axs:
                 ax.set_ylabel(r'$\hat{n_s}$', fontsize=self.fontsize)
-        fig.suptitle(title, y=0.92)
+        if not 'omit_title' in kwargs.keys():
+            fig.suptitle(title, y=0.92, fontsize=self.fontsize) 
+        elif not kwargs['omit_title']:
+            fig.suptitle(title, y=0.92, fontsize=self.fontsize) 
+        if self.savefigs:
+            delta_t_str = f"delta_t_{delta_t:.2e}" if 'delta_t' in kwargs.keys() else 'full_gamma_time'
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'ns_fitting_panel_{delta_t_str}_gamma_{spec:.1f}_allflavor_{self.all_flavor}_minloge_{self.min_log_e:.1f}.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
     
     def gamma_fitting_panel(self, **kwargs):
-        fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
-                                figsize=(16,10), sharey=True, sharex=True)
+        if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
+            fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
+                                    figsize=(16,10), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         axs = np.ravel(aaxs)
         used_axs = []
@@ -249,10 +270,22 @@ class GammaCatalog():
         for ax in aaxs[:,0]:
             if ax in used_axs:
                 ax.set_ylabel(r'$\hat{\gamma}$', fontsize=self.fontsize)
-        fig.suptitle(title, y=0.92)
+        if not 'omit_title' in kwargs.keys():
+            fig.suptitle(title, y=0.92, fontsize=self.fontsize) 
+        elif not kwargs['omit_title']:
+            fig.suptitle(title, y=0.92, fontsize=self.fontsize) 
+        if self.savefigs:
+            delta_t_str = f"delta_t_{delta_t:.2e}" if 'delta_t' in kwargs.keys() else 'full_gamma_time'
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'gamma_fitting_panel_{delta_t_str}_allflavor_{self.all_flavor}_minloge_{self.min_log_e:.1f}.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
     
     def compare_photon_to_nus(self, **kwargs):
-        fig, ax = plt.subplots(dpi=self.dpi)
+        if not 'fig' in kwargs.keys() and not 'ax' in kwargs.keys():
+            fig, ax = plt.subplots(dpi=self.dpi)
+        else:
+            fig = kwargs['fig']; ax = kwargs['ax']
         if not 'delta_t' in kwargs:
             for name in self.names:
                 try:
@@ -270,7 +303,19 @@ class GammaCatalog():
                     if self.verbose:
                         print(f"No sensitivity for nova {name}")
             title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
-        ax.set_title(title)
+        if not 'omit_title' in kwargs.keys():
+            ax.set_title(title, fontsize = self.fontsize)
+        elif not kwargs['omit_title']:
+            ax.set_title(title, fontsize = self.fontsize)
+        if self.savefigs:
+            delta_t_str = f"delta_t_{delta_t:.2e}" if 'delta_t' in kwargs.keys() else 'full_gamma_time'
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'photon_and_nu_SED_{delta_t_str}_allflavor_{self.all_flavor}_minloge_{self.min_log_e:.1f}.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
+        if 'return_fig' in kwargs.keys():
+            return fig, ax
+
 
 class GammaRayNova():
     r'''Holds information about analysis for 
