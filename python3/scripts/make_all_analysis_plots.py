@@ -32,7 +32,14 @@ def make_stacking_plots(stack):
     pass
 
 def make_GRECO_plots():
-    pass
+    gplots = GRECOPlots(min_log_e=args.minLogE, allflavor=args.allflavor, save=True)
+    gplots.declination_pdf()
+    gplots.energy_pdf()
+    for true_en in [True, False]:
+        for true_err in [True, False]:
+            gplots.angular_error_plot(true_energy=true_en, true_error=true_err)
+    gplots.errors_vs_declination()
+    
 
 if __name__ == '__main__':
 
@@ -49,9 +56,10 @@ if __name__ == '__main__':
             output=args.output_path)
     make_gamma_correlation_plots(cat)
 
-    #print("Makiing bla bla bla with parameters bla bla")
-    #cat = GammaCatalog()
-    #make_gamma_correlation_plots(cat)
+    print("Making figures for the GRECO dataset with parameters:")
+    print(f"\t Min log10(E): {args.minLogE:.1f}, \t All flavor: {args.allflavor}")
+    print(f"\t Figures will be saved to {args.output_path}")
+    make_GRECO_plots()
 
     #print("Makiing bla bla bla with parameters bla bla")
     #cat = GammaCatalog()
