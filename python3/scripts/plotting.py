@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib as mpl
-try:
-    mpl.use('agg')
-except:
-    pass
+#try:
+#    mpl.use('agg')
+#except:
+#    pass
 import matplotlib.pyplot as plt
 import pandas as pd
 import astropy as ap
@@ -42,7 +42,6 @@ class GammaCatalog():
             self.spec_ind = [self.spec_ind]
         self.min_log_e = kwargs.pop('min_log_e', 0.)
         self.verbose = kwargs.pop('verbose', False)
-        self.fontsize = kwargs.pop
         self.fontsize = kwargs.pop('fontsize', 16)
         self.gamma_colors = {2.0: 'C0', 2.5: 'C1', 3.0: 'C2'}
         self.central_90 = {2.0: (23.26, 4430.12), 2.5: (8.69, 1594.00), 
@@ -519,6 +518,10 @@ class GRECOPlots():
         self.log_energy_bins = kwargs.pop('log_e_bins', np.linspace(self.low_en_bin, 4., 31))
         self.sin_dec_bins = kwargs.pop('sin_dec_bins', np.linspace(-1., 1., 31))
         self.initialize_analysis()
+        self.dpi = kwargs.pop('dpi', 150)
+        self.savefigs = kwargs.pop('save', False)
+        self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
+        self.fontsize = kwargs.pop('fontsize', 16)
 
     def initialize_analysis(self, **kwargs):
         greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
@@ -547,6 +550,7 @@ class GRECOPlots():
                                                              self.sin_dec_bins,
                                                              self.log_energy_bins,
                                                              grl=grl, key='GRECOv2.2', cascades=True)
+        cy.CONF['mp_cpus'] = 5
 
         ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
         greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
@@ -558,10 +562,15 @@ class GRECOPlots():
         sd = np.linspace (-1, 1, 300)
         ax.plot (sd, self.ana[0].bg_space_param(sindec=sd), label='spline')
         ax.set_ylim(0)
-        ax.set_title(greco_ana[0].plot_key)
-        ax.set_xlabel(r'$\sin(\delta)$')
-        ax.set_ylabel(r'probability density')
+        ax.set_title(self.ana[0].plot_key)
+        ax.set_xlabel(r'$\sin(\delta)$', fontsize=self.fontsize)
+        ax.set_ylabel(r'probability density', fontsize=self.fontsize)
         ax.legend(loc='lower left')
+        if self.savefigs:
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'GRECO_declination_pdf.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
 
     def energy_pdf(self, **kwargs):
         for gamma in self.spec_ind:
@@ -570,9 +579,119 @@ class GRECOPlots():
             ss = dict(zip(eprm.gammas, eprm.ss_hl))
             things = hl.plot2d(ax, ss[gamma].eval(bins=100),
                                vmin=1e-2, vmax=1e2, log=True, cbar=True, cmap='RdBu_r')
-            ax.set_title(self.ana[0].plot_key)
+            ax.set_title(self.ana[0].plot_key + r', $\gamma = $' + f" {gamma:.1f}")
             things['colorbar'].set_label(r'$S/B$')
             things['colorbar'].ax.tick_params(which='both', direction='out')
-            ax.set_xlabel(r'$\sin(\delta)$')
-            ax.set_ylabel(r'$\log_{10}(E/\mathrm{GeV})$')
+            ax.set_xlabel(r'$\sin(\delta)$', fontsize=self.fontsize)
+            ax.set_ylabel(r'$\log_{10}(E/\mathrm{GeV})$', fontsize=self.fontsize)
             plt.tight_layout()
+            if self.savefigs:
+                for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'GRECO_energy_pdf_gamma_{gamma:.1f}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+
+    def angular_error_plot(self, **kwargs):
+        r'''Bla'''
+        true_energy = kwargs.pop('true_energy', True)
+        true_error = kwargs.pop('true_error', True)
+        a = self.ana[-1]
+        data, sig = a.data, a.sig
+        if true_energy:
+            energy_array = sig.true_energy
+            xlab = r'$E_\mathrm{true}$ [GeV]'
+        else:
+            energy_array = sig.energy
+            xlab = r'$E_\mathrm{reco}$ [GeV]'
+        if true_error:
+            error_array = sig.dpsi_deg
+            ylab = r'$\Delta\Psi[\mathrm{true,reco}]~[^\circ]$'
+        else:
+            error_array = sig.sigma_deg
+            ylab = r'$\sigma~[^\circ]$'
+
+        h = hl.hist_slide(
+            (5,1),
+            (energy_array, error_array),
+            # E^-2 weighting
+            sig.oneweight*sig.true_energy**-2,
+            bins=(10**np.r_[0.0:4.0:.25], np.r_[0:180.01:1])
+        )
+
+        # normalize along the angular error axis
+        h = h.normalize(1)
+        # get 20%, 50%, and 80% quantiles
+        h2 = h.contain(1, .2); h5 = h.contain(1, .5); h8 = h.contain(1, .8)
+        soft_colors = cy.plotting.soft_colors
+        fig, ax = plt.subplots()
+        # plot quantiles, emphasize median
+        color = soft_colors[0]
+        hl.fill_between(ax, 0, h2, color=color, alpha=.3, drawstyle='line')
+        hl.fill_between(ax, 0, h5, color=color, alpha=.3, drawstyle='line')
+        hl.fill_between(ax, 0, h8, color=color, alpha=.3, drawstyle='line')
+        hl.plot1d (ax, h5, color=color, lw=2, drawstyle='default')
+
+        # trick to get the legend handles colored right
+        # try testing what happens if you just do hl.fill_between(..., label='...')
+        nans = [np.nan, np.nan]
+        ax.plot (nans, nans, color=color, lw=5, alpha=1 - (1-0.3)**1, label='80\%')
+        ax.plot (nans, nans, color=color, lw=5, alpha=1 - (1-0.3)**2, label='50\%')
+        ax.plot (nans, nans, color=color, lw=5, alpha=1 - (1-0.3)**3, label='20\%')
+
+        # labels etc
+        ax.semilogx(); ax.set_xlabel(xlab, fontsize=self.fontsize)
+        ax.set_ylabel(ylab, fontsize=self.fontsize)
+        ax.set_xlim(h.bins[0][1], h.bins[0][-2]); ax.set_ylim(0)
+        ax.legend(loc='upper right', fontsize=self.fontsize); plt.tight_layout()
+        if self.savefigs:
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'GRECO_energy_vs_error_true_energy_{true_energy}_true_errors_{true_error}.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
+
+    def errors_vs_declination(self, **kwargs):
+        r'''Bla'''
+        a = self.ana[-1]
+        data, sig = a.data, a.sig
+        h = hl.hist_slide(
+            (5,1),
+            (np.sin(data.dec), data.sigma_deg),
+            # E^-2 weighting
+            #sig.oneweight*sig.true_energy**-2,
+            bins=(np.r_[-1.0:1.0:30j], np.r_[0:180.01:1])
+        )
+
+        # normalize along the angular error axis
+        h = h.normalize(1)
+        # get 20%, 50%, and 80% quantiles
+        h2 = h.contain(1, .2); h5 = h.contain(1, .5); h8 = h.contain(1, .8)
+        soft_colors = cy.plotting.soft_colors
+        fig, ax = plt.subplots()
+        # plot quantiles, emphasize median
+        color = soft_colors[0]
+        hl.fill_between(ax, 0, h2, color=color, alpha=.3, drawstyle='line')
+        hl.fill_between(ax, 0, h5, color=color, alpha=.3, drawstyle='line')
+        hl.fill_between(ax, 0, h8, color=color, alpha=.3, drawstyle='line')
+        hl.plot1d (ax, h5, color=color, lw=2, drawstyle='default')
+
+        # trick to get the legend handles colored right
+        # try testing what happens if you just do hl.fill_between(..., label='...')
+        nans = [np.nan, np.nan]
+        ax.plot (nans, nans, color=color, lw=5, alpha=1 - (1-0.3)**1, label='80\%')
+        ax.plot (nans, nans, color=color, lw=5, alpha=1 - (1-0.3)**2, label='50\%')
+        ax.plot (nans, nans, color=color, lw=5, alpha=1 - (1-0.3)**3, label='20\%')
+
+        # labels etc
+        ax.set_xlabel(r'$\sin(\delta)$', fontsize=self.fontsize)
+        ax.set_ylabel(r'$\sigma~[^\circ]$', fontsize=self.fontsize)
+        ax.set_xlim(h.bins[0][1], h.bins[0][-2]); ax.set_ylim(0)
+        ax.legend(loc='upper right', fontsize=self.fontsize); plt.tight_layout()
+        if self.savefigs:
+            for ftype in ['pdf', 'png']:
+                plt.savefig(self.savepath + \
+                            f'GRECO_error_vs_sindec.{ftype}', 
+                            dpi=self.dpi, bbox_inches='tight')
+
+    def effective_area(self, **kwargs):
+        r'''Bla'''
+        pass
