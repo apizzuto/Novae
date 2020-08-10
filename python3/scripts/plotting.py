@@ -506,4 +506,73 @@ class GRECOPlots():
     overall dataset and its performance'''
 
     def __init__(self, **kwargs):
-        pass
+        self.all_flavor = kwargs.pop('allflavor', True)
+        self.spec_ind = kwargs.pop('index', [2., 2.5, 3.0])
+        if type(self.spec_ind) is float:
+            self.spec_ind = [self.spec_ind]
+        self.min_log_e = kwargs.pop('min_log_e', 0.)
+        self.verbose = kwargs.pop('verbose', False)
+        if self.min_log_e is not None:
+            self.low_en_bin = self.min_log_e
+        else:
+            self.low_en_bin = 0.0
+        self.log_energy_bins = kwargs.pop('log_e_bins', np.linspace(self.low_en_bin, 4., 31))
+        self.sin_dec_bins = kwargs.pop('sin_dec_bins', np.linspace(-1., 1., 31))
+        self.initialize_analysis()
+
+    def initialize_analysis(self, **kwargs):
+        greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
+
+        data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
+        exp = [np.load(data) for data in data_fs]
+        exp = np.hstack(exp)
+        if self.all_flavor:
+            mcfiles = glob(greco_base + 'IC86_2012.nu*_with_angErr.npy')
+            mc = np.load(mcfiles[0])
+            for flav in mcfiles[1:]:
+                mc = np.concatenate((mc, np.load(flav)))
+        else:
+            mcfile = glob(greco_base + 'IC86_2012.numu_with_angErr.npy')
+            mc = np.load(mcfile)
+        grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
+        grl = [np.load(g) for g in grls]
+        grl = np.hstack(grl)
+        if self.min_log_e is not None:
+            exp_msk = exp['logE'] > self.min_log_e
+            exp = exp[exp_msk]
+            mc_msk = mc['logE'] > self.min_log_e
+            mc = mc[mc_msk]
+
+        greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']),
+                                                             self.sin_dec_bins,
+                                                             self.log_energy_bins,
+                                                             grl=grl, key='GRECOv2.2', cascades=True)
+
+        ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
+        greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
+        self.ana = greco_ana
+
+    def declination_pdf(self, **kwargs):
+        fig, ax = plt.subplots()
+        hl.plot1d (ax, self.ana[0].bg_space_param.h, crosses=True, color='k', label='histogram')
+        sd = np.linspace (-1, 1, 300)
+        ax.plot (sd, self.ana[0].bg_space_param(sindec=sd), label='spline')
+        ax.set_ylim(0)
+        ax.set_title(greco_ana[0].plot_key)
+        ax.set_xlabel(r'$\sin(\delta)$')
+        ax.set_ylabel(r'probability density')
+        ax.legend(loc='lower left')
+
+    def energy_pdf(self, **kwargs):
+        for gamma in self.spec_ind:
+            fig, ax = plt.subplots()
+            eprm = self.ana[0].energy_pdf_ratio_model
+            ss = dict(zip(eprm.gammas, eprm.ss_hl))
+            things = hl.plot2d(ax, ss[gamma].eval(bins=100),
+                               vmin=1e-2, vmax=1e2, log=True, cbar=True, cmap='RdBu_r')
+            ax.set_title(self.ana[0].plot_key)
+            things['colorbar'].set_label(r'$S/B$')
+            things['colorbar'].ax.tick_params(which='both', direction='out')
+            ax.set_xlabel(r'$\sin(\delta)$')
+            ax.set_ylabel(r'$\log_{10}(E/\mathrm{GeV})$')
+            plt.tight_layout()
