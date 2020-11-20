@@ -26,6 +26,7 @@ true_dpsi = hp.rotator.angdist([np.rad2deg(neutrinos['ra']),
                                   )
 
 #Next few lines because monopod reco angles are swapped in original MC file
+#FIXED IN v2.2, KEEP HERE IN CASE EVER NEED TO RERUN v2.1
 #tmp_azi = neutrinos['monopod_zen'].copy()
 #tmp_zen = neutrinos['monopod_azi'].copy()
 #neutrinos['monopod_zen'] = tmp_zen

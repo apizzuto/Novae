@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+r'''This script trains a random forest on numu MC
+given a set of hyperparameters taken as command
+line arguments'''
+
 import numpy as np
 from glob import glob as glob
 import h5py
@@ -97,7 +101,8 @@ rf_search = GridSearchCV(estimator = forest,
 
 rf_search.fit(X_train, y_train)
 
-outfile = '/data/user/apizzuto/Nova/RandomForests/v2.2/GridSearchResults_logSeparation_{}_bootstrap_{}_minsamples_{}'.format(logSeparation, args.boot, args.minsamp)
+version = 'v2.4'
+outfile = '/data/user/apizzuto/Nova/RandomForests/{}/GridSearchResults_logSeparation_{}_bootstrap_{}_minsamples_{}'.format(version, logSeparation, args.boot, args.minsamp)
 
 pickle.dump(rf_search, open(outfile, 'wb'))
 
