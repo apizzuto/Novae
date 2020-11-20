@@ -1,3 +1,7 @@
+r'''Run this script on GRECO data files after the model has been
+trained. This will add the extra columns as well as load the 
+model and perform the regression'''
+
 import numpy as np
 from glob import glob
 import pickle, h5py, inspect, astropy, argparse, sys
