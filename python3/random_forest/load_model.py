@@ -30,7 +30,7 @@ def load_model(minsamp = 100, logSep = True, standardize = False):
     '''
     cv = pickle.load(open(model_path +  
         'GridSearchResults_logSeparation_{}'.format(logSep) + \
-        '_bootstrap_True_minsamples_{}'.format(minsamp)))
+        '_bootstrap_True_minsamples_{}'.format(minsamp), 'rb'))
     best_model = cv.best_estimator_
     return best_model
 
@@ -65,7 +65,7 @@ def clean_monte_carlo(path, logSep = True, standardize = False,
                                           'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
                                           #'trueDeltaLLH', 
                                           'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow',
-                                          'conv', 'astro', 'prompt'], axis = 'columns')
+                                          'conv', 'astro', 'prompt', 'genie_gen_r', 'genie_gen_z', 'uncorrected_ow'], axis = 'columns')
     old_names = neutrinos_df.columns
     new_names = [on.replace('_', ' ') for on in old_names]
     neutrinos_df.columns = new_names

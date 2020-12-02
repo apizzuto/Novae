@@ -47,7 +47,7 @@ neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE',
                                   'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
                                   #'trueDeltaLLH', 
                                     'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow',
-                                    'conv', 'prompt', 'astro'], axis = 'columns')
+                                    'conv', 'prompt', 'astro', 'genie_gen_r', 'genie_gen_z', 'uncorrected_ow'], axis = 'columns')
 old_names = neutrinos_df.columns
 new_names = [on.replace('_', ' ') for on in old_names]
 neutrinos_df.columns = new_names
