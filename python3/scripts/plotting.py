@@ -524,7 +524,7 @@ class GRECOPlots():
         self.fontsize = kwargs.pop('fontsize', 16)
 
     def initialize_analysis(self, **kwargs):
-        greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
+        greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
 
         data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
         exp = [np.load(data) for data in data_fs]
@@ -549,7 +549,7 @@ class GRECOPlots():
         greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']),
                                                              self.sin_dec_bins,
                                                              self.log_energy_bins,
-                                                             grl=grl, key='GRECOv2.2', cascades=True)
+                                                             grl=grl, key='GRECOv2.4', cascades=True)
         cy.CONF['mp_cpus'] = 5
 
         ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
