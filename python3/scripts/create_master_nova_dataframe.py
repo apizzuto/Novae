@@ -169,6 +169,7 @@ max_greco_time = Time(max_greco_mjd, format='mjd')
 master_df = master_df[master_df['Date'] > min_greco_time]
 master_df = master_df[master_df['Date'] < max_greco_time]
 
+master_df = master_df.reset_index()
 master_df.to_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 
 ###############################################################################
