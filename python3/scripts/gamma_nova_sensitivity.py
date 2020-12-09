@@ -37,7 +37,7 @@ delta_t = args.deltaT
 delta_t_days = delta_t / 86400.
 nova_ind = args.nova_num
 
-greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
+greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
 
 data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
 exp = [np.load(data) for data in data_fs]
@@ -66,17 +66,19 @@ else:
 greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
                                                      np.linspace(-1., 1., 31),
                                                      np.linspace(low_en_bin, 4., 31), 
-                                                     grl=grl, key='GRECOv2.2', cascades=True)
+                                                     grl=grl, key='GRECOv2.4', cascades=True)
 
 ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
 greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 
-gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+gamma_df = master_df[master_df['gamma']==True]
+gamma_df = gamma_df.reset_index()
 try:
     ra = np.radians(gamma_df['RA'][nova_ind])
     dec = np.radians(gamma_df['Dec'][nova_ind])
-    mjd_start = gamma_df['Start Time'][nova_ind]
-    mjd_stop = gamma_df['Stop Time'][nova_ind]
+    mjd_start = gamma_df['gamma_start'][nova_ind].mjd
+    mjd_stop = gamma_df['gamma_stop'][nova_ind].mjd
     name = gamma_df['Name'][nova_ind]
 except:
     print(f"Only {len(gamma_df)} novae to choose from, index {nova_ind} not available")
@@ -92,7 +94,8 @@ if not during_greco:
 
 delta_t_days = delta_t_days if not args.full_gamma_time else mjd_stop - mjd_start
 
-conf = {'extended': True,
+conf = {'ana': greco_ana,
+       'extended': True,
        'space': "ps",
         'time': "transient",
         'sig': 'transient',
@@ -102,7 +105,8 @@ src = cy.utils.Sources(ra=ra,
                        dec=dec, 
                        mjd=mjd_start, 
                        sigma_t=0., 
-                       t_100=delta_t_days)
+                       t_100=delta_t_days, 
+                       name=name)
 cy.CONF['src'] = src
 cy.CONF['mp_cpus'] = 5
 
