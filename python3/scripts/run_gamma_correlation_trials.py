@@ -23,15 +23,17 @@ job = pycondor.Job('sensitivity_stacking_novae_greco','/home/apizzuto/Nova/pytho
 gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
 
 for nova_num in range(len(gamma_df)):
-    for deltaT in np.logspace(1., 6.5, 12):
+    for deltaT in np.logspace(2., 6.5, 10):
         for gamma in [2.0, 2.5, 3.0]:
-            for cut in [0.0, 1.0]:
-                job.add_arg('--nova_num={} --deltaT={} --index={} --minLogE={} --allflavor'.format(nova_num, deltaT, gamma, cut))
+            #for cut in [0.0, 1.0]:
+            for flav in ['', ' --allflavor']:
+                job.add_arg('--nova_num={} --deltaT={} --index={}{}'.format(nova_num, deltaT, gamma, flav))
 
 for nova_num in range(len(gamma_df)):
     for gamma in [2.0, 2.5, 3.0]:
-        for cut in [0.0, 1.0]:
-            job.add_arg('--nova_num={} --index={} --minLogE={} --allflavor --full_gamma_time'.format(nova_num, gamma, cut))
+        #for cut in [0.0, 1.0]:
+        for flav in ['', ' --allflavor']:
+            job.add_arg('--nova_num={} --index={} --full_gamma_time{}'.format(nova_num, gamma, flav))
 
 dagman = pycondor.Dagman('Skylab_Novae_sensitivity_trials', submit=submit, verbose=2)
 dagman.add_job(job)
