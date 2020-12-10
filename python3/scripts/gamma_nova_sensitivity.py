@@ -48,7 +48,7 @@ if args.allflavor:
     for flav in mcfiles[1:]:
         mc = np.concatenate((mc, np.load(flav)))
 else:
-    mcfile = glob(greco_base + 'IC86_2012.numu_with_angErr.npy')
+    mcfile = glob(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')[0]
     mc = np.load(mcfile)
 grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
 grl = [np.load(g) for g in grls]
