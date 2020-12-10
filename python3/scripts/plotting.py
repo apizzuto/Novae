@@ -3,7 +3,7 @@ import matplotlib as mpl
 #try:
 #    mpl.use('agg')
 #except:
-#    pass
+#    pass 
 import matplotlib.pyplot as plt
 import pandas as pd
 import astropy as ap
@@ -18,7 +18,10 @@ import csky as cy
 
 from glob import glob
 mpl.style.use('/home/apizzuto/Nova/python3/scripts/novae_plots.mplstyle')
-gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+gamma_df = master_df[master_df['gamma']==True]
+gamma_df = gamma_df.reset_index()
+#gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
 
 
 class StackingPlots():
@@ -47,9 +50,12 @@ class GammaCatalog():
         self.central_90 = {2.0: (23.26, 4430.12), 2.5: (8.69, 1594.00), 
                            3.0: (4.76, 419.32)}
         
-        gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+        #gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+        master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+        gamma_df = master_df[master_df['gamma']==True]
+        gamma_df = gamma_df.reset_index()
         names = gamma_df['Name']
-        delta_ts = np.logspace(1., 6.5, 12)
+        delta_ts = np.logspace(2., 6.5, 10)
         self.delta_ts = delta_ts
         all_novae = {name: {delta_t: GammaRayNova(name, delta_t=delta_t, **kwargs) for delta_t in delta_ts}
                              for name in gamma_df['Name']}
@@ -149,7 +155,8 @@ class GammaCatalog():
                     self.all_novae[name][delta_t].background_ts_plot(ax=ax, label_axes=False)
                     used_axs.append(ax)
                     ii += 1
-                except:
+                except Exception as e:
+                    print(e)
                     pass
             title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
         else:
@@ -330,14 +337,17 @@ class GammaRayNova():
             self.full_time = True
         if self.full_time:
             try:
-                delta_t = gamma_df[gamma_df['Name'] == name]['Stop Time'] - \
-                            gamma_df[gamma_df['Name'] == name]['Start Time']
-                delta_t = delta_t.values[0] * 86400.
+                delta_t = gamma_df[gamma_df['Name'] == name]['gamma_stop'] - \
+                            gamma_df[gamma_df['Name'] == name]['gamma_start']
+                delta_t = delta_t.values[0].sec
             except NameError:
-                gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
-                delta_t = gamma_df[gamma_df['Name'] == name]['Stop Time'] - \
-                            gamma_df[gamma_df['Name'] == name]['Start Time']
-                delta_t = delta_t.values[0] * 86400.
+                #gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+                master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+                gamma_df = master_df[master_df['gamma']==True]
+                gamma_df = gamma_df.reset_index()
+                delta_t = gamma_df[gamma_df['Name'] == name]['gamma_stop'] - \
+                            gamma_df[gamma_df['Name'] == name]['gamma_start']
+                delta_t = delta_t.values[0].sec
             self.delta_t = delta_t
             self.delta_t_str = "full_gamma_time"
         else:
@@ -444,12 +454,15 @@ class GammaRayNova():
     def compare_sens_to_photons(self, ax=None, label_axes=True, **kwargs):
         r'''Plot time integrated sensitivities and compare them to 
         the best-fit gamma-ray spectra'''
-        gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+        #gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+        master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+        gamma_df = master_df[master_df['gamma']==True]
+        gamma_df = gamma_df.reset_index()
         try:
             gamma_info = gamma_df.loc[gamma_df['Name'] == self.name]
-            gamma = float(gamma_info['Index'])
-            integrated_norm = float(gamma_info['Flux'])*1e-7
-            cutoff = float(gamma_info['Cutoff'])
+            gamma = float(gamma_info['gamma_ind'])
+            integrated_norm = float(gamma_info['gamma_norm'])*1e-7
+            cutoff = float(gamma_info['gamma_cutoff'])
         except:
             print(f"Could not find Nova {self.name} in dataframe")
             return
@@ -472,7 +485,8 @@ class GammaRayNova():
         else:
             photon_flux = photon_norm * np.power(ens, -gamma) * \
                             np.exp(-ens / cutoff)
-        ax.plot(ens, photon_flux* ens**2. * self.delta_t, 
+            photon_flux = np.where(photon_flux > 1e-100, photon_flux, 1e-100)
+        ax.plot(ens, photon_flux* ens**2. * self.delta_t,
                 color=sns.xkcd_rgb['battleship grey'], alpha=0.7)
         
         ax.loglog()
