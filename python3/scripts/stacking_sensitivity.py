@@ -28,12 +28,12 @@ args = parser.parse_args()
 delta_t = args.deltaT
 delta_t_days = delta_t / 86400.
 
-greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.2/'
+greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
 
 data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
 exp = [np.load(data) for data in data_fs]
 exp = np.hstack(exp)
-mc = np.load(greco_base + 'IC86_2012.numu_with_angErr.npy')
+mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
 grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
 grl = [np.load(g) for g in grls]
 grl = np.hstack(grl)
@@ -47,26 +47,16 @@ if args.minLogE is not None:
 greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
                                                      np.linspace(-1., 1., 31),
                                                      np.linspace(0., 4., 31), 
-                                                     grl=grl, key='GRECOv2.2', cascades=True)
+                                                     grl=grl, key='GRECOv2.4', cascades=True)
 
 ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
 greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 
-tab = Table.read('/home/apizzuto/Nova/source_list/appendix.tex')
-df = tab.to_pandas()
-coords = SkyCoord(frame="galactic", l=df['$l$']*u.degree, b=df['$b$']*u.degree)
-equatorial = coords.icrs
-df['ra'] = equatorial.ra.deg
-df['dec'] = equatorial.dec.deg
-df = df.replace(['-'], np.nan)
-
-#df = df[~df['gamma']]
-df['mjd'] = np.array([Time(pt, '%Y-%m-%d').mjd for pt in df['Peak Time']])
-during_greco = (df['mjd'] > greco_ana.mjd_min) & (df['mjd'] + delta_t_days < greco_ana.mjd_max)
-df = df[during_greco]
-
-ras = df['ra']
-decs = df['dec']
+master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+ras = master_df['RA']
+decs = master_df['Dec']
+names = master_df['Name']
+mjds = np.array([t.mjd for t in master_df['Date']])
 delta_ts = np.ones_like(ras) * delta_t_days
 
 conf = {'extended': True,
@@ -77,7 +67,7 @@ conf = {'extended': True,
 
 src = cy.utils.Sources(ra=np.radians(ras), 
                        dec=np.radians(decs), 
-                       mjd=df['mjd'], 
+                       mjd=mjds, 
                        sigma_t=np.zeros_like(delta_ts), 
                        t_100=delta_ts)
 
