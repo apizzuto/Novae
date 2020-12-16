@@ -80,21 +80,51 @@ bg = cy.dists.Chi2TSD(tr.get_many_fits(n_trials))
 
 tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)})
 
-beta = 0.9
+result = {}
 
-result = tr.find_n_sig(bg.median(), beta, 
+########################################################################
+################ SENSITIVITY CALCULATION ###############################
+########################################################################
+beta = 0.9
+sensitivity = tr.find_n_sig(bg.median(), beta, 
                        batch_size=250,
                        n_sig_step=5,
                        max_batch_size=0, 
                        logging=True, 
                        n_bootstrap=1)
 
-result['E2dNdE'] = tr.to_E2dNdE(result, E0=1., unit=1e3)
+sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
+
+########################################################################
+################ DISCOVERY POTENTIAL CALC ##############################
+########################################################################
+thresh_ts = bg.isf_nsigma(5.)
+discovery = tr.find_n_sig(thresh_ts, 0.5,
+                       batch_size=250,
+                       n_sig_step=5,
+                       max_batch_size=0,
+                       logging=True,
+                       n_bootstrap=1)
+discovery['E2dNdE'] = tr.to_E2dNdE(discovery, E0=1., unit=1e3)
+discovery['nsigma'] = 5.
+discovery['CL'] = 0.5
+
+########################################################################
+######################## FIT BIAS TRIALS ###############################
+########################################################################
+n_sigs = np.r_[:201:10]
+trials = [tr.get_many_fits(100, n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
+for (n_sig, t) in zip(n_sigs, trials):
+    t['ntrue'] = np.repeat(n_sig, len(t))
+allt = cy.utils.Arrays.concatenate(trials)
+
 result['bg'] = bg
+result['sensitivity'] = sensitivity
+result['discovery'] = discovery
+result['fit'] = allt
+result['settings'] = args
+result['source_info'] = {'ra': ras, 'dec': decs, 'name': names, 'mjd': mjds}
 
 add_str = 'minLogE_{:.1f}'.format(args.minLogE) if args.minLogE is not None else ''
 with open('/home/apizzuto/Nova/python3/scripts/stacking_sens_res/delta_t_{:.2e}_gamma_{}{}.pkl'.format(delta_t, args.index, add_str), 'wb') as f:
     pickle.dump(result, f)
-
-
-

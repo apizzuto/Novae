@@ -21,9 +21,9 @@ job = pycondor.Job('sensitivity_stacking_novae_greco','/home/apizzuto/Nova/pytho
 			extra_lines= ['should_transfer_files = YES', 'when_to_transfer_output = ON_EXIT', 'Requirements =  (Machine != "node128.icecube.wisc.edu")']
 			)
 #for sigma in ['1', '10', '20', '30', '45', '90']:
-for deltaT in [86400.*0.1, 86400.*0.2, 86400.*0.5, 86400.*1.0, 86400.*2.0, 86400.*5., 86400.*10., 86400.*14.]:
+for deltaT in np.logspace(-3., 1., 9)*86400.:
     for gamma in [2.0, 2.5, 3.0]:
-        for cut in [0.0, 1.0]:
+        for cut in [0.0, 0.5, 1.0]:
             job.add_arg('--deltaT={} --index={} --minLogE={}'.format(deltaT, gamma, cut))
 
 dagman = pycondor.Dagman('Skylab_Novae_sensitivity_trials', submit=submit, verbose=2)
