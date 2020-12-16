@@ -23,13 +23,128 @@ gamma_df = master_df[master_df['gamma']==True]
 gamma_df = gamma_df.reset_index()
 #gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
 
-
 class StackingPlots():
     r'''Helper class to make analysis plots for the
     stacking analysis'''
     
-    def __init__(self, **kwargs):
+    def __init__(self, delta_t, **kwargs):
+        self.delta_t = delta_t
+        self.min_log_e = kwargs.pop('min_log_e', 0.)
+        self.all_flavor = ksargs.pop('allflavor', False)
+        self.spec_ind = kwargs.pop('index', [2., 2.5, 3.])
+        self.verbose = kwargs.pop('verbose', False)
+        self.df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+        self.names = self.df['Name']
+        self.initialize_analysis()
+        self.dpi = kwargs.pop('dpi', 150)
+        self.savefigs = kwargs.pop('save', False)
+        self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
+        self.fontsize = kwargs.pop('fontsize', 16)
+
+    def initialize_analysis(self):
+        greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
+
+        data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
+        exp = [np.load(data) for data in data_fs]; exp = np.hstack(exp)
+        mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
+        grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
+        grl = [np.load(g) for g in grls]; grl = np.hstack(grl)
+
+        greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
+                                                            np.linspace(-1., 1., 31),
+                                                            np.linspace(0., 4., 31), 
+                                                            grl=grl, key='GRECOv2.4', cascades=True)
+
+        ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
+        greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
+        ras = self.df['RA']; decs = self.df['Dec']
+        delta_t = np.ones_like(ras)*self.delta_t/86400.
+        mjds = np.array([t.mjd for t in self.df['Date']])
+        conf = {'extended': True, 'space': "ps", 'time': "transient", 'sig': 'transient'}
+        src = cy.utils.Sources(ra=np.radians(ras), 
+                       dec=np.radians(decs), 
+                       mjd=mjds, 
+                       sigma_t=np.zeros_like(delta_t), 
+                       t_100=delta_t)
+
+        cy.CONF['src'] = src
+        cy.CONF['mp_cpus'] = 10
+        self.conf = conf
+        self.src = src
+        self.greco = greco
+        self.ana = greco_ana
+    
+    def sensitivity_plot(self):
         pass
+
+    def likelihood_scan(self, n_inj=0., inj_gamma =2.0, truth=False):
+        r'''Perform a single trial, with or without signal injected,
+        and calculate the likelihood landscape
+        
+        Parameters:
+        -----------
+         - n_inj: float
+            Number of injected signal events
+         - inj_gamma: float
+            Injected spectral index
+         - truth: bool
+            True llh scan (only permitted after unblinding)
+        '''
+        if truth and n_inj != 0.:
+            print("Can't look at truth with signal")
+        elif truth:
+            print("HAVENT IMPLEMENTED TRUTH YET")
+        else:
+            tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, 
+                    inj_conf={'flux': cy.hyp.PowerLawFlux(inj_gamma)})
+        trial = tr.get_one_trial(n_sig=n_inj)
+        llh = tr.get_one_llh_from_trial(trial)
+        nss = np.linspace(0., 120., 100)
+        gammas = np.linspace(1., 4., 100)
+        llh_space = llh.scan_ts(ns=nss, gamma=gammas)
+        mesh_ns, mesh_gam = np.meshgrid(nss, gammas)
+        best_fit_ts = np.max(llh_space[0])
+        best_fit_ns = mesh_ns.flatten()[np.argmax(llh_space[0])]
+        best_fit_gamma = mesh_gam.flatten()[np.argmax(llh_space[0])]
+        # Calculate critical values
+        chi2 = st.chi2(2., loc=0., scale=1)
+        crit_med = chi2.isf(0.5)
+        crit_90 = chi2.isf(1.0-0.9)
+        crit_99 = chi2.isf(1.0-0.99)
+
+        fig, ax1 = plt.subplots(dpi=150)
+        ts_space = llh_space[0]
+
+        im = ax1.pcolor(mesh_ns, mesh_gam, -1.*(ts_space - best_fit_ts), 
+                            cmap="Blues_r", vmin=0, vmax=50)#, norm=LogNorm(vmin=0.01, vmax=20))
+        ax_c = plt.colorbar(im, ax=ax1, format='$%.1f$')
+        ax_c.ax.tick_params(direction='out')
+        ax_c.set_label(r"$-2\Delta\,\mathrm{LLH}$")
+
+        ax1.contour(mesh_ns, mesh_gam, -1.*(ts_space - best_fit_ts), 
+                    #levels=[1,4, 9, 16, 25], 
+                    levels=[crit_med, crit_90, crit_99], colors="w")
+        if not truth:
+            ax1.plot(n_inj, inj_gamma, marker="^", color="w", markersize=10, label='Truth' )
+        ax1.plot(best_fit_ns, best_fit_gamma, marker="*", color="w", 
+                        markersize=10, label='Best-fit')
+        ax1.set_ylabel(r"$\gamma$")
+        ax1.set_xlabel(r"$n_\mathrm{s}$")
+        ax1.legend(loc=4, facecolor=sns.xkcd_rgb['light grey'])
+        fig.tight_layout()
+
+    def background_distribution(self):
+        pass
+
+    def sensitivity_vs_time(self):
+        pass
+
+    def fitting_plot(self):
+        r'''Include something to compare systematics (ie does bias go away
+        with an energy cut)'''
+        pass
+    
+
 
 class GammaCatalog():
     r'''Helper class to make analysis plots for the
