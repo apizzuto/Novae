@@ -10,6 +10,6 @@ scripts/optical_novae/
 scripts/mprofile*
 notebook/.ipynb_checkpoints/
 scripts/*.pyc
-python3/scripts/stacking_sens_res/
+scripts/stacking_sens_res/
 source_list/galnovae/
 *__pycache__*
