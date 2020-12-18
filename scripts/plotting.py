@@ -35,13 +35,19 @@ class StackingPlots():
         self.verbose = kwargs.pop('verbose', False)
         self.df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
         self.names = self.df['Name']
-        self.initialize_analysis()
+        #self.initialize_analysis()
         self.dpi = kwargs.pop('dpi', 150)
         self.savefigs = kwargs.pop('save', False)
         self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
         self.fontsize = kwargs.pop('fontsize', 16)
+        self.show = kwargs.pop('show', True)
+        self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
+        self.all_delta_ts = np.logspace(-3., 1., 9)*86400.
+        self.all_results = None
 
     def initialize_analysis(self):
+        if self.verbose:
+            print("Initializing csky analysis")
         greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
 
         data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
@@ -74,9 +80,6 @@ class StackingPlots():
         self.greco = greco
         self.ana = greco_ana
     
-    def sensitivity_plot(self):
-        pass
-
     def likelihood_scan(self, n_inj=0., inj_gamma =2.0, truth=False):
         r'''Perform a single trial, with or without signal injected,
         and calculate the likelihood landscape
@@ -136,6 +139,9 @@ class StackingPlots():
     def background_distribution(self):
         pass
 
+    def background_vs_time(self):
+        pass
+
     def sensitivity_vs_time(self):
         pass
 
@@ -143,6 +149,68 @@ class StackingPlots():
         r'''Include something to compare systematics (ie does bias go away
         with an energy cut)'''
         pass
+
+    def find_sens_vs_time(self, events=False):
+        """
+        Obtain a dictionary of the analysis sensitivity versus time for
+        a given set of systematics
+        
+        Parameters:
+        -----------
+        - events: bool
+            Return the sensitivities in units of injected events 
+            instead of in units of flux
+        Returns:
+        --------
+        - 
+        """
+        """JUST LOOP OVER ALL RESULTS AND GRAB THE SENS MAKING A LIST 
+        INSTEAD OF A DICT"""
+        pass
+
+    def get_all_sens(self):
+        """Fetch all of the relevant analysis trials"""
+        cut = self.min_log_e
+        add_str = f'minLogE_{cut:.1f}' if cut is not None else ''
+        results = {gamma: {t: 
+            np.load(trials_path + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}.pkl',
+            allow_pickle=True) for t in self.all_delta_ts} 
+            for gamma in self.spec_ind}
+        event_sensitivity = {gamma: 
+            np.array([results[gamma][ii]['sensitivity']['n_sig'] 
+            for ii in self.all_delta_ts]) 
+            for gamma in self.spec_ind}
+        sensitivity = {gamma: 
+            np.array([results[gamma][ii]['sensitivity']['E2dNdE'] 
+            for ii in self.all_delta_ts]) 
+            for gamma in self.spec_ind}
+        event_discovery = {gamma: 
+            np.array([results[gamma][ii]['discovery']['n_sig'] 
+            for ii in self.all_delta_ts]) 
+            for gamma in self.spec_ind}
+        discovery = {gamma: 
+            np.array([results[gamma][ii]['discovery']['E2dNdE'] 
+            for ii in self.all_delta_ts]) 
+            for gamma in self.spec_ind}
+        self.all_results = results
+        self.all_sensitivity = sensitivity
+        self.all_event_sensitivity = event_sensitivity
+        self.all_discovery = discovery
+        self.all_event_discovery = event_discovery
+        disc_dict = results[self.spec_ind[0]][self.all_delta_ts[0]]['discovery']
+        self.disc_cl = disc_dict['CL']
+        self.discovery_nsigma = disc_dict['nsigma']
+
+    def get_this_sens(self):
+        """From all of the trials, extract the relevant time window"""
+        if self.all_results is None:
+            self.get_all_sens()
+        self.results = {gamma: self.all_results[gamma][self.delta_t]
+            for gamma in self.spec_ind}
+        self.sensitivity = {gamma: self.results[gamma]['sensitivity']
+            for gamma in self.spec_ind}
+        self.discovery = {gamma: self.results[gamma]['discovery']
+            for gamma in self.spec_ind}
     
 
 
