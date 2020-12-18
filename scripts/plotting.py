@@ -202,37 +202,63 @@ class StackingPlots():
     def plot_sensitivity_vs_time(self):
         pass
 
-    def fitting_plot(self):
-        r'''Include something to compare systematics (ie does bias go away
-        with an energy cut)'''
-        fig, axs = plt.subplots(1, 2, figsize=(6,3), dpi=200)
+    def fitting_plot(self, gamma = 2.0, no_labels=False):
+        """
+        Include something to compare systematics (ie does bias go away
+        with an energy cut)
 
-        dns = np.mean(np.diff(n_sigs))
-        ns_bins = np.r_[n_sigs - 0.5*dns, n_sigs[-1] + 0.5*dns]
-        expect_kw = dict(color='C0', ls='--', lw=1, zorder=-10)
-        expect_gamma = tr.sig_injs[0].flux[0].gamma
+        Parameters:
+        -----------
+        - gamma: float or array
+            Spectral index (or list thereof) to inject and fit
+        - no_labels: bool (default False)
+            raise this flag if iterating over this function multiple 
+            times for a subplot
+        """
+        if type(gamma) == float:
+            gamma = [gamma]
 
-        ax = axs[0]
-        h = hl.hist((allt.ntrue, allt.ns), bins=(ns_bins, 100))
-        hl.plot1d(ax, h.contain_project(1),errorbands=True, drawstyle='default')
+        fig, axs = plt.subplots(1, 2, figsize=(9,5), dpi=200)
+        plt.subplots_adjust(wspace=0.04, hspace=0.04)
+        gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
 
-        lim = ns_bins[[0, -1]]
-        ax.set_xlim(ax.set_ylim(lim))
-        ax.plot(lim, lim, **expect_kw)
-        ax.set_aspect('equal')
+        for gam in gamma:
+            fit_trials = self.results[gam]['fit']
+            n_inj = np.unique(fit_trials.ntrue)
+            dns = np.mean(np.diff(n_inj))
+            ns_bins = np.r_[n_inj - 0.5*dns, n_inj[-1] + 0.5*dns]
+            expect_kw = dict(color=gam_cols[gam], ls='--', lw=1, zorder=-10)
 
-        ax = axs[1]
-        h = hl.hist((allt.ntrue, allt.gamma), bins=(ns_bins, 100))
-        hl.plot1d(ax, h.contain_project(1),errorbands=True, drawstyle='default')
-        ax.axhline(expect_gamma, **expect_kw)
-        ax.set_xlim(axs[0].get_xlim())
+            ax = axs[0]
+            h = hl.hist(
+                (fit_trials.ntrue, fit_trials.ns), 
+                bins=(ns_bins, 100))
+            hl.plot1d(
+                ax, h.contain_project(1), errorbands=True, 
+                drawstyle='default', label=r'$\gamma = {:.1f}$'.format(gam))
 
-        for ax in axs:
-            ax.set_xlabel(r'$n_\mathrm{inj}$')
-            ax.grid()
-        axs[0].set_ylabel(r'$n_s$')
-        axs[1].set_ylabel(r'$\gamma$')
+            lim = ns_bins[[0, -1]]
+            ax.set_xlim(ax.set_ylim(lim))
+            ax.plot(lim, lim, **expect_kw)
+            ax.set_aspect('equal')
 
+            ax = axs[1]
+            h = hl.hist(
+                (fit_trials.ntrue, fit_trials.gamma), 
+                bins=(ns_bins, 100))
+            hl.plot1d(
+                ax, h.contain_project(1), errorbands=True, 
+                drawstyle='default')
+            ax.axhline(gam, **expect_kw)
+            ax.set_xlim(axs[0].get_xlim())
+
+            for ax in axs:
+                ax.set_xlabel(r'$n_\mathrm{inj}$')
+                ax.grid()
+            axs[0].set_ylabel(r'$n_s$')
+            axs[1].set_ylabel(r'$\gamma$')
+
+        axs[0].legend(loc=2)
         plt.tight_layout()
 
     def fitting_plot_panel(self):
