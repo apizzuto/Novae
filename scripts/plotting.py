@@ -9,6 +9,7 @@ import pandas as pd
 import astropy as ap
 import pickle
 import scipy as sp
+import scipy.stats as st
 import mpmath
 import seaborn as sns
 from matplotlib.lines import Line2D
@@ -30,7 +31,7 @@ class StackingPlots():
     def __init__(self, delta_t, **kwargs):
         self.delta_t = delta_t
         self.min_log_e = kwargs.pop('min_log_e', 0.)
-        self.all_flavor = ksargs.pop('allflavor', False)
+        self.all_flavor = kwargs.pop('allflavor', False)
         self.spec_ind = kwargs.pop('index', [2., 2.5, 3.])
         self.verbose = kwargs.pop('verbose', False)
         self.df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
@@ -42,8 +43,9 @@ class StackingPlots():
         self.fontsize = kwargs.pop('fontsize', 16)
         self.show = kwargs.pop('show', True)
         self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
-        self.all_delta_ts = np.logspace(-3., 1., 9)*86400.
+        self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
         self.all_results = None
+        self.ana = None
 
     def initialize_analysis(self):
         if self.verbose:
@@ -93,14 +95,16 @@ class StackingPlots():
          - truth: bool
             True llh scan (only permitted after unblinding)
         '''
+        if self.ana is None:
+            self.initialize_analysis()
         if truth and n_inj != 0.:
             print("Can't look at truth with signal")
         elif truth:
-            print("HAVENT IMPLEMENTED TRUTH YET")
+            print("ONLY LOOK AT TRUTH IF YOU HAVE PERMISSION TO UNBLIND")
         else:
-            tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, 
+            tr = cy.get_trial_runner(self.conf, ana=self.ana, src=self.src, 
                     inj_conf={'flux': cy.hyp.PowerLawFlux(inj_gamma)})
-        trial = tr.get_one_trial(n_sig=n_inj)
+        trial = tr.get_one_trial(n_sig=n_inj, TRUTH=truth)
         llh = tr.get_one_llh_from_trial(trial)
         nss = np.linspace(0., 120., 100)
         gammas = np.linspace(1., 4., 100)
@@ -137,10 +141,54 @@ class StackingPlots():
         fig.tight_layout()
 
     def background_distribution(self):
-        pass
+        """
+        Plot the background TS distribution for a given time 
+        window
+        """
+        fig, ax = plt.subplots(dpi=200)
+        bg = self.results[self.spec_ind[0]]['bg']
+        h = bg.get_hist(bins=50)
+        hl.plot1d(ax, h, crosses=True,
+                label='{} bg trials'.format(bg.n_total))
+
+        x = h.centers[0]
+        norm = h.integrate().values
+        ax.semilogy(x, norm * bg.pdf(x), lw=1, ls='--',
+                    label=r'$\chi^2[{:.2f}\mathrm{{dof}},\ \eta={:.3f}]$'.format(bg.ndof, bg.eta))
+
+        ax.set_xlabel(r'TS')
+        ax.set_ylabel(r'number of trials')
+        ax.legend()
+        plt.tight_layout()
 
     def background_vs_time(self):
-        pass
+        """
+        Make a 3x3 panel plot for the background trials for all of 
+        the different time windows, not just the one that we are
+        focusing on
+        """
+        fig, aaxs = plt.subplots(
+            nrows=3, ncols=3, sharex=True, sharey=True, dpi=200,
+            figsize=(13,11))
+        axs = aaxs.ravel()
+        plt.subplots_adjust(hspace=0.03, wspace=0.03)
+        for ii, del_t in enumerate(self.all_delta_ts):
+            bg = self.all_results[self.spec_ind[0]][del_t]['bg']
+            h = bg.get_hist(bins=np.linspace(0., 10., 41))
+            hl.plot1d(axs[ii], h, crosses=True,
+                    label=r'BG, $\Delta T = {:.1e}$ s'.format(del_t))
+
+            x = h.centers[0]
+            norm = h.integrate().values
+            axs[ii].semilogy(x, norm * bg.pdf(x), lw=1, ls='--',
+                        label=r'$\chi^2[{:.2f}\mathrm{{dof}},\ \eta={:.3f}]$'.format(bg.ndof, bg.eta))
+            if ii // 3 == 2:
+                axs[ii].set_xlabel(r'TS')
+            if ii % 3 == 0:
+                axs[ii].set_ylabel(r'$N$')
+            axs[ii].set_ylim(3e-1, 8e3)
+            axs[ii].legend(loc=1)
+        plt.tight_layout()
 
     def sensitivity_plot(self):
         """
@@ -157,7 +205,35 @@ class StackingPlots():
     def fitting_plot(self):
         r'''Include something to compare systematics (ie does bias go away
         with an energy cut)'''
-        pass
+        fig, axs = plt.subplots(1, 2, figsize=(6,3), dpi=200)
+
+        dns = np.mean(np.diff(n_sigs))
+        ns_bins = np.r_[n_sigs - 0.5*dns, n_sigs[-1] + 0.5*dns]
+        expect_kw = dict(color='C0', ls='--', lw=1, zorder=-10)
+        expect_gamma = tr.sig_injs[0].flux[0].gamma
+
+        ax = axs[0]
+        h = hl.hist((allt.ntrue, allt.ns), bins=(ns_bins, 100))
+        hl.plot1d(ax, h.contain_project(1),errorbands=True, drawstyle='default')
+
+        lim = ns_bins[[0, -1]]
+        ax.set_xlim(ax.set_ylim(lim))
+        ax.plot(lim, lim, **expect_kw)
+        ax.set_aspect('equal')
+
+        ax = axs[1]
+        h = hl.hist((allt.ntrue, allt.gamma), bins=(ns_bins, 100))
+        hl.plot1d(ax, h.contain_project(1),errorbands=True, drawstyle='default')
+        ax.axhline(expect_gamma, **expect_kw)
+        ax.set_xlim(axs[0].get_xlim())
+
+        for ax in axs:
+            ax.set_xlabel(r'$n_\mathrm{inj}$')
+            ax.grid()
+        axs[0].set_ylabel(r'$n_s$')
+        axs[1].set_ylabel(r'$\gamma$')
+
+        plt.tight_layout()
 
     def fitting_plot_panel(self):
         """bla"""
@@ -188,7 +264,7 @@ class StackingPlots():
         cut = self.min_log_e
         add_str = f'minLogE_{cut:.1f}' if cut is not None else ''
         results = {gamma: {t: 
-            np.load(trials_path + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}.pkl',
+            np.load(self.trials_base + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}.pkl',
             allow_pickle=True) for t in self.all_delta_ts} 
             for gamma in self.spec_ind}
         event_sensitivity = {gamma: 
@@ -215,6 +291,7 @@ class StackingPlots():
         disc_dict = results[self.spec_ind[0]][self.all_delta_ts[0]]['discovery']
         self.disc_cl = disc_dict['CL']
         self.discovery_nsigma = disc_dict['nsigma']
+        self.get_this_sens()
 
     def get_this_sens(self):
         """From all of the trials, extract the relevant time window"""
@@ -227,7 +304,6 @@ class StackingPlots():
         self.discovery = {gamma: self.results[gamma]['discovery']
             for gamma in self.spec_ind}
     
-
 
 class GammaCatalog():
     r'''Helper class to make analysis plots for the
@@ -524,7 +600,6 @@ class GammaCatalog():
         if 'return_fig' in kwargs.keys():
             return fig, ax
 
-
 class GammaRayNova():
     r'''Holds information about analysis for 
     individual gamma-ray novae'''
@@ -567,8 +642,8 @@ class GammaRayNova():
             self.discovery_trials = {}
             self.fitting_trials = {}
             for ind in self.spec_ind:
-                trials_path = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t_str}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
-                trials_f = glob(trials_path)[0]
+                self.trials_base = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t_str}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
+                trials_f = glob(self.trials_base)[0]
                 with open(trials_f, 'rb') as f:
                     nova_trials = pickle.load(f)
                 self.sensitivity_trials[ind] = nova_trials['sensitivity']
