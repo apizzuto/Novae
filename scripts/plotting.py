@@ -142,7 +142,16 @@ class StackingPlots():
     def background_vs_time(self):
         pass
 
-    def sensitivity_vs_time(self):
+    def sensitivity_plot(self):
+        """
+        Plot the TS distributions (bg and signal) for the strengths
+        that give us sensitivity and discovery. 
+        Note, we round to the nearest trial that we have because
+        we don't often inject exactly the right amount of signal
+        """
+        pass
+
+    def plot_sensitivity_vs_time(self):
         pass
 
     def fitting_plot(self):
@@ -150,23 +159,29 @@ class StackingPlots():
         with an energy cut)'''
         pass
 
-    def find_sens_vs_time(self, events=False):
+    def fitting_plot_panel(self):
+        """bla"""
+        pass
+
+    def find_sens_vs_time(self):
         """
         Obtain a dictionary of the analysis sensitivity versus time for
         a given set of systematics
-        
-        Parameters:
-        -----------
-        - events: bool
-            Return the sensitivities in units of injected events 
-            instead of in units of flux
-        Returns:
-        --------
-        - 
         """
-        """JUST LOOP OVER ALL RESULTS AND GRAB THE SENS MAKING A LIST 
-        INSTEAD OF A DICT"""
-        pass
+        if self.all_results is None:
+            self.get_all_sens()
+        self.sens_vs_time = {gamma: [self.all_sensitivity[gamma][t]
+            for t in self.all_delta_ts]
+            for gamma in self.spec_ind}
+        self.ev_sens_vs_time = {gamma: [self.all_event_sensitivity[gamma][t]
+            for t in self.all_delta_ts]
+            for gamma in self.spec_ind}
+        self.disc_vs_time = {gamma: [self.all_discovery[gamma][t]
+            for t in self.all_delta_ts]
+            for gamma in self.spec_ind}
+        self.ev_disc_vs_time = {gamma: [self.all_event_discovery[gamma][t]
+            for t in self.all_delta_ts]
+            for gamma in self.spec_ind}
 
     def get_all_sens(self):
         """Fetch all of the relevant analysis trials"""
