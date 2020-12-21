@@ -22,7 +22,6 @@ mpl.style.use('/home/apizzuto/Nova/scripts/novae_plots.mplstyle')
 master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 gamma_df = master_df[master_df['gamma']==True]
 gamma_df = gamma_df.reset_index()
-#gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
 
 class StackingPlots():
     r'''Helper class to make analysis plots for the
@@ -44,11 +43,14 @@ class StackingPlots():
         self.fontsize = kwargs.pop('fontsize', 16)
         self.show = kwargs.pop('show', True)
         self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
-        self.all_delta_ts = np.logspace(-3., 1., 9)[:]*86400.
+        self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
         self.all_results = None
         self.ana = None
+        self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
+        self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3'}
 
     def initialize_analysis(self):
+        """Set up a csky analysis object"""
         if self.verbose:
             print("Initializing csky analysis")
         greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
@@ -89,19 +91,20 @@ class StackingPlots():
         self.greco = greco
         self.ana = greco_ana
     
-    def likelihood_scan(self, n_inj=0., inj_gamma =2.0, truth=False):
-        r'''Perform a single trial, with or without signal injected,
+    def likelihood_scan(self, n_inj=0., inj_gamma=2.0, truth=False):
+        """
+        Perform a single trial, with or without signal injected,
         and calculate the likelihood landscape
         
-        Parameters:
-        -----------
-         - n_inj: float
-            Number of injected signal events
-         - inj_gamma: float
-            Injected spectral index
-         - truth: bool
-            True llh scan (only permitted after unblinding)
-        '''
+        :type n_inj: float
+        :param n_inj: Number of injected signal events
+
+        :type inj_gamma: float
+        :param inj_gamma: Injected spectral index
+
+        :type truth: bool
+        :param truth: True llh scan (only permitted after unblinding)
+        """
         if self.ana is None:
             self.initialize_analysis()
         if truth and n_inj != 0.:
@@ -152,6 +155,12 @@ class StackingPlots():
         """
         Plot the background TS distribution for a given time 
         window
+
+        :type ax: matplotlib axes object
+        :param ax: pass if you are already working with a set of axes
+
+        :type show: bool
+        :param show: call plt.show if true
         """
         if ax is None:
             fig, ax = plt.subplots(dpi=200)
@@ -206,6 +215,9 @@ class StackingPlots():
         that give us sensitivity and discovery. 
         Note, we round to the nearest trial that we have because
         we don't often inject exactly the right amount of signal
+
+        :type gamma: float
+        :param gamma: spectral index for the signal trials
         """
         fig, ax = plt.subplots(dpi=200)
         self.background_distribution(ax=ax, show=False)
@@ -236,8 +248,72 @@ class StackingPlots():
         ax.legend()
         ax.set_ylim(3e-1, 1e4)
 
-    def plot_sensitivity_vs_time(self):
-        pass
+    def plot_sensitivity_vs_time(
+        self, ax=None, gamma=2.0, in_flux=True, show=True, 
+        with_discovery=False):
+        r"""Make a plot of sensitivity vs. time
+
+        :type ax: matplotlib axes instance
+        :param ax: pass if you are already working on a set of axes
+
+        :type gamma: float
+        :param gamma: spectral index for signal injection
+
+        :type in_flux: bool
+        :param in_flux: return in flux units if true (else n_events)
+
+        :type show: bool
+        :param show: if true, label axes and call plt.show
+
+        :type with_discovery: bool
+        :param with_discovery: Also plot discovery potential
+        """
+        if ax is None:
+            fig, ax = plt.subplots(dpi=200)
+        if self.min_log_e is None:
+            lab = 'None' 
+        else:
+            lab = "$\log_{10}\Big(E_{\mathrm{min}} / \mathrm{GeV} \Big) = $" \
+                     + f" {self.min_log_e}"
+        if in_flux:
+            sens_dict = self.all_sensitivity
+            disc_dict = self.all_discovery
+        else:
+            sens_dict = self.all_event_sensitivity
+            disc_dict = self.all_event_discovery
+        ax.plot(
+            self.all_delta_ts, sens_dict[gamma], label=lab,
+            ls='-', lw=2., color=self.min_log_cols[self.min_log_e])
+        if with_discovery:
+            disc_lab = ''
+            ax.plot(
+                self.all_delta_ts, disc_dict[gamma], 
+                label=disc_lab, ls='--', lw=2.,
+                color=self.min_log_cols[self.min_log_e]
+                )
+        if show:
+            ax.set_title('$\gamma = $' + f"{gamma:.1f}")
+            ax.set_xlabel('$\Delta T$ (s)')
+            if in_flux:
+                ax.set_ylabel(r'$E^2 \frac{dN}{dEdA} @ $' +
+                    r'$1 \mathrm{TeV}$ (TeV cm${-2}$)')
+            else:
+                ax.set_ylabel(r'$\langle n_{\mathrm{inj}} \rangle$')
+            ax.loglog()
+            legend1 = ax.legend(fontsize=12, loc=4)
+            if with_discovery:
+                handles = []
+                handles.append(Line2D([0], [0], color='grey', 
+                                  lw=1.5, label=r"Sensitivity"))
+                handles.append(
+                    Line2D([0], [0], color='grey', ls='--', lw=1.5, 
+                    label=f"{self.discovery_nsigma} sigma discovery pot."))
+                legend2 = ax.legend(
+                    handles=handles, loc=2, fontsize=12, frameon=False
+                    )
+                plt.gca().add_artist(legend1)
+            ylims = ax.set_ylim()
+            ax.set_ylim(ylims[0]*0.6, ylims[1])
 
     def fitting_plot(self, gamma = 2.0, no_labels=False):
         """
@@ -256,14 +332,13 @@ class StackingPlots():
 
         fig, axs = plt.subplots(1, 2, figsize=(9,5), dpi=200)
         plt.subplots_adjust(wspace=0.04, hspace=0.04)
-        gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
 
         for gam in gamma:
             fit_trials = self.results[gam]['fit']
             n_inj = np.unique(fit_trials.ntrue)
             dns = np.mean(np.diff(n_inj))
             ns_bins = np.r_[n_inj - 0.5*dns, n_inj[-1] + 0.5*dns]
-            expect_kw = dict(color=gam_cols[gam], ls='--', lw=1, zorder=-10)
+            expect_kw = dict(color=self.gam_cols[gam], ls='--', lw=1, zorder=-10)
 
             ax = axs[0]
             h = hl.hist(
@@ -376,6 +451,20 @@ class StackingPlots():
         self.rng_seed = seed
 
     def find_nearest(self, arr, val, in_val=True):
+        """Find an element in an array closest to certain value
+
+        :type arr: array-like
+        :param arr: array to compare against
+
+        :type val: float
+        :param val: value to find nearby element for
+
+        :type in_val: bool
+        :param in_val: Return value if true, index if not
+
+        :rtype: float or int
+        :return: element in array nearby val or the index thereof
+        """
         arr = np.asarray(arr)
         idx = (np.abs(arr - val)).argmin()
         if in_val:
