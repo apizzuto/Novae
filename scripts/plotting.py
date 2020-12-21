@@ -34,6 +34,7 @@ class StackingPlots():
         self.all_flavor = kwargs.pop('allflavor', False)
         self.spec_ind = kwargs.pop('index', [2., 2.5, 3.])
         self.verbose = kwargs.pop('verbose', False)
+        self.rng_seed = kwargs.pop('seed', None)
         self.df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
         self.names = self.df['Name']
         #self.initialize_analysis()
@@ -57,6 +58,12 @@ class StackingPlots():
         mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
         grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
         grl = [np.load(g) for g in grls]; grl = np.hstack(grl)
+
+        if self.min_log_e is not None:
+            exp_msk = exp['logE'] > self.min_log_e
+            exp = exp[exp_msk]
+            mc_msk = mc['logE'] > self.min_log_e
+            mc = mc[mc_msk]
 
         greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
                                                             np.linspace(-1., 1., 31),
@@ -104,15 +111,16 @@ class StackingPlots():
         else:
             tr = cy.get_trial_runner(self.conf, ana=self.ana, src=self.src, 
                     inj_conf={'flux': cy.hyp.PowerLawFlux(inj_gamma)})
-        trial = tr.get_one_trial(n_sig=n_inj, TRUTH=truth)
+        trial = tr.get_one_trial(n_sig=n_inj, TRUTH=truth, seed=self.rng_seed,
+                    poisson=False)
         llh = tr.get_one_llh_from_trial(trial)
-        nss = np.linspace(0., 120., 100)
-        gammas = np.linspace(1., 4., 100)
+        nss = np.linspace(0., 120., 80)
+        gammas = np.linspace(1., 4., 80)
         llh_space = llh.scan_ts(ns=nss, gamma=gammas)
         mesh_ns, mesh_gam = np.meshgrid(nss, gammas)
         best_fit_ts = np.max(llh_space[0])
-        best_fit_ns = mesh_ns.flatten()[np.argmax(llh_space[0])]
-        best_fit_gamma = mesh_gam.flatten()[np.argmax(llh_space[0])]
+        best_fit_ns = mesh_ns.flatten()[np.argmax(llh_space[0].T)]
+        best_fit_gamma = mesh_gam.flatten()[np.argmax(llh_space[0].T)]
         # Calculate critical values
         chi2 = st.chi2(2., loc=0., scale=1)
         crit_med = chi2.isf(0.5)
@@ -122,13 +130,13 @@ class StackingPlots():
         fig, ax1 = plt.subplots(dpi=150)
         ts_space = llh_space[0]
 
-        im = ax1.pcolor(mesh_ns, mesh_gam, -1.*(ts_space - best_fit_ts), 
+        im = ax1.pcolor(mesh_ns, mesh_gam, -1.*(ts_space.T - best_fit_ts), 
                             cmap="Blues_r", vmin=0, vmax=50)#, norm=LogNorm(vmin=0.01, vmax=20))
         ax_c = plt.colorbar(im, ax=ax1, format='$%.1f$')
         ax_c.ax.tick_params(direction='out')
         ax_c.set_label(r"$-2\Delta\,\mathrm{LLH}$")
 
-        ax1.contour(mesh_ns, mesh_gam, -1.*(ts_space - best_fit_ts), 
+        ax1.contour(mesh_ns, mesh_gam, -1.*(ts_space.T - best_fit_ts), 
                     #levels=[1,4, 9, 16, 25], 
                     levels=[crit_med, crit_90, crit_99], colors="w")
         if not truth:
@@ -207,13 +215,12 @@ class StackingPlots():
         Include something to compare systematics (ie does bias go away
         with an energy cut)
 
-        Parameters:
-        -----------
-        - gamma: float or array
-            Spectral index (or list thereof) to inject and fit
-        - no_labels: bool (default False)
-            raise this flag if iterating over this function multiple 
-            times for a subplot
+        :type gamma: float or array
+        :param gamma: Spectral index (or list thereof) to inject and fit
+
+        :type no_labels: bool
+        :param no_labels: raise this flag if iterating over this 
+                          function multiple times for a subplot
         """
         if type(gamma) == float:
             gamma = [gamma]
@@ -329,6 +336,15 @@ class StackingPlots():
             for gamma in self.spec_ind}
         self.discovery = {gamma: self.results[gamma]['discovery']
             for gamma in self.spec_ind}
+
+    def set_seed(self, seed):
+        """
+        Reset the seed to a new value to get unique llh trials
+
+        :type seed: int
+        :param seed: new random seed for llh trials
+        """
+        self.rng_seed = seed
     
 
 class GammaCatalog():
