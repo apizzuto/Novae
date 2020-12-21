@@ -44,7 +44,7 @@ class StackingPlots():
         self.fontsize = kwargs.pop('fontsize', 16)
         self.show = kwargs.pop('show', True)
         self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
-        self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
+        self.all_delta_ts = np.logspace(-3., 1., 9)[:]*86400.
         self.all_results = None
         self.ana = None
 
@@ -148,12 +148,13 @@ class StackingPlots():
         ax1.legend(loc=4, facecolor=sns.xkcd_rgb['light grey'])
         fig.tight_layout()
 
-    def background_distribution(self):
+    def background_distribution(self, ax=None, show=True):
         """
         Plot the background TS distribution for a given time 
         window
         """
-        fig, ax = plt.subplots(dpi=200)
+        if ax is None:
+            fig, ax = plt.subplots(dpi=200)
         bg = self.results[self.spec_ind[0]]['bg']
         h = bg.get_hist(bins=50)
         hl.plot1d(ax, h, crosses=True,
@@ -164,10 +165,11 @@ class StackingPlots():
         ax.semilogy(x, norm * bg.pdf(x), lw=1, ls='--',
                     label=r'$\chi^2[{:.2f}\mathrm{{dof}},\ \eta={:.3f}]$'.format(bg.ndof, bg.eta))
 
-        ax.set_xlabel(r'TS')
-        ax.set_ylabel(r'number of trials')
-        ax.legend()
-        plt.tight_layout()
+        if show:
+            ax.set_xlabel(r'TS')
+            ax.set_ylabel(r'number of trials')
+            ax.legend()
+            plt.tight_layout()
 
     def background_vs_time(self):
         """
@@ -198,14 +200,41 @@ class StackingPlots():
             axs[ii].legend(loc=1)
         plt.tight_layout()
 
-    def sensitivity_plot(self):
+    def sensitivity_plot(self, gamma=2.0):
         """
         Plot the TS distributions (bg and signal) for the strengths
         that give us sensitivity and discovery. 
         Note, we round to the nearest trial that we have because
         we don't often inject exactly the right amount of signal
         """
-        pass
+        fig, ax = plt.subplots(dpi=200)
+        self.background_distribution(ax=ax, show=False)
+        bins = np.linspace(0., 20., 51)
+
+        sens_trials = self.sensitivity[gamma]['tss']
+        sens_n = self.sensitivity[gamma]['n_sig']
+        ninjs = np.unique(np.asarray(list(sens_trials.keys())))
+        close_nsig_sens = self.find_nearest(ninjs, sens_n)
+        plt.hist(
+            sens_trials[close_nsig_sens], bins=bins, histtype='step',
+            lw=1.5, label=r'$\langle n_{\mathrm{inj}} \rangle = $' +
+            f'{close_nsig_sens}', zorder=2
+            )
+
+        disc_trials = self.discovery[gamma]['tss']
+        disc_n = self.discovery[gamma]['n_sig']
+        ninjs = np.unique(np.asarray(list(disc_trials.keys())))
+        close_nsig_disc = self.find_nearest(ninjs, disc_n)
+        plt.hist(
+            disc_trials[close_nsig_disc], bins=bins, histtype='step',
+            lw=1.5, label=r'$\langle n_{\mathrm{inj}} \rangle = $' +
+            f'{close_nsig_sens}', zorder=2
+            )
+
+        ax.set_xlabel('TS')
+        ax.set_ylabel(r'$N$')
+        ax.legend()
+        ax.set_ylim(3e-1, 1e4)
 
     def plot_sensitivity_vs_time(self):
         pass
@@ -345,6 +374,14 @@ class StackingPlots():
         :param seed: new random seed for llh trials
         """
         self.rng_seed = seed
+
+    def find_nearest(self, arr, val, in_val=True):
+        arr = np.asarray(arr)
+        idx = (np.abs(arr - val)).argmin()
+        if in_val:
+            return arr[idx]
+        else:
+            return idx
     
 
 class GammaCatalog():
