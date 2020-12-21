@@ -75,7 +75,7 @@ cy.CONF['src'] = src
 cy.CONF['mp_cpus'] = 5
 
 tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
-n_trials = 5000
+n_trials = 1000
 bg = cy.dists.Chi2TSD(tr.get_many_fits(n_trials))
 
 tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)})
@@ -87,7 +87,7 @@ result = {}
 ########################################################################
 beta = 0.9
 sensitivity = tr.find_n_sig(bg.median(), beta, 
-                       batch_size=250,
+                       batch_size=100,
                        n_sig_step=5,
                        max_batch_size=0, 
                        logging=True, 
@@ -100,7 +100,7 @@ sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
 ########################################################################
 thresh_ts = bg.isf_nsigma(5.)
 discovery = tr.find_n_sig(thresh_ts, 0.5,
-                       batch_size=250,
+                       batch_size=100,
                        n_sig_step=5,
                        max_batch_size=0,
                        logging=True,
@@ -113,7 +113,7 @@ discovery['CL'] = 0.5
 ######################## FIT BIAS TRIALS ###############################
 ########################################################################
 n_sigs = np.r_[:201:10]
-trials = [tr.get_many_fits(100, n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
+trials = [tr.get_many_fits(50, n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
 for (n_sig, t) in zip(n_sigs, trials):
     t['ntrue'] = np.repeat(n_sig, len(t))
 allt = cy.utils.Arrays.concatenate(trials)
