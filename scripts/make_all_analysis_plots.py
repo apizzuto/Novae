@@ -31,15 +31,15 @@ def make_gamma_correlation_plots(cat):
 def make_stacking_plots(stack):
     print("\n\t Beginning stackcing plots")
     stack.get_all_sens()
-    stack.sensitivity_plot(show=False)
-    stack.background_distribution(show=False)
-    stack.background_vs_time(show=False)
+    stack.sensitivity_plot()
+    stack.background_distribution()
+    stack.background_vs_time()
     #stack.likelihood_scan(truth=True)
-    stack.fitting_plot(gamma=[2.0, 2.5, 3.], show=False)
+    stack.fitting_plot(gamma=[2.0, 2.5, 3.])
     for gam in [2.0, 2.5, 3.0]:
         for disc in [True, False]:
             stack.sensitivity_efficiency_curve(
-                gamma=gam, discovery=disc, show=False
+                gamma=gam, discovery=disc
                 )
     print("\t Finished stacking plots")
     
