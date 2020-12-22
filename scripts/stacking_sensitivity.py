@@ -18,11 +18,14 @@ import pickle
 from glob import glob
 
 
-parser = argparse.ArgumentParser(description='Novae background')
-parser.add_argument('--deltaT', type=float, default = 1000.,
+parser = argparse.ArgumentParser(description='Novae stacked analysis')
+parser.add_argument('--deltaT', type=float, default = 86400.,
                     help='Time window in seconds')
 parser.add_argument('--index', type=float, default=1, help='Spectral Index')
 parser.add_argument('--minLogE', type=float, default=None, help='Cut on the minimum reco energy')
+parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
+parser.add_argument('--ntrials_bg', type=float, default=5000, help="Number of backgound trials")
+parser.add_argument('--ntrials_sig', type=float, defulat=250, help="Number of signal trials")
 args = parser.parse_args()
 
 delta_t = args.deltaT
@@ -33,7 +36,15 @@ greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
 data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
 exp = [np.load(data) for data in data_fs]
 exp = np.hstack(exp)
-mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
+if args.allflavor:
+    mcfiles = glob(greco_base + 'IC86_2012.nu*_with_angErr.npy')
+    mc = np.load(mcfiles[0])
+    for flav in mcfiles[1:]:
+        mc = np.concatenate((mc, np.load(flav)))
+else:
+    mcfile = glob(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')[0]
+    mc = np.load(mcfile)
+#mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
 grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
 grl = [np.load(g) for g in grls]
 grl = np.hstack(grl)
@@ -75,7 +86,7 @@ cy.CONF['src'] = src
 cy.CONF['mp_cpus'] = 5
 
 tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
-n_trials = 1000
+n_trials = args.ntrials_bg
 bg = cy.dists.Chi2TSD(tr.get_many_fits(n_trials))
 
 tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)})
@@ -87,7 +98,7 @@ result = {}
 ########################################################################
 beta = 0.9
 sensitivity = tr.find_n_sig(bg.median(), beta, 
-                       batch_size=100,
+                       batch_size=args.ntrials_sig,
                        n_sig_step=5,
                        max_batch_size=0, 
                        logging=True, 
@@ -100,7 +111,7 @@ sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
 ########################################################################
 thresh_ts = bg.isf_nsigma(5.)
 discovery = tr.find_n_sig(thresh_ts, 0.5,
-                       batch_size=100,
+                       batch_size=args.ntrials_sig,
                        n_sig_step=5,
                        max_batch_size=0,
                        logging=True,
@@ -113,7 +124,7 @@ discovery['CL'] = 0.5
 ######################## FIT BIAS TRIALS ###############################
 ########################################################################
 n_sigs = np.r_[:201:10]
-trials = [tr.get_many_fits(50, n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
+trials = [tr.get_many_fits(int(args.ntrials_sig/2), n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
 for (n_sig, t) in zip(n_sigs, trials):
     t['ntrue'] = np.repeat(n_sig, len(t))
 allt = cy.utils.Arrays.concatenate(trials)
@@ -126,5 +137,7 @@ result['settings'] = args
 result['source_info'] = {'ra': ras, 'dec': decs, 'name': names, 'mjd': mjds}
 
 add_str = 'minLogE_{:.1f}'.format(args.minLogE) if args.minLogE is not None else ''
-with open('/home/apizzuto/Nova/scripts/stacking_sens_res/delta_t_{:.2e}_gamma_{}{}.pkl'.format(delta_t, args.index, add_str), 'wb') as f:
+with open('/home/apizzuto/Nova/scripts/stacking_sens_res/' +
+    'delta_t_{:.2e}_gamma_{}{}_allflavor_{}.pkl'.format(
+    delta_t, args.index, add_str, args.allflavor), 'wb') as f:
     pickle.dump(result, f)
