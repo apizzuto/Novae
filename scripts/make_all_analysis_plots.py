@@ -29,8 +29,20 @@ def make_gamma_correlation_plots(cat):
     print("\t - Finished plots with fixed time windows")
 
 def make_stacking_plots(stack):
-    pass
-
+    print("\n\t Beginning stackcing plots")
+    stack.get_all_sens()
+    stack.sensitivity_plot(show=False)
+    stack.background_distribution(show=False)
+    stack.background_vs_time(show=False)
+    #stack.likelihood_scan(truth=True)
+    stack.fitting_plot(gamma=[2.0, 2.5, 3.], show=False)
+    for gam in [2.0, 2.5, 3.0]:
+        for disc in [True, False]:
+            stack.sensitivity_efficiency_curve(
+                gamma=gam, discovery=disc, show=False
+                )
+    print("\t Finished stacking plots")
+    
 def make_GRECO_plots():
     gplots = GRECOPlots(min_log_e=args.minLogE, allflavor=args.allflavor, save=True)
     gplots.declination_pdf()
@@ -47,6 +59,7 @@ if __name__ == '__main__':
     parser.add_argument('--minLogE', type=float, default=0.0, help='Cut on the minimum reco energy')
     parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
     parser.add_argument('--output_path', type=str, default='/data/user/apizzuto/Nova/plots/')
+    parser.add_argument('--stacking_time', type=float, default=86400., help="Stacking time window")
     args = parser.parse_args()
 
     print("Making figures for the unstacked analysis with parameters:")
@@ -56,11 +69,16 @@ if __name__ == '__main__':
             output=args.output_path)
     make_gamma_correlation_plots(cat)
 
+    print("Making figures for the stacked analysis with parameters:")
+    print(f"\t Min log10(E): {args.minLogE:.1f}, \t All flavor: {args.allflavor}")
+    print(f"\t Stacking time window: {args.stacking_time:.2e} s")
+    print(f"\t Figures will be saved to {args.output_path}")
+    stack_plots = StackingPlots(
+        args.stacking_time, min_log_e=args.minLogE, allflavor=args.allflavor,
+        save=True, output=args.output_path)
+    make_stacking_plots(stack_plots)
+
     print("Making figures for the GRECO dataset with parameters:")
     print(f"\t Min log10(E): {args.minLogE:.1f}, \t All flavor: {args.allflavor}")
     print(f"\t Figures will be saved to {args.output_path}")
     make_GRECO_plots()
-
-    #print("Makiing bla bla bla with parameters bla bla")
-    #cat = GammaCatalog()
-    #make_gamma_correlation_plots(cat)
