@@ -26,6 +26,7 @@ parser.add_argument('--minLogE', type=float, default=None, help='Cut on the mini
 parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
 parser.add_argument('--ntrials_bg', type=float, default=5000, help="Number of backgound trials")
 parser.add_argument('--ntrials_sig', type=float, defulat=250, help="Number of signal trials")
+parser.add_argument('--seed', type=int, default=123, help="Random number seed")
 args = parser.parse_args()
 
 delta_t = args.deltaT
@@ -110,7 +111,8 @@ sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
 ################ DISCOVERY POTENTIAL CALC ##############################
 ########################################################################
 thresh_ts = bg.isf_nsigma(5.)
-discovery = tr.find_n_sig(thresh_ts, 0.5,
+beta = 0.9 # beta = 0.5
+discovery = tr.find_n_sig(thresh_ts, beta,
                        batch_size=args.ntrials_sig,
                        n_sig_step=5,
                        max_batch_size=0,
