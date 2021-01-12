@@ -42,7 +42,8 @@ class StackingPlots():
         self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
         self.fontsize = kwargs.pop('fontsize', 16)
         self.show = kwargs.pop('show', True)
-        self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
+        #self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
+        self.trials_base = '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/all_lowstats/'
         self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
         self.all_results = None
         self.ana = None
@@ -502,7 +503,17 @@ class GammaCatalog():
         all_novae = {name: {delta_t: GammaRayNova(name, delta_t=delta_t, **kwargs) for delta_t in delta_ts}
                              for name in gamma_df['Name']}
         self.all_novae = all_novae
-        self.full_time_novae = {name: GammaRayNova(name, **kwargs) for name in gamma_df['Name']}
+        # Put a cap on the maximum allowed time window of 10^6 seconds
+        self.full_time_novae = {}
+        for name in gamma_df['Name']:
+            tmp_del_t = gamma_df[gamma_df['Name'] == name]['gamma_stop'] - \
+                            gamma_df[gamma_df['Name'] == name]['gamma_start']
+            tmp_del_t = tmp_del_t.values[0].sec
+            if tmp_del_t > 1e6:
+                self.full_time_novae[name] = GammaRayNova(name, delta_t=1e6, **kwargs)
+            else:
+                self.full_time_novae[name] = GammaRayNova(name, **kwargs)
+        # self.full_time_novae = {name: GammaRayNova(name, **kwargs) for name in gamma_df['Name']}
         self.names = names
         self.dpi = kwargs.pop('dpi', 150)
         self.sens_col = kwargs.pop('sens_col', sns.xkcd_rgb['light navy blue'])
@@ -611,7 +622,7 @@ class GammaCatalog():
                     ii += 1
                 except:
                     pass
-            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -662,7 +673,7 @@ class GammaCatalog():
                     ii += 1
                 except:
                     pass
-            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -712,7 +723,7 @@ class GammaCatalog():
                     ii += 1
                 except:
                     pass
-            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -745,7 +756,7 @@ class GammaCatalog():
                 except:
                     if self.verbose:
                         print(f"No sensitivity for nova {name}")
-            title = r"$\Delta T_{\nu} = \Delta T_{\gamma}$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
         else:
             delta_t = kwargs['delta_t']
             for name in self.names:
@@ -791,6 +802,8 @@ class GammaRayNova():
                 delta_t = delta_t.values[0].sec
             self.delta_t = delta_t
             self.delta_t_str = "full_gamma_time"
+            if self.delta_t > 1e6:
+                print("LOOKING AT NOVA WITH TIME WINDOW LONGER THAN 1e6 SECONDS")
         else:
             try:
                 self.delta_t = kwargs['delta_t']
@@ -810,8 +823,8 @@ class GammaRayNova():
             self.discovery_trials = {}
             self.fitting_trials = {}
             for ind in self.spec_ind:
-                self.trials_base = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t_str}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
-                trials_f = glob(self.trials_base)[0]
+                tmp_trials_base = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t_str}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
+                trials_f = glob(tmp_trials_base)[0]
                 with open(trials_f, 'rb') as f:
                     nova_trials = pickle.load(f)
                 self.sensitivity_trials[ind] = nova_trials['sensitivity']
@@ -844,8 +857,11 @@ class GammaRayNova():
         ax.plot(ts, norm * bg.pdf(ts))
         ax.semilogy(nonposy='clip')
         ax.set_ylim(1e-1, bg.n_total*1.5)
-        ax.text(20, 6e2, self.name.replace('_', ' ') + '\n' + r'$\delta={:.0f}$'.format(self.dec*180./np.pi), 
-                ha='right', va='center', fontsize=self.fontsize)
+        ax.text(20, 6e2, self.name.replace('_', ' ') + '\n' + r'$\delta={:.0f}$'.format(self.dec*180./np.pi) \
+            + r'$^{\circ}$' + '\n' + r'$\Delta T = {:.1f}$ days'.format(self.delta_t / 86400.), 
+            ha='right', va='center', fontsize=self.fontsize)
+        # ax.text(20, 1.0e2, r'$\Delta T = {:.1e}$ s'.format(self.delta_t),
+        #     ha='right', va='center', fontsize=self.fontsize)
         if label_axes:
             ax.set_xlabel('TS', fontsize=self.fontsize)
             ax.set_ylabel('Number of Trials', fontsize=self.fontsize)
@@ -868,6 +884,9 @@ class GammaRayNova():
         expect_kw = dict(color=self.gamma_colors[gamma], 
                          ls='--', lw=1, zorder=-10)
         ax.plot(lim, lim, **expect_kw)
+        ax.text(2, 42, self.name.replace('_', ' ') + '\n' + r'$\delta={:.0f}$'.format(self.dec*180./np.pi) \
+            + r'$^{\circ}$' + '\n' + r'$\Delta T = {:.1f}$ days'.format(self.delta_t / 86400.), 
+            ha='left', va='center', fontsize=self.fontsize)
         if label_axes:
             ax.set_xlabel(r'$n_\mathrm{inj}$', fontsize=self.fontsize)
             ax.set_ylabel(r'$\hat{n_s}$', fontsize=self.fontsize)
