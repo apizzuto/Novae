@@ -17,8 +17,8 @@ import csky as cy
 import pickle
 from glob import glob
 
+def run_fitting_trials(args):
 
-def run_sensitivity_trials(args):
     delta_t = args.deltaT
     delta_t_days = delta_t / 86400.
 
@@ -79,47 +79,19 @@ def run_sensitivity_trials(args):
     tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
     n_trials = args.ntrials_bg
 
-    ########################################################################
-    ################ LOAD BACKGROUND FROM TRIALS???? ###############################
-    ########################################################################
-
-    bg = cy.dists.Chi2TSD(tr.get_many_fits(n_trials))
-
     tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)})
 
     result = {}
 
     ########################################################################
-    ################ SENSITIVITY CALCULATION ###############################
+    ######################## FIT BIAS TRIALS ###############################
     ########################################################################
-    beta = 0.9
-    sensitivity = tr.find_n_sig(bg.median(), beta, 
-                        batch_size=args.ntrials_sig,
-                        n_sig_step=5,
-                        max_batch_size=0, 
-                        logging=True, 
-                        n_bootstrap=1)
+    n_sigs = np.r_[:201:10]
+    trials = [tr.get_many_fits(int(args.ntrials_sig/2), n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
+    for (n_sig, t) in zip(n_sigs, trials):
+        t['ntrue'] = np.repeat(n_sig, len(t))
+    allt = cy.utils.Arrays.concatenate(trials)
 
-    sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
-
-    ########################################################################
-    ################ DISCOVERY POTENTIAL CALC ##############################
-    ########################################################################
-    thresh_ts = bg.isf_nsigma(5.)
-    beta = 0.9 # beta = 0.5
-    discovery = tr.find_n_sig(thresh_ts, beta,
-                        batch_size=args.ntrials_sig,
-                        n_sig_step=5,
-                        max_batch_size=0,
-                        logging=True,
-                        n_bootstrap=1)
-    discovery['E2dNdE'] = tr.to_E2dNdE(discovery, E0=1., unit=1e3)
-    discovery['nsigma'] = 5.
-    discovery['CL'] = 0.5
-
-    result['bg'] = bg
-    result['sensitivity'] = sensitivity
-    result['discovery'] = discovery
     result['fit'] = allt
     result['settings'] = args
     result['source_info'] = {'ra': ras, 'dec': decs, 'name': names, 'mjd': mjds}
@@ -137,9 +109,8 @@ if __name__ == "__main__":
     parser.add_argument('--index', type=float, default=1, help='Spectral Index')
     parser.add_argument('--minLogE', type=float, default=None, help='Cut on the minimum reco energy')
     parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
-    parser.add_argument('--ntrials_bg', type=float, default=5000, help="Number of backgound trials")
     parser.add_argument('--ntrials_sig', type=float, defulat=250, help="Number of signal trials")
     parser.add_argument('--seed', type=int, default=123, help="Random number seed")
     args = parser.parse_args()
 
-    run_sensitivity_trials(args)
+    run_fitting_trials(args)
