@@ -75,7 +75,7 @@ def run_background_trials(args):
 
     tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
     n_trials = args.ntrials
-    #bg = cy.dists.Chi2TSD(tr.get_many_fits(n_trials))
+    
     bg_trials = tr.get_many_fits(n_trials, seed=args.seed, logging=False)
     
     add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
