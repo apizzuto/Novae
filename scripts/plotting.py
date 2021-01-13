@@ -92,27 +92,27 @@ class StackingPlots():
         self.src = src
         self.greco = greco
         self.ana = greco_ana
-        self.initialize_trial_runners()
+        #self.initialize_trial_runners()
 
-    def initialize_trial_runners(self):
-        trs = {}
-        ras = self.df['RA']; decs = self.df['Dec']
-        mjds = np.array([t.mjd for t in self.df['Date']])
-        for del_t in self.all_delta_ts:
-            print("yeet")
-            tmp_src = cy.utils.Sources(
-                ra=np.radians(ras), 
-                dec=np.radians(decs), 
-                mjd=mjds, 
-                sigma_t=np.zeros_like(ras), 
-                t_100=np.ones_like(ras)*del_t/86400.
-                )
-            trs[del_t] = {gamma: cy.get_trial_runner(
-                self.conf, ana=self.ana, src=tmp_src, 
-                inj_conf={'flux': cy.hyp.PowerLawFlux(gamma)}
-                ) for gamma in [2., 2.5, 3.0]}
-        self.trs = trs
-        self.tr = self.trs[self.delta_t]
+    # def initialize_trial_runners(self):
+    #     trs = {}
+    #     ras = self.df['RA']; decs = self.df['Dec']
+    #     mjds = np.array([t.mjd for t in self.df['Date']])
+    #     for del_t in self.all_delta_ts:
+    #         print("yeet")
+    #         tmp_src = cy.utils.Sources(
+    #             ra=np.radians(ras), 
+    #             dec=np.radians(decs), 
+    #             mjd=mjds, 
+    #             sigma_t=np.zeros_like(ras), 
+    #             t_100=np.ones_like(ras)*del_t/86400.
+    #             )
+    #         trs[del_t] = {gamma: cy.get_trial_runner(
+    #             self.conf, ana=self.ana, src=tmp_src, 
+    #             inj_conf={'flux': cy.hyp.PowerLawFlux(gamma)}
+    #             ) for gamma in [2., 2.5, 3.0]}
+    #     self.trs = trs
+    #     self.tr = self.trs[self.delta_t]
     
     def likelihood_scan(self, n_inj=0., inj_gamma=2.0, truth=False):
         """
@@ -424,53 +424,53 @@ class StackingPlots():
         cut = self.min_log_e
         add_str = f'minLogE_{cut:.1f}' if cut is not None else ''
 
-        def ndarray_to_Chi2TSD(trials):
-            return cy.dists.Chi2TSD(cy.utils.Arrays(trials))
+        # def ndarray_to_Chi2TSD(trials):
+        #     return cy.dists.Chi2TSD(cy.utils.Arrays(trials))
 
-        results = {}
-        for gamma in self.spec_ind:
-            results[gamma] = {}
-            for del_t in self.all_delta_ts:
-                print("yayayayaya")
-                bg = cy.bk.get_all(
-                    self.trials_base + "bg/",
-                    'delta_t_{:.2e}_{}seed_*.npy'.format(
-                    del_t, add_str), 
-                    merge=np.concatenate, 
-                    post_convert=ndarray_to_Chi2TSD
-                    )
-                sens_sig = cy.bk.get_all(
-                    self.trials_base + "sensitivity/nsig/",
-                    'delta_t_{:.2e}_gamma_{}{}_allflavor_{}_seed_*.npy'.format(
-                    del_t, gamma, add_str, self.all_flavor),
-                    merge=np.concatenate,
-                    post_convert=cy.utils.Arrays
-                    )
-                fits_sig = cy.bk.get_all(
-                    self.trials_base + "fits/",
-                    'delta_t_{:.2e}_gamma_{}{}_allflavor_{}_seed_*.npy'.format(
-                        del_t, gamma, add_str, self.all_flavor),
-                    merge=np.concatenate,
-                    post_convert=cy.utils.Arrays
-                    )
-                sensitivity = self.find_n_sig(
-                    bg, sens_sig, del_t, gamma, beta=0.9, nsigma=None
-                    )
-                discovery = self.find_n_sig(
-                    bg, sens_sig, del_t, gamma, beta=0.5, nsigma=5.
-                    )
+        # results = {}
+        # for gamma in self.spec_ind:
+        #     results[gamma] = {}
+        #     for del_t in self.all_delta_ts:
+        #         print("yayayayaya")
+        #         bg = cy.bk.get_all(
+        #             self.trials_base + "bg/",
+        #             'delta_t_{:.2e}_{}seed_*.npy'.format(
+        #             del_t, add_str), 
+        #             merge=np.concatenate, 
+        #             post_convert=ndarray_to_Chi2TSD
+        #             )
+        #         sens_sig = cy.bk.get_all(
+        #             self.trials_base + "sensitivity/nsig/",
+        #             'delta_t_{:.2e}_gamma_{}{}_allflavor_{}_seed_*.npy'.format(
+        #             del_t, gamma, add_str, self.all_flavor),
+        #             merge=np.concatenate,
+        #             post_convert=cy.utils.Arrays
+        #             )
+        #         fits_sig = cy.bk.get_all(
+        #             self.trials_base + "fits/",
+        #             'delta_t_{:.2e}_gamma_{}{}_allflavor_{}_seed_*.npy'.format(
+        #                 del_t, gamma, add_str, self.all_flavor),
+        #             merge=np.concatenate,
+        #             post_convert=cy.utils.Arrays
+        #             )
+        #         sensitivity = self.find_n_sig(
+        #             bg, sens_sig, del_t, gamma, beta=0.9, nsigma=None
+        #             )
+        #         discovery = self.find_n_sig(
+        #             bg, sens_sig, del_t, gamma, beta=0.5, nsigma=5.
+        #             )
                 
-                results[gamma][del_t] = {
-                    'bg': bg, 
-                    'sensitivity': sensitivity,
-                    'discovery': discovery,
-                    'fit': fits_sig
-                }
+        #         results[gamma][del_t] = {
+        #             'bg': bg, 
+        #             'sensitivity': sensitivity,
+        #             'discovery': discovery,
+        #             'fit': fits_sig
+        #         }
 
-        # results = {gamma: {t: 
-        #     np.load(self.trials_base + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}.pkl',
-        #     allow_pickle=True) for t in self.all_delta_ts} 
-        #     for gamma in self.spec_ind}
+        results = {gamma: {t: 
+            np.load(self.trials_base + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}.pkl',
+            allow_pickle=True) for t in self.all_delta_ts} 
+            for gamma in self.spec_ind}
         event_sensitivity = {gamma: 
             np.array([results[gamma][ii]['sensitivity']['n_sig'] 
             for ii in self.all_delta_ts]) 
@@ -509,23 +509,23 @@ class StackingPlots():
         self.discovery = {gamma: self.results[gamma]['discovery']
             for gamma in self.spec_ind}
 
-    def find_n_sig(self, bg, sigs, del_t, gamma, beta=0.9, nsigma=None):
-        tr = self.trs[del_t][gamma]
-        if nsigma is not None:
-            ts = bg.isf_nsigma(nsigma)
-        else:
-            ts = bg.median()
-        trials = {0: bg.trials}
-        trials.update(sigs)
-        result = tr.find_n_sig(
-            ts, beta, max_batch_size=0, logging=False, 
-            trials=trials, n_bootstrap=1
-            )
-        result['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
-        if nsigma is not None:
-            result['nsigma'] = nsigma
-            result['CL'] = beta
-        return result
+    # def find_n_sig(self, bg, sigs, del_t, gamma, beta=0.9, nsigma=None):
+    #     tr = self.trs[del_t][gamma]
+    #     if nsigma is not None:
+    #         ts = bg.isf_nsigma(nsigma)
+    #     else:
+    #         ts = bg.median()
+    #     trials = {0: bg.trials}
+    #     trials.update(sigs)
+    #     result = tr.find_n_sig(
+    #         ts, beta, max_batch_size=0, logging=False, 
+    #         trials=trials, n_bootstrap=1
+    #         )
+    #     result['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
+    #     if nsigma is not None:
+    #         result['nsigma'] = nsigma
+    #         result['CL'] = beta
+    #     return result
 
     def set_seed(self, seed):
         """
