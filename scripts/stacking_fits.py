@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from scipy import stats
 import pandas as pd
-import astropy as ap
-from astropy.table import Table
-from astropy import units as u
-from astropy.coordinates import SkyCoord
 from astropy.time import Time
-from datetime import datetime
 import argparse
 import matplotlib as mpl
 mpl.use('Agg')
@@ -35,7 +29,6 @@ def run_fitting_trials(args):
     else:
         mcfile = glob(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')[0]
         mc = np.load(mcfile)
-    #mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
     grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
     grl = [np.load(g) for g in grls]
     grl = np.hstack(grl)
@@ -46,10 +39,12 @@ def run_fitting_trials(args):
         mc_msk = mc['logE'] > args.minLogE
         mc = mc[mc_msk]
 
-    greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
-                                                        np.linspace(-1., 1., 31),
-                                                        np.linspace(0., 4., 31), 
-                                                        grl=grl, key='GRECOv2.4', cascades=True)
+    greco = cy.selections.CustomDataSpecs.CustomDataSpec(
+        exp, mc, np.sum(grl['livetime']), 
+        np.linspace(-1., 1., 31),
+        np.linspace(0., 4., 31), 
+        grl=grl, key='GRECOv2.4', cascades=True
+        )
 
     ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
     greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
@@ -67,49 +62,44 @@ def run_fitting_trials(args):
             'sig': 'transient',
         }
 
-    src = cy.utils.Sources(ra=np.radians(ras), 
-                        dec=np.radians(decs), 
-                        mjd=mjds, 
-                        sigma_t=np.zeros_like(delta_ts), 
-                        t_100=delta_ts)
+    src = cy.utils.Sources(
+        ra=np.radians(ras), 
+        dec=np.radians(decs), 
+        mjd=mjds, 
+        sigma_t=np.zeros_like(delta_ts), 
+        t_100=delta_ts
+        )
 
     cy.CONF['src'] = src
     cy.CONF['mp_cpus'] = 5
 
-    tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
-    n_trials = args.ntrials_bg
+    tr = cy.get_trial_runner(
+        conf, ana=greco_ana, src=src, 
+        inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)}
+        )
 
-    tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)})
-
-    result = {}
-
-    ########################################################################
-    ######################## FIT BIAS TRIALS ###############################
-    ########################################################################
     n_sigs = np.r_[:201:10]
-    trials = [tr.get_many_fits(int(args.ntrials_sig/2), n_sig=n_sig, logging=False, seed=n_sig) for n_sig in n_sigs]
+    trials = [tr.get_many_fits(int(args.ntrials_sig), 
+        n_sig=n_sig, logging=False, seed=args.seed) for n_sig in n_sigs]
     for (n_sig, t) in zip(n_sigs, trials):
         t['ntrue'] = np.repeat(n_sig, len(t))
     allt = cy.utils.Arrays.concatenate(trials)
 
-    result['fit'] = allt
-    result['settings'] = args
-    result['source_info'] = {'ra': ras, 'dec': decs, 'name': names, 'mjd': mjds}
+    add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
+    filename = '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/fits/' \
+        + 'delta_t_{:.2e}_gamma_{}{}_allflavor_{}_seed_{}.npy'.format(
+        delta_t, args.index, add_str, args.allflavor, args.seed)
+    np.save(filename, allt.as_array)
 
-    add_str = 'minLogE_{:.1f}'.format(args.minLogE) if args.minLogE is not None else ''
-    with open('/home/apizzuto/Nova/scripts/stacking_sens_res/' +
-        'delta_t_{:.2e}_gamma_{}{}_allflavor_{}.pkl'.format(
-        delta_t, args.index, add_str, args.allflavor), 'wb') as f:
-        pickle.dump(result, f)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Novae stacked analysis')
+    parser = argparse.ArgumentParser(description='Novae stacked analysis bias trials')
     parser.add_argument('--deltaT', type=float, default = 86400.,
                         help='Time window in seconds')
     parser.add_argument('--index', type=float, default=1, help='Spectral Index')
     parser.add_argument('--minLogE', type=float, default=None, help='Cut on the minimum reco energy')
     parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
-    parser.add_argument('--ntrials_sig', type=float, defulat=250, help="Number of signal trials")
+    parser.add_argument('--ntrials_sig', type=float, default=250, help="Number of signal trials")
     parser.add_argument('--seed', type=int, default=123, help="Random number seed")
     args = parser.parse_args()
 

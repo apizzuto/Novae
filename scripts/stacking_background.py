@@ -41,7 +41,8 @@ def run_background_trials(args):
         exp, mc, np.sum(grl['livetime']), 
         np.linspace(-1., 1., 31),
         np.linspace(0., 4., 31), 
-        grl=grl, key='GRECOv2.4', cascades=True)
+        grl=grl, key='GRECOv2.4', cascades=True
+        )
 
     ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
     greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
@@ -61,11 +62,13 @@ def run_background_trials(args):
             'sig': 'transient',
         }
 
-    src = cy.utils.Sources(ra=np.radians(ras), 
-                        dec=np.radians(decs), 
-                        mjd=mjds, 
-                        sigma_t=np.zeros_like(delta_ts), 
-                        t_100=delta_ts)
+    src = cy.utils.Sources(
+        ra=np.radians(ras), 
+        dec=np.radians(decs), 
+        mjd=mjds, 
+        sigma_t=np.zeros_like(delta_ts), 
+        t_100=delta_ts
+        )
 
     cy.CONF['src'] = src
     cy.CONF['mp_cpus'] = 5
@@ -80,10 +83,6 @@ def run_background_trials(args):
         + 'delta_t_{:.2e}_{}seed_{}.npy'.format(
         delta_t, add_str, args.seed)
     np.save(filename, bg_trials.as_array)
-    # with open('/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/bg/' +
-    #     'delta_t_{:.2e}_{}_allflavor_{}_seed_{}.pkl'.format(
-    #     delta_t, add_str, args.allflavor, args.seed), 'wb') as f:
-    #     pickle.dump(result, f)
 
 
 if __name__ == "__main__":
