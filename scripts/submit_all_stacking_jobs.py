@@ -1,4 +1,4 @@
- import pycondor, argparse, sys, os.path
+import pycondor, argparse, sys, os.path
 from glob import glob
 import numpy as np
 import pandas as pd
@@ -31,7 +31,7 @@ background_jobs = pycondor.Job(
 
 low_mem_signal = pycondor.Job(
     'sensitivity_signal_novae_greco_low_mem',
-    '/home/apizzuto/Nova/scripts/stacking_sensitivity.py',
+    '/home/apizzuto/Nova/scripts/stacking_signal_trials.py',
     error=error,
     output=output,
     log=log,
@@ -48,7 +48,7 @@ low_mem_signal = pycondor.Job(
 
 high_mem_signal = pycondor.Job(
     'sensitivity_stacking_novae_greco_high_mem',
-    '/home/apizzuto/Nova/scripts/stacking_sensitivity.py',
+    '/home/apizzuto/Nova/scripts/stacking_signal_trials.py',
     error=error,
     output=output,
     log=log,
@@ -66,9 +66,9 @@ high_mem_signal = pycondor.Job(
 for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])):
     for seed in range(50):
         if deltaT > 86400.:
-			ntrials_bg = 2000
-		else:
-			ntrials_bg = 5000
+            ntrials_bg = 2000
+        else:
+            ntrials_bg = 5000
         for cut in [0.0, 0.5, 1.0]:
             background_jobs.add_arg(
                 f"--deltaT={deltaT} --minLogE={cut} --ntrials={ntrials_bg} --seed={seed}"
