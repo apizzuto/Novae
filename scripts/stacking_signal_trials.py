@@ -77,9 +77,9 @@ def run_all_signal_trials(args):
     cy.CONF['mp_cpus'] = 5
 
     def ndarray_to_Chi2TSD(trials):
-            return cy.dists.Chi2TSD(cy.utils.Arrays(trials))
+        return cy.dists.Chi2TSD(cy.utils.Arrays(trials))
 
-    add_str = 'minLogE_{:.1f}'.format(args.minLogE) if args.minLogE is not None else ''
+    add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
     bg = cy.bk.get_all(
         '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/bg/',
         'delta_t_{:.2e}_{}seed_*.npy'.format(
@@ -151,7 +151,7 @@ def run_all_signal_trials(args):
     result['source_info'] = {'ra': ras, 'dec': decs, 'name': names, 'mjd': mjds}
 
     with open('/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/signal_results/' +
-        'delta_t_{:.2e}_gamma_{}{}_allflavor_{}.pkl'.format(
+        'delta_t_{:.2e}_gamma_{}_{}allflavor_{}.pkl'.format(
         delta_t, args.index, add_str, args.allflavor), 'wb') as f:
         pickle.dump(result, f)
 
