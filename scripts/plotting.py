@@ -111,6 +111,7 @@ class StackingPlots():
         if truth and n_inj != 0.:
             print("Can't look at truth with signal")
         elif truth:
+            tr = cy.get_trial_runner(self.conf, ana=self.ana, src=self.src)
             print("ONLY LOOK AT TRUTH IF YOU HAVE PERMISSION TO UNBLIND")
         else:
             tr = cy.get_trial_runner(self.conf, ana=self.ana, src=self.src, 
@@ -147,6 +148,7 @@ class StackingPlots():
             ax1.plot(n_inj, inj_gamma, marker="^", color="w", markersize=10, label='Truth' )
         ax1.plot(best_fit_ns, best_fit_gamma, marker="*", color="w", 
                         markersize=10, label='Best-fit')
+        print(best_fit_ts, best_fit_ns, best_fit_gamma)
         ax1.set_ylabel(r"$\gamma$")
         ax1.set_xlabel(r"$n_\mathrm{s}$")
         ax1.legend(loc=4, facecolor=sns.xkcd_rgb['light grey'])
@@ -400,7 +402,7 @@ class StackingPlots():
     def get_all_sens(self):
         """Fetch all of the relevant analysis trials"""
         cut = self.min_log_e
-        add_str = f'minLogE_{cut:.1f}' if cut is not None else ''
+        add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
 
         results = {gamma: {t: 
             np.load(self.trials_base + 'signal_results/' \
