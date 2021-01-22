@@ -41,14 +41,16 @@ class StackingPlots():
         self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
         self.fontsize = kwargs.pop('fontsize', 16)
         self.show = kwargs.pop('show', True)
-        #self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
+        # self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
         self.trials_base = '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/'
-        self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
+        # self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
+        self.all_delta_ts = np.append(np.logspace(-3., 1., 9)[:]*86400.,
+            np.array([86400.*5.]))
         self.all_results = None
         self.ana = None
         self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
         self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3'}
-        self.initialize_analysis()
+        # self.initialize_analysis()
 
     def initialize_analysis(self):
         """Set up a csky analysis object"""
@@ -196,7 +198,7 @@ class StackingPlots():
         plt.subplots_adjust(hspace=0.03, wspace=0.03)
         for ii, del_t in enumerate(self.all_delta_ts):
             bg = self.all_results[self.spec_ind[0]][del_t]['bg']
-            h = bg.get_hist(bins=np.linspace(0., 10., 41))
+            h = bg.get_hist(bins=np.linspace(0., 12., 51))
             hl.plot1d(axs[ii], h, crosses=True,
                     label=r'BG, $\Delta T = {:.1e}$ s'.format(del_t))
 
@@ -208,7 +210,7 @@ class StackingPlots():
                 axs[ii].set_xlabel(r'TS')
             if ii % 3 == 0:
                 axs[ii].set_ylabel(r'$N$')
-            axs[ii].set_ylim(3e-1, 8e3)
+            axs[ii].set_ylim(3e-1, 3e5)
             axs[ii].legend(loc=1)
         plt.tight_layout()
 
