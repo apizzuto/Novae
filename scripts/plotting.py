@@ -44,8 +44,8 @@ class StackingPlots():
         # self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
         self.trials_base = '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/'
         # self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
-        self.all_delta_ts = np.append(np.logspace(-3., 1., 9)[:]*86400.,
-            np.array([86400.*5.]))
+        self.all_delta_ts = np.sort(np.append(np.logspace(-3., 1., 9)[:]*86400.,
+            np.array([86400.*5.])))
         self.all_results = None
         self.ana = None
         self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
@@ -196,7 +196,7 @@ class StackingPlots():
             figsize=(13,11))
         axs = aaxs.ravel()
         plt.subplots_adjust(hspace=0.03, wspace=0.03)
-        for ii, del_t in enumerate(self.all_delta_ts):
+        for ii, del_t in enumerate(self.all_delta_ts[1:]):
             bg = self.all_results[self.spec_ind[0]][del_t]['bg']
             h = bg.get_hist(bins=np.linspace(0., 12., 51))
             hl.plot1d(axs[ii], h, crosses=True,
@@ -770,9 +770,9 @@ class GammaCatalog():
             for name in self.names:
                 try:
                     self.all_novae[name][delta_t].compare_sens_to_photons(ax=ax)
-                except:
+                except Exception as e:
                     if self.verbose:
-                        print(f"No sensitivity for nova {name}")
+                        print(e, f"No sensitivity for nova {name}")
             title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
         if not 'omit_title' in kwargs.keys():
             ax.set_title(title, fontsize = self.fontsize)
