@@ -1177,3 +1177,17 @@ class GRECOPlots():
     def effective_area(self, **kwargs):
         r'''Bla'''
         pass
+
+class SynthesisPlots():
+    r'''Sometihng?'''
+    def __init__(self, **kwargs):
+        pass
+
+    def gamma_lightcurve_with_greco_rate(self, **kwargs):
+        pass
+
+    def all_sky_scatter_plot(self, **kwargs):
+        pass
+
+    def mollview_with_sensitivity(self, **kwargs):
+        pass
