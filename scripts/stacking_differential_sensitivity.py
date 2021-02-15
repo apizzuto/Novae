@@ -98,14 +98,12 @@ def run_differential_sens(args):
 
     if delta_t < 1e3:
         n_sig_step = 5
-    elif delta_t <= 86400. and args.index <= 2.5:
+    elif delta_t <= 86400.:
         n_sig_step = 7
     elif delta_t <= 86400:
         n_sig_step = 15
-    elif args.index <= 2.5:
-        n_sig_step = 15
     else:
-        n_sig_step = 25
+        n_sig_step = 15
     
     result = {}
 
