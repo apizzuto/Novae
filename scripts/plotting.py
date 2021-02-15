@@ -51,6 +51,7 @@ class StackingPlots():
         self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
         self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3'}
         # self.initialize_analysis()
+        self.diff_sens = None
 
     def initialize_analysis(self):
         """Set up a csky analysis object"""
@@ -449,6 +450,43 @@ class StackingPlots():
             for gamma in self.spec_ind}
         self.discovery = {gamma: self.results[gamma]['discovery']
             for gamma in self.spec_ind}
+
+    def get_differential_sens(self):
+        """Load in the differential sensitivity results"""
+        cut = self.min_log_e
+        add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+        results =  np.load(self.trials_base + 'differential_sens/' \
+            + f'delta_t_{self.delta_t:.2e}{add_str}_' \
+            + f'allflavor_{self.all_flavor}.pkl',
+            allow_pickle=True)
+        self.diff_sens = results
+
+    def plot_differential_sens(self):
+        """Plot the differential sensitivity"""
+        if self.diff_sens is None:
+            self.get_differential_sens()
+        log_es = np.linspace(0., 4., 5)
+        mids = 10.**(log_es[:-1] + np.diff(log_es) / 2.)
+        e_bins = 10.**log_es
+        diff_sens = []
+        for low_en, high_en in zip(e_bins[:-1], e_bins[1:]):
+            diff_sens.append(
+                self.diff_sens[f'sensitivity_{low_en:.1f}_' \
+                    + f'{high_en:.1f}']['E2dNdE'])
+        diff_sens = np.asarray(diff_sens)
+
+        fig, ax = plt.subplots()
+        bin_width = np.sqrt(10.)
+        plt.errorbar(mids, diff_sens,  
+            xerr=[mids-mids/bin_width, mids*bin_width-mids],
+            marker='^', ls=':', #label=r'$\sin \delta = $' +'{:.1f}'.format(np.sin(np.radians(dec))),
+            color=self.min_log_cols[self.min_log_e])
+        plt.loglog()
+        plt.xlabel(r'$E_{\nu}$ (GeV)')
+        plt.ylabel(r'$E^2 \frac{dN}{dEdA} @ $' +
+                    r'$1 \mathrm{TeV}$ (TeV cm${-2}$)')
+        
+
 
     def set_seed(self, seed):
         """
