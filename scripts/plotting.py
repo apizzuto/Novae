@@ -461,7 +461,8 @@ class StackingPlots():
             allow_pickle=True)
         self.diff_sens = results
 
-    def plot_differential_sens(self):
+    def plot_differential_sens(self, ax=None, color=None, label=None,
+        show_label=False):
         """Plot the differential sensitivity"""
         if self.diff_sens is None:
             self.get_differential_sens()
@@ -475,16 +476,22 @@ class StackingPlots():
                     + f'{high_en:.1f}']['E2dNdE'])
         diff_sens = np.asarray(diff_sens)
 
-        fig, ax = plt.subplots()
+        if ax is None:
+            fig, ax = plt.subplots()
         bin_width = np.sqrt(10.)
-        plt.errorbar(mids, diff_sens,  
+        if color is None:
+            color = self.min_log_cols[self.min_log_e]
+        ax.errorbar(mids, diff_sens,  
             xerr=[mids-mids/bin_width, mids*bin_width-mids],
             marker='^', ls=':', #label=r'$\sin \delta = $' +'{:.1f}'.format(np.sin(np.radians(dec))),
-            color=self.min_log_cols[self.min_log_e])
-        plt.loglog()
-        plt.xlabel(r'$E_{\nu}$ (GeV)')
-        plt.ylabel(r'$E^2 \frac{dN}{dEdA} @ $' +
+            color=color, label=label)
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlabel(r'$E_{\nu}$ (GeV)')
+        ax.set_ylabel(r'$E^2 \frac{dN}{dEdA} @ $' +
                     r'$1 \mathrm{TeV}$ (TeV cm${-2}$)')
+        if show_label:
+            ax.legend(loc=1)
         
 
 
