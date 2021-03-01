@@ -28,7 +28,7 @@ parser.add_argument('--allflavor', default=False, action='store_true', help='Inc
 args = parser.parse_args()
 
 df = pd.read_pickle('/home/apizzuto/Nova/Novae_details_with_seasons.csv')
-df = df.sort_values('Start Time (gamma ray)')
+df = df.sort_values('Start Time (gamma ray)') 
 
 deltaT = args.deltaT
 
