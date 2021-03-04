@@ -7,6 +7,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 import astropy as ap
+from astropy.coordinates import SkyCoord
+import astropy.units as u
 import pickle
 import scipy as sp
 import scipy.stats as st
@@ -493,8 +495,6 @@ class StackingPlots():
         if show_label:
             ax.legend(loc=1)
         
-
-
     def set_seed(self, seed):
         """
         Reset the seed to a new value to get unique llh trials
@@ -1224,15 +1224,133 @@ class GRECOPlots():
         pass
 
 class SynthesisPlots():
-    r'''Sometihng?'''
+    r'''Combines GRECO information with general nova information'''
     def __init__(self, **kwargs):
-        pass
+        self.nova_info = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+        self.greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
+        grls = sorted(glob(self.greco_base + 'GRL/IC86_20*data.npy'))
+        self.grls = [np.load(g) for g in grls]
+        grl = np.hstack(grls)
+        self.master_grl = grl
+        datafs = sorted(glob(self.greco_base + 'IC86_20*data.npy'))
+        self.datafs = datafs
+        datas = [np.load(dataf) for dataf in datafs]
+        self.exps = datas
+        self.palette = sns.color_palette('colorblind')
 
-    def gamma_lightcurve_with_greco_rate(self, **kwargs):
-        pass
+    def __mids(self, arr):
+        return arr[:-1] + (np.diff(arr) / 2.)
+
+    def __find_nearest(self, array, values):
+            array = np.asarray(array)
+            idx = [(np.abs(array - value)).argmin() for value in values]
+            return array[idx]
+
+    def gamma_lightcurve_with_greco_rate(self, show_opt=False):
+        vals, ts = [], []
+        uptime = []
+        col_ind = []
+
+        for grl, exp in zip(self.grls, self.exps):
+            time_bins = np.arange(grl['start'][0], grl['stop'][-1], 14.)
+            time_bins = np.append(time_bins, grl['stop'][-1])
+            time_bins = self.__find_nearest(grl['stop'], time_bins)
+            h, b = np.histogram(exp['time'], bins = time_bins)
+            b = self.__mids(b)
+            vals.append(h)
+            ts.append(b)
+            ut, b = np.histogram(grl['start'], bins = time_bins, weights = grl['livetime'])
+            uptime.append(ut)
+
+        rates = [np.where(up != 0., v / (up * 86400.), 0.) for up, v in zip(uptime, vals)]
+        val_err = [np.sqrt(v) for v in vals]
+        rate_err = [np.where(up != 0., v_err / (up * 86400.), 0.) for up, v_err in zip(uptime, val_err)]
+
+        fig, ax = plt.subplots(figsize = (12, 4), dpi=200)
+
+        for i in range(len(ts)):
+            plt.errorbar(ts[i], rates[i], yerr = rate_err[i], 
+                mec = self.palette[i], mfc = self.palette[i], 
+                ecolor = self.palette[i], ls = '', 
+                label = self.datafs[i][-18:-9].replace('_', ' '))
+
+        has_labeled_gam = False
+        for i, nova in self.nova_info.iterrows():
+            if nova['gamma']:
+                if not has_labeled_gam:
+                    plt.axvspan(nova['gamma_start'].mjd, nova['gamma_stop'].mjd,
+                        color = sns.xkcd_rgb['light navy'], alpha = 0.2, 
+                        label = r"$\gamma$ detected nova")
+                    has_labeled_gam = True
+                else:
+                    plt.axvspan(nova['gamma_start'].mjd, nova['gamma_stop'].mjd,
+                        color = sns.xkcd_rgb['light navy'], alpha = 0.2)
+            if show_opt:
+                if i == 0:
+                    plt.axvline(nova['Date'].mjd, ls='--', alpha = 0.4,
+                        color = sns.xkcd_rgb['light navy'], label='Optical peak')
+                else:
+                    plt.axvline(nova['Date'].mjd, ls='--', alpha = 0.4,
+                        color = sns.xkcd_rgb['light navy'])
+            
+        plt.legend(loc = (1.01, 0.1), frameon=False, fontsize = 16)
+        plt.xlim(56000, 58700)
+        plt.ylim(0.0039, 0.0052)
+        plt.ylabel('Rate (Hz)')
+        plt.xlabel('Time (MJD)')
+        # plt.text(56200, 0.0041, 'IceCube Preliminary', color=sns.xkcd_rgb['tomato red'], fontsize=20)
+        plt.show()
 
     def all_sky_scatter_plot(self, **kwargs):
-        pass
+        fig = plt.figure(figsize=(8,4), dpi=200, facecolor='w')
+
+        gplane = SkyCoord(frame='galactic', b = np.zeros(5000)*u.degree, 
+            l = np.linspace(0.0, 360., 5000)*u.degree)
+        gplane_icrs = gplane.icrs
+        gcent = SkyCoord(frame='galactic', b = [0.0]*u.degree, 
+            l = [0.0]*u.degree)
+        gcent_icrs = gcent.icrs
+        cols = [sns.xkcd_rgb['orange pink'] if k is True 
+            else sns.xkcd_rgb['light navy blue'] for k in self.nova_info['gamma']]
+        s = np.array([14 if k is True else 10 for k in self.nova_info['gamma']])
+
+        legend_els = [ 
+            Line2D([0], [0], marker='^', ls = '', 
+                color=sns.xkcd_rgb['orange pink'], 
+                label=r'$\gamma$ detected'),
+            Line2D([0], [0], marker='o', ls = '', 
+                color=sns.xkcd_rgb['light navy blue'], 
+                label='Optical only')
+            ]
+
+        ax = fig.add_subplot(111, projection='mollweide')
+        ax.grid(True, alpha = 0.35, zorder=1, ls = '--')
+
+        gamma_msk = self.nova_info['gamma']
+        equatorial = SkyCoord(ra=self.nova_info['RA'][~gamma_msk]*u.deg, 
+            dec=self.nova_info['Dec'][~gamma_msk]*u.deg)
+        gamma_coords = SkyCoord(ra=self.nova_info['RA'][gamma_msk]*u.deg, 
+            dec=self.nova_info['Dec'][gamma_msk]*u.deg)
+
+        ax.scatter(-1*equatorial.ra.wrap_at('360d').radian + np.pi, 
+            equatorial.dec.radian,
+            zorder=20, s = 10, c = sns.xkcd_rgb['light navy blue'])
+        ax.scatter(-1*gamma_coords.ra.wrap_at('360d').radian + np.pi, 
+            gamma_coords.dec.radian,
+            zorder=20, s = 14, marker='^',
+            c = sns.xkcd_rgb['orange pink'])
+
+        ax.scatter(-1.*gplane_icrs.ra.wrap_at('360d').radian + np.pi, 
+            gplane_icrs.dec.radian,
+            zorder=10, c = 'k', s = 0.5)
+
+        ax.set_xticklabels(["{:.0f}".format(v) + r'$^{\circ}$' 
+            for v in np.linspace(330., 30., 11)], fontsize = 14)
+        ax.set_yticklabels(["{:+.0f}".format(v) + r'$^{\circ}$' 
+            for v in np.linspace(-75., 75., 11)], fontsize = 14)
+        plt.text(110.*np.pi / 180., -45 * np.pi / 180, 'Equatorial\n(J2000)')
+        ax.legend(loc=(0.2, -0.18), handles=legend_els, ncol = 2, 
+            frameon=False)
 
     def mollview_with_sensitivity(self, **kwargs):
         pass
