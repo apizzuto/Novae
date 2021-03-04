@@ -3,8 +3,6 @@
 import numpy as np
 from scipy import stats
 import pandas as pd
-import astropy as ap
-from astropy.table import Table
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
@@ -18,14 +16,14 @@ import pickle
 from glob import glob
 import sys
 
-parser = argparse.ArgumentParser(description='Sensitivity for individual gamma-ray detected novae')
+parser = argparse.ArgumentParser(description='Sensitivity vs declination for a fixed time window')
 parser.add_argument('--deltaT', type=float, default = 1000.,
                     help='Time window in seconds')
+parser.add_argument('--index', type=float, default=1, help='Spectral Index')
 parser.add_argument('--minLogE', type=float, default=None, help='Cut on the minimum reco energy')
 parser.add_argument('--ntrials_bg', type=int, default=10000, help="Number of background trials")
 parser.add_argument('--ntrials_sig', type=int, default=500, help='Number of trials per signal strength')
 parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
-parser.add_argument('--dec', type=float, required=True, help='declination in degrees')
 args = parser.parse_args()
 
 delta_t = args.deltaT
@@ -65,11 +63,6 @@ greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['liveti
 ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
 greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 
-ra = 0.0
-dec = np.radians(args.dec)
-mjd_start = 58200. #This is just kinda random in 2017
-mjd_stop = mjd_start + delta_t_days
-
 conf = {'ana': greco_ana,
        'extended': True,
        'space': "ps",
@@ -77,51 +70,47 @@ conf = {'ana': greco_ana,
         'sig': 'transient',
        }
 
-src = cy.utils.Sources(ra=ra, 
-                       dec=dec, 
-                       mjd=mjd_start, 
-                       sigma_t=0., 
-                       t_100=delta_t_days)
-cy.CONF['src'] = src
-cy.CONF['mp_cpus'] = 5
+result_dict = {'dec': [], 
+    'sens': [],
+    'sens_nsig': []}
 
-tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
-bg = cy.dists.Chi2TSD(tr.get_many_fits(args.ntrials_bg))
+ra = 0.
+mjd_start = 57200.
+sin_decs = np.linspace(-0.95, 0.95, 20)
+for dec in np.arcsin(sin_decs):
+    src = cy.utils.Sources(ra=ra, 
+                        dec=dec, 
+                        mjd=mjd_start, 
+                        sigma_t=0., 
+                        t_100=delta_t_days)
+    cy.CONF['src'] = src
+    cy.CONF['mp_cpus'] = 5
 
-Ebins = 10**np.r_[0.:4.1:1.0]
-trs = [
-    cy.get_trial_runner(conf, 
-        ana=greco_ana, src=src,
-        flux=cy.hyp.PowerLawFlux(2.0, energy_range=(Emin, Emax)))
-    for (Emin, Emax) in zip(Ebins[:-1], Ebins[1:])
-]
+    tr = cy.get_trial_runner(conf, ana=greco_ana, src=src)
+    bg = cy.dists.Chi2TSD(tr.get_many_fits(args.ntrials_bg))
 
-result = {}
+    tr = cy.get_trial_runner(conf, ana=greco_ana, src=src, 
+        inj_conf={'flux': cy.hyp.PowerLawFlux(args.index)})
 
-for ii, tr in enumerate(trs):
-    try:
-        ########################################################################
-        ################ SENSITIVITY CALCULATION ###############################
-        ########################################################################
-        sensitivity = tr.find_n_sig(bg.median(), 0.9, 
-                            batch_size=args.ntrials_sig,
-                            n_sig_step=3,
-                            max_batch_size=0, 
-                            logging=True, 
-                            n_bootstrap=1)
-        sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=Ebins[ii]/1e3, unit=1e3)
-        result[f'sensitivity_{Ebins[ii]:.1f}_{Ebins[ii+1]:.1f}'] = sensitivity
-    except:
-        print(f"Could not do energy range {Ebins[ii]} to {Ebins[ii+1]}")
+    ########################################################################
+    ################ SENSITIVITY CALCULATION ###############################
+    ########################################################################
+    sensitivity = tr.find_n_sig(bg.median(), 0.9, 
+                        batch_size=args.ntrials_sig,
+                        n_sig_step=1,
+                        max_batch_size=0, 
+                        logging=True, 
+                        n_bootstrap=1)
+    sensitivity['E2dNdE'] = tr.to_E2dNdE(sensitivity, E0=1., unit=1e3)
 
-result['bg'] = bg
-result['settings'] = args
-result['source_info'] = {'ra': ra, 'dec': dec, 
-    'mjd_start': mjd_start, 'mjd_stop': mjd_stop}
+    result_dict['dec'].append(dec)
+    result_dict['sens'].append(sensitivity['E2dNdE'])
+    result_dict['sens_nsig'].append(sensitivity['n_sig'])
+
 
 add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
 delta_t_str = f"{delta_t:.2e}"
-output_loc = f"/data/user/apizzuto/Nova/csky_trials/differential_sens/dec_{dec:.1f}_delta_t_{delta_t_str}_{add_str}_allflavor_{args.allflavor}_trials.pkl"
+output_loc = f"/data/user/apizzuto/Nova/csky_trials/sens_vs_dec/sens_vs_dec_delta_t_{delta_t_str}_{add_str}gamma_{args.index}_allflavor_{args.allflavor}_trials.pkl"
 
 with open(output_loc, 'wb') as f:
-    pickle.dump(result, f)
+    pickle.dump(result_dict, f)
