@@ -11,6 +11,7 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 import pickle
 import scipy as sp
+from scipy.interpolate import UnivariateSpline
 import scipy.stats as st
 import mpmath
 import seaborn as sns
@@ -1301,8 +1302,12 @@ class SynthesisPlots():
         # plt.text(56200, 0.0041, 'IceCube Preliminary', color=sns.xkcd_rgb['tomato red'], fontsize=20)
         plt.show()
 
-    def all_sky_scatter_plot(self, **kwargs):
-        fig = plt.figure(figsize=(8,4), dpi=200, facecolor='w')
+    def all_sky_scatter_plot(self, fig = None, ax = None, 
+        show_legend=True, **kwargs):
+        if fig is None and ax is None:
+            fig = plt.figure(figsize=(8,4), dpi=200, facecolor='w')
+            ax = fig.add_subplot(111, projection='mollweide')
+        ax.grid(True, alpha = 0.35, zorder=1, ls = '--')
 
         gplane = SkyCoord(frame='galactic', b = np.zeros(5000)*u.degree, 
             l = np.linspace(0.0, 360., 5000)*u.degree)
@@ -1311,7 +1316,7 @@ class SynthesisPlots():
             l = [0.0]*u.degree)
         gcent_icrs = gcent.icrs
         cols = [sns.xkcd_rgb['orange pink'] if k is True 
-            else sns.xkcd_rgb['light navy blue'] for k in self.nova_info['gamma']]
+            else sns.xkcd_rgb['battleship grey'] for k in self.nova_info['gamma']]
         s = np.array([14 if k is True else 10 for k in self.nova_info['gamma']])
 
         legend_els = [ 
@@ -1319,12 +1324,9 @@ class SynthesisPlots():
                 color=sns.xkcd_rgb['orange pink'], 
                 label=r'$\gamma$ detected'),
             Line2D([0], [0], marker='o', ls = '', 
-                color=sns.xkcd_rgb['light navy blue'], 
+                color=sns.xkcd_rgb['battleship grey'], 
                 label='Optical only')
             ]
-
-        ax = fig.add_subplot(111, projection='mollweide')
-        ax.grid(True, alpha = 0.35, zorder=1, ls = '--')
 
         gamma_msk = self.nova_info['gamma']
         equatorial = SkyCoord(ra=self.nova_info['RA'][~gamma_msk]*u.deg, 
@@ -1334,7 +1336,7 @@ class SynthesisPlots():
 
         ax.scatter(-1*equatorial.ra.wrap_at('360d').radian + np.pi, 
             equatorial.dec.radian,
-            zorder=20, s = 10, c = sns.xkcd_rgb['light navy blue'])
+            zorder=20, s = 10, c = sns.xkcd_rgb['battleship grey'])
         ax.scatter(-1*gamma_coords.ra.wrap_at('360d').radian + np.pi, 
             gamma_coords.dec.radian,
             zorder=20, s = 14, marker='^',
@@ -1349,8 +1351,58 @@ class SynthesisPlots():
         ax.set_yticklabels(["{:+.0f}".format(v) + r'$^{\circ}$' 
             for v in np.linspace(-75., 75., 11)], fontsize = 14)
         plt.text(110.*np.pi / 180., -45 * np.pi / 180, 'Equatorial\n(J2000)')
-        ax.legend(loc=(0.2, -0.18), handles=legend_els, ncol = 2, 
-            frameon=False)
+        if show_legend:
+            ax.legend(loc=(0.2, -0.18), handles=legend_els, ncol = 2, 
+                frameon=False)
 
     def mollview_with_sensitivity(self, **kwargs):
-        pass
+        fig = plt.figure(figsize=(8,4), dpi=200, facecolor='w')
+        ax = fig.add_subplot(111, projection='mollweide')
+        self.all_sky_scatter_plot(fig=fig, ax=ax, show_legend=False)
+        sens_vs_dec = np.load('/data/user/apizzuto/Nova/csky_trials/sens_vs_dec/' 
+            + 'sens_vs_dec_delta_t_8.64e+04_gamma_2.0_allflavor_True_trials.pkl',
+            allow_pickle=True)
+        spl = UnivariateSpline(np.sin(np.array(sens_vs_dec['dec'])), 
+            np.array(sens_vs_dec['sens']))
+
+        nlats, nlons = (73, 145)
+        lats = np.linspace(-np.pi / 2, np.pi / 2, nlats)
+        lons = np.linspace(-np.pi, np.pi, nlons)
+        lons, lats = np.meshgrid(lons, lats)
+
+        lat_deg = np.rad2deg(lats)
+        lon_deg = np.rad2deg(lons)
+
+        sens = spl(np.sin(lats))
+
+        cmap = sns.color_palette("crest", 200)
+        cmap = mpl.colors.ListedColormap(cmap)
+
+        cc = ax.pcolormesh(lons, lats, sens,
+            shading='nearest',
+            cmap = cmap
+            #transform=ccrs.PlateCarree()
+            )
+
+        cbaxes = fig.add_axes([0.18, 0.0, 0.4, 0.06]) 
+        cbaxes.axis('off')
+        cbar = fig.colorbar(cc, ax=cbaxes, orientation='horizontal',
+            fraction=1.0, pad=0.0,
+            label = r'$E^2 \frac{dN}{dEdA} @ $' +
+                    r'$1 \mathrm{TeV}$ (TeV cm$^{-2}$)')
+        
+        cbar.ax.tick_params(direction='out')
+        ax.grid(True, alpha = 0.35, zorder=2, ls = '--')
+
+        legend_els = [ 
+            Line2D([0], [0], marker='^', ls = '', 
+                color=sns.xkcd_rgb['orange pink'], 
+                label=r'$\gamma$ detected'),
+            Line2D([0], [0], marker='o', ls = '', 
+                color=sns.xkcd_rgb['battleship grey'], 
+                label='Optical only')
+            ]
+
+        ax.legend(loc=(0.62, -0.22), handles=legend_els, ncol = 1, 
+            frameon=False)
+
