@@ -1316,7 +1316,7 @@ class SynthesisPlots():
             l = [0.0]*u.degree)
         gcent_icrs = gcent.icrs
         cols = [sns.xkcd_rgb['orange pink'] if k is True 
-            else sns.xkcd_rgb['battleship grey'] for k in self.nova_info['gamma']]
+            else sns.xkcd_rgb['grey'] for k in self.nova_info['gamma']]
         s = np.array([14 if k is True else 10 for k in self.nova_info['gamma']])
 
         legend_els = [ 
@@ -1324,7 +1324,7 @@ class SynthesisPlots():
                 color=sns.xkcd_rgb['orange pink'], 
                 label=r'$\gamma$ detected'),
             Line2D([0], [0], marker='o', ls = '', 
-                color=sns.xkcd_rgb['battleship grey'], 
+                color=sns.xkcd_rgb['grey'], 
                 label='Optical only')
             ]
 
@@ -1336,7 +1336,7 @@ class SynthesisPlots():
 
         ax.scatter(-1*equatorial.ra.wrap_at('360d').radian + np.pi, 
             equatorial.dec.radian,
-            zorder=20, s = 10, c = sns.xkcd_rgb['battleship grey'])
+            zorder=20, s = 10, c = sns.xkcd_rgb['grey'])
         ax.scatter(-1*gamma_coords.ra.wrap_at('360d').radian + np.pi, 
             gamma_coords.dec.radian,
             zorder=20, s = 14, marker='^',
@@ -1399,7 +1399,7 @@ class SynthesisPlots():
                 color=sns.xkcd_rgb['orange pink'], 
                 label=r'$\gamma$ detected'),
             Line2D([0], [0], marker='o', ls = '', 
-                color=sns.xkcd_rgb['battleship grey'], 
+                color=sns.xkcd_rgb['grey'], 
                 label='Optical only')
             ]
 

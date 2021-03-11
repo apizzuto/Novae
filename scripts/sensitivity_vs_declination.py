@@ -95,9 +95,11 @@ for dec in np.arcsin(sin_decs):
     ########################################################################
     ################ SENSITIVITY CALCULATION ###############################
     ########################################################################
+    nsig_step = 1. if delta_t < 864000. else 20.
+
     sensitivity = tr.find_n_sig(bg.median(), 0.9, 
                         batch_size=args.ntrials_sig,
-                        n_sig_step=1,
+                        n_sig_step=nsig_step,
                         max_batch_size=0, 
                         logging=True, 
                         n_bootstrap=1)
