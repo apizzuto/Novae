@@ -126,6 +126,18 @@ optical_info = pd.read_csv('/home/apizzuto/Nova/source_list/nova_optical_peaks.c
 optical_info['OpticalPeak'] = [Time(t, format='iso') for t in optical_info['OpticalPeak']]
 
 ###############################################################################
+#######             Keep dictionary of the extra peak mags              ######
+###############################################################################
+peak_mag = {
+    'V3661 Oph': 10.6, 'V3662 Oph': 14.1, 'V659 Sct': 8.3,
+    'V1659 Sco': 12.3, 'V1656 Sco': 11.4, 'V1707 Sco': 10.3,
+    'V5853 Sgr': 10.7, 'V2860 Ori': 9.4, 'V611 Sct': 13.4,
+    'V5856 Sgr': 5.4, 'V670 Ser': 11.8, 'V1660 Sco': 13.0,
+    'V549 Vel': 9.3, 'V392 Per': 6.2, 'V555 Nor': 12.43,
+    'MGAB-V207': 3.7
+}
+
+###############################################################################
 #######              Create one master dataframe for it all      ##############
 ###############################################################################
 master_dict = dict(Name = [], Date = [], Peak = [], RA = [], Dec = [], gamma = [],
@@ -190,8 +202,9 @@ for name in all_names:
                     print(f"\t - NO MAX MAGNITUDE FOR NOVA {name}")
         else:
             print("\t - COULD NOT FIND GAMMA NOVA IN EITHER, NO TIME AVAILABLE?", name)
-            for mkey, key in [('Date', 'Date'), ('Peak', 'Max Mag.')]:
+            for mkey, key in [('Date', 'Date')]:
                 master_dict[mkey].append(np.nan)
+            master_dict['Peak'].append(peak_mag[name])
         master_dict['gamma'].append(True)
         
     elif name in df['Name'].unique():
@@ -224,6 +237,13 @@ for name in all_names:
             master_dict[mkey].append(np.nan)
     else:
         print("why here tho?")
+
+for i, (name, p) in enumerate(zip(master_dict['Name'], master_dict['Peak'])):
+    try:
+        if np.isnan(p):
+            master_dict['Peak'][i] = peak_mag[name]
+    except:
+        pass
         
 master_df = pd.DataFrame.from_dict(master_dict)
 
@@ -284,3 +304,39 @@ ax.set_yticklabels(["{:+.0f}".format(v) + r'$^{\circ}$' for v in np.linspace(-75
 plt.text(110.*np.pi / 180., -45 * np.pi / 180, 'Equatorial\n(J2000)')
 ax.legend(loc=(0.2, -0.18), handles=legend_els, ncol = 2, frameon=False)
 plt.savefig('/home/apizzuto/public_html/novae/skymap_all_novae.png', dpi=200, bbox_inches='tight')
+
+
+###############################################################################
+#######              Make latex table of novae for paper      ##############
+###############################################################################
+def clean_date(date):
+    return date.iso.split(' ')[0]
+
+def clean_ra(ra):
+    return f"{ra:.2f}" + "$^{\circ}$"
+
+def clean_dec(dec):
+    return f"{dec:+.2f}" + "$^{\circ}$"
+
+def clean_gam(gamma):
+    return '\checkmark' if gamma else '--'
+
+novae = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
+novae = novae.sort_values('Date')
+novae = novae[["Name", "Date", "RA", "Dec", "Peak", "gamma", "refs"]]
+for col, cleaner in [('Date', clean_date), ('RA', clean_ra), ('Dec', clean_dec),
+                    ('gamma', clean_gam)]:
+    novae[col] = novae[col].apply(cleaner)
+    
+novae = novae.rename(columns={'Date': 'Peak Date', 'RA': '$\\alpha$',
+                             'Dec': '$\delta$', 'gamma': '$\gamma$-detected',
+                             'refs': 'Reference', 'Peak': "Peak Mag."})
+    
+latex_str = novae.to_latex(longtable=True, index_names=False, index=False)
+latex_str = latex_str.replace('\\textasciicircum ', '^')
+latex_str = latex_str.replace('\$', '$')
+latex_str = latex_str.replace('\\textbackslash ', '\\')
+latex_str = latex_str.replace('\\{', '{')
+latex_str = latex_str.replace('\\}', '}')
+with open('./tmp_latex_table_paper.tex', 'w') as fi:
+    fi.writelines(latex_str)
