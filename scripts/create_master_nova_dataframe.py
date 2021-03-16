@@ -251,11 +251,11 @@ master_df = pd.DataFrame.from_dict(master_dict)
 ###############################################################################
 #######         Cut out novae that occured outside of GRECO      ##############
 ###############################################################################
-min_greco_mjd = np.min(np.load('/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/IC86_2012.data.npy')['time'])
+min_greco_mjd = np.min(np.load('/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v5/IC86_2012.data.npy')['time'])
 min_greco_time = Time(min_greco_mjd, format='mjd')
 
-max_greco_mjd = np.max(np.load('/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/IC86_2018.data.npy')['time'])
-max_greco_mjd = 59000. # End of May 2020 lines up with end of 2019 data
+max_greco_mjd = np.max(np.load('/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/IC86_2019.data.npy')['time'])
+# max_greco_mjd = 59000. # End of May 2020 lines up with end of 2019 data
 max_greco_time = Time(max_greco_mjd, format='mjd')
 
 master_df = master_df[master_df['Date'] > min_greco_time]

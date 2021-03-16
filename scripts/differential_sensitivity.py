@@ -31,7 +31,7 @@ args = parser.parse_args()
 delta_t = args.deltaT
 delta_t_days = delta_t / 86400.
 
-greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.4/'
+greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/'
 
 data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
 exp = [np.load(data) for data in data_fs]
@@ -60,7 +60,7 @@ else:
 greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
                                                      np.linspace(-1., 1., 31),
                                                      np.linspace(low_en_bin, 4., 31), 
-                                                     grl=grl, key='GRECOv2.4', cascades=True)
+                                                     grl=grl, key='GRECOv2.5', cascades=True)
 
 ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
 greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
