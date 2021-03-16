@@ -101,6 +101,7 @@ rf_search = GridSearchCV(estimator = forest,
 
 rf_search.fit(X_train, y_train)
 
+# Version 2.4 model is the same as v2.5 model because the MC did not change
 version = 'v2.4'
 outfile = '/data/user/apizzuto/Nova/RandomForests/{}/GridSearchResults_logSeparation_{}_bootstrap_{}_minsamples_{}'.format(version, logSeparation, args.boot, args.minsamp)
 

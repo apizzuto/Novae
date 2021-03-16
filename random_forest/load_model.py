@@ -9,7 +9,7 @@ df_feature_cols = ['nstring', 'nchannel', 'zen', 'logE', 'cascade energy',
          'monopod zen', 'pidDeltaLLH', 'pidPeglegLLH', 'pidMonopodLLH',
          'pidLength', 'monopod pegleg dpsi']
 
-model_path = '/data/user/apizzuto/Nova/RandomForests/v2.4/'
+model_path = '/data/user/apizzuto/Nova/RandomForests/v2.5/'
 
 def load_model(minsamp = 100, logSep = True, standardize = False):
     r'''
