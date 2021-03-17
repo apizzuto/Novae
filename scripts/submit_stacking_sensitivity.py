@@ -44,11 +44,11 @@ for allflavor_str in [' --allflavor', '']:
 			ntrials_sig = 250
 			ntrials_bg = 5000
 		for gamma in [2.0, 2.5, 3.0]:
-			for cut in [0.0, 0.5, 1.0]:
-				if deltaT > 86400:
-					high_mem_job.add_arg(f'--deltaT={deltaT} --index={gamma} --minLogE={cut} --ntrials_sig={ntrials_sig} --ntrials_bg={ntrials_bg}{allflavor_str}')
-				else:
-					low_mem_job.add_arg(f'--deltaT={deltaT} --index={gamma} --minLogE={cut} --ntrials_sig={ntrials_sig} --ntrials_bg={ntrials_bg}{allflavor_str}')
+			# for cut in [0.0, 0.5, 1.0]:
+			if deltaT > 86400:
+				high_mem_job.add_arg(f'--deltaT={deltaT} --index={gamma} --ntrials_sig={ntrials_sig} --ntrials_bg={ntrials_bg}{allflavor_str}')
+			else:
+				low_mem_job.add_arg(f'--deltaT={deltaT} --index={gamma} --ntrials_sig={ntrials_sig} --ntrials_bg={ntrials_bg}{allflavor_str}')
 
 dagman = pycondor.Dagman('Skylab_Novae_sensitivity_trials', submit=submit, verbose=2)
 dagman.add_job(low_mem_job)

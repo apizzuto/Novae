@@ -69,31 +69,31 @@ for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])
             ntrials_bg = 2000
         else:
             ntrials_bg = 5000
-        for cut in [0.0, 0.5, 1.0]:
-            background_jobs.add_arg(
-                f"--deltaT={deltaT} --minLogE={cut} --ntrials={ntrials_bg} --seed={seed}"
-            )        
+        # for cut in [0.0, 0.5, 1.0]:
+        background_jobs.add_arg(
+            f"--deltaT={deltaT} --ntrials={ntrials_bg} --seed={seed}"
+        )        
 
 for allflavor_str in [' --allflavor', '']:
-	for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])):
-		if deltaT > 86400.:
-			ntrials_sig = 100
-		else:
-			ntrials_sig = 250
-		for gamma in [2.0, 2.5, 3.0]:
-			for cut in [0.0, 0.5, 1.0]:
-				if deltaT > 86400:
-					high_mem_signal.add_arg(
-                        f'--deltaT={deltaT} --index={gamma} --minLogE={cut}' \
-                        + f' --ntrials_sig={ntrials_sig} ' \
-                        + f'--ntrials_bg={ntrials_bg}{allflavor_str}'
-                        )
-				else:
-					low_mem_signal.add_arg(
-                        f'--deltaT={deltaT} --index={gamma} --minLogE={cut}' \
-                        + f' --ntrials_sig={ntrials_sig} ' \
-                        + f'--ntrials_bg={ntrials_bg}{allflavor_str}'
-                        )
+    for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])):
+        if deltaT > 86400.:
+            ntrials_sig = 100
+        else:
+            ntrials_sig = 250
+        for gamma in [2.0, 2.5, 3.0]:
+            # for cut in [0.0, 0.5, 1.0]:
+            if deltaT > 86400:
+                high_mem_signal.add_arg(
+                    f'--deltaT={deltaT} --index={gamma}' \
+                    + f' --ntrials_sig={ntrials_sig} ' \
+                    + f'--ntrials_bg={ntrials_bg}{allflavor_str}'
+                    )
+            else:
+                low_mem_signal.add_arg(
+                    f'--deltaT={deltaT} --index={gamma}' \
+                    + f' --ntrials_sig={ntrials_sig} ' \
+                    + f'--ntrials_bg={ntrials_bg}{allflavor_str}'
+                    )
 
 
 background_jobs.add_child(low_mem_signal)

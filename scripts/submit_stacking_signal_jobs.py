@@ -56,18 +56,18 @@ for allflavor_str in [' --allflavor', '']:
         else:
             ntrials_sig = 250
         for gamma in [2.0, 2.5, 3.0]:
-            for cut in [0.0, 0.5, 1.0]:
-                if deltaT > 86400:
-                    high_mem_signal.add_arg(
-                    f'--deltaT={deltaT} --index={gamma} --minLogE={cut}' \
-                        + f' --ntrials_sig={ntrials_sig}' \
-                        + f'{allflavor_str}'
-                        )
-                else:
-                    low_mem_signal.add_arg(
-                        f'--deltaT={deltaT} --index={gamma} --minLogE={cut}' \
-                        + f' --ntrials_sig={ntrials_sig}' \
-                        + f'{allflavor_str}'
-                        ) 
+            # for cut in [0.0, 0.5, 1.0]:
+            if deltaT > 86400:
+                high_mem_signal.add_arg(
+                f'--deltaT={deltaT} --index={gamma}' \
+                    + f' --ntrials_sig={ntrials_sig}' \
+                    + f'{allflavor_str}'
+                    )
+            else:
+                low_mem_signal.add_arg(
+                    f'--deltaT={deltaT} --index={gamma}' \
+                    + f' --ntrials_sig={ntrials_sig}' \
+                    + f'{allflavor_str}'
+                    ) 
 
 dagman.build_submit()
