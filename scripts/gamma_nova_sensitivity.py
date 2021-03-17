@@ -28,7 +28,7 @@ parser.add_argument('--ntrials_bg', type=int, default=10000, help="Number of bac
 parser.add_argument('--ntrials_sig', type=int, default=500, help='Number of trials per signal strength')
 parser.add_argument('--full_gamma_time', action='store_true', default=False,
                         help="Raise if you want to use the full gamma ray time window")
-parser.add_argument('--disc_n_sigma', type=float, default=3., help="Number of sigma for disc. pot")
+parser.add_argument('--disc_n_sigma', type=float, default=5., help="Number of sigma for disc. pot")
 parser.add_argument('--disc_CL', type=float, default=0.5, help="Confidence level for disc. pot")
 parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
 args = parser.parse_args()
@@ -74,6 +74,7 @@ greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 gamma_df = master_df[master_df['gamma']==True]
 gamma_df = gamma_df.reset_index()
+
 try:
     ra = np.radians(gamma_df['RA'][nova_ind])
     dec = np.radians(gamma_df['Dec'][nova_ind])

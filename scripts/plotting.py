@@ -1294,8 +1294,8 @@ class SynthesisPlots():
                     plt.axvline(nova['Date'].mjd, ls='--', alpha = 0.4,
                         color = sns.xkcd_rgb['light navy'])
             
-        plt.legend(loc = (1.01, 0.1), frameon=False, fontsize = 16)
-        plt.xlim(56000, 58700)
+        plt.legend(loc = (1.01, 0.03), frameon=False, fontsize = 16)
+        plt.xlim(56000, 59000)
         plt.ylim(0.0039, 0.0052)
         plt.ylabel('Rate (Hz)')
         plt.xlabel('Time (MJD)')
