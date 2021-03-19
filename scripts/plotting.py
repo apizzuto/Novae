@@ -49,10 +49,11 @@ class StackingPlots():
         # self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
         self.all_delta_ts = np.sort(np.append(np.logspace(-3., 1., 9)[:]*86400.,
             np.array([86400.*5.])))
+        # self.all_delta_ts = np.logspace(-3., 1., 9)*86400.
         self.all_results = None
         self.ana = None
         self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
-        self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3'}
+        self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3', None: 'C0'}
         # self.initialize_analysis()
         self.diff_sens = None
 
@@ -410,12 +411,22 @@ class StackingPlots():
         cut = self.min_log_e
         add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
 
-        results = {gamma: {t: 
-            np.load(self.trials_base + 'signal_results/' \
-                + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}_' \
-                + f'allflavor_{self.all_flavor}.pkl',
-            allow_pickle=True) for t in self.all_delta_ts} 
-            for gamma in self.spec_ind}
+        results = {gamma: {} for gamma in self.spec_ind}
+        for gamma in self.spec_ind:
+            for t in self.all_delta_ts:
+                try:
+                    results[gamma][t] = np.load(self.trials_base + 'signal_results/' \
+                        + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}_' \
+                        + f'allflavor_{self.all_flavor}.pkl',
+                        allow_pickle=True)
+                except:
+                    pass
+        # {gamma: {t: 
+        #     np.load(self.trials_base + 'signal_results/' \
+        #         + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}_' \
+        #         + f'allflavor_{self.all_flavor}.pkl',
+        #     allow_pickle=True) for t in self.all_delta_ts} 
+        #     for gamma in self.spec_ind}
         event_sensitivity = {gamma: 
             np.array([results[gamma][ii]['sensitivity']['n_sig'] 
             for ii in self.all_delta_ts]) 
@@ -552,7 +563,8 @@ class GammaCatalog():
         gamma_df = master_df[master_df['gamma']==True]
         gamma_df = gamma_df.reset_index()
         names = gamma_df['Name']
-        delta_ts = np.logspace(2., 6.5, 10)
+        # delta_ts = np.logspace(2., 6.5, 10)
+        delta_ts = np.logspace(-3.5, 1., 10)*86400.
         self.delta_ts = delta_ts
         all_novae = {name: {delta_t: GammaRayNova(name, delta_t=delta_t, **kwargs) for delta_t in delta_ts}
                              for name in gamma_df['Name']}
@@ -563,8 +575,8 @@ class GammaCatalog():
             tmp_del_t = gamma_df[gamma_df['Name'] == name]['gamma_stop'] - \
                             gamma_df[gamma_df['Name'] == name]['gamma_start']
             tmp_del_t = tmp_del_t.values[0].sec
-            if tmp_del_t > 1e6:
-                self.full_time_novae[name] = GammaRayNova(name, delta_t=1e6, **kwargs)
+            if tmp_del_t > 10.*86400:
+                self.full_time_novae[name] = GammaRayNova(name, delta_t=86400.*10., **kwargs)
             else:
                 self.full_time_novae[name] = GammaRayNova(name, **kwargs)
         # self.full_time_novae = {name: GammaRayNova(name, **kwargs) for name in gamma_df['Name']}
@@ -648,8 +660,8 @@ class GammaCatalog():
     
     def background_ts_panel(self, **kwargs):
         if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
-            fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
-                                    figsize=(16,10), sharey=True, sharex=True)
+            fig, aaxs = plt.subplots(nrows=4, ncols=4, dpi=self.dpi,
+                                    figsize=(14,14), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         axs = np.ravel(aaxs)
         used_axs = []
@@ -674,9 +686,10 @@ class GammaCatalog():
                     self.full_time_novae[name].background_ts_plot(ax=ax, label_axes=False)
                     used_axs.append(ax)
                     ii += 1
-                except:
+                except Exception as e:
+                    print(e)
                     pass
-            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -699,8 +712,8 @@ class GammaCatalog():
 
     def ns_fitting_panel(self, **kwargs):
         if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
-            fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
-                                    figsize=(16,10), sharey=True, sharex=True)
+            fig, aaxs = plt.subplots(nrows=4, ncols=4, dpi=self.dpi,
+                                    figsize=(14,14), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         spec = kwargs.pop('gamma', 2.)
         axs = np.ravel(aaxs)
@@ -727,7 +740,7 @@ class GammaCatalog():
                     ii += 1
                 except:
                     pass
-            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -750,8 +763,8 @@ class GammaCatalog():
     
     def gamma_fitting_panel(self, **kwargs):
         if not 'fig' in kwargs.keys() and not 'axs' in kwargs.keys():
-            fig, aaxs = plt.subplots(nrows=3, ncols=5, dpi=self.dpi,
-                                    figsize=(16,10), sharey=True, sharex=True)
+            fig, aaxs = plt.subplots(nrows=4, ncols=4, dpi=self.dpi,
+                                    figsize=(14,14), sharey=True, sharex=True)
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         axs = np.ravel(aaxs)
         used_axs = []
@@ -777,7 +790,7 @@ class GammaCatalog():
                     ii += 1
                 except:
                     pass
-            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -810,12 +823,12 @@ class GammaCatalog():
                 except:
                     if self.verbose:
                         print(f"No sensitivity for nova {name}")
-            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10^6 \;\mathrm{s})$"
+            title = r"$\Delta T_{\nu} = \min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         else:
             delta_t = kwargs['delta_t']
             for name in self.names:
                 try:
-                    self.all_novae[name][delta_t].compare_sens_to_photons(ax=ax)
+                    self.all_novae[name][delta_t].compare_sens_to_photons(ax=ax, **kwargs)
                 except Exception as e:
                     if self.verbose:
                         print(e, f"No sensitivity for nova {name}")
@@ -869,15 +882,17 @@ class GammaRayNova():
         self.spec_ind = kwargs.pop('index', [2., 2.5, 3.0])
         if type(self.spec_ind) is float:
             self.spec_ind = [self.spec_ind]
-        self.min_log_e = kwargs.pop('min_log_e', 0.)
-        self.verbose = kwargs.pop('verbose', False)
+        self.min_log_e = kwargs.pop('min_log_e', None)
+        self.min_log_e_str = f'_minLogE_{self.min_log_e:.1f}' if self.min_log_e is not None else ''
+        self.verbose = kwargs.pop('verbose', True)
         self.trials_base = '/data/user/apizzuto/Nova/csky_trials/'
         try:
             self.sensitivity_trials = {}
             self.discovery_trials = {}
             self.fitting_trials = {}
             for ind in self.spec_ind:
-                tmp_trials_base = self.trials_base + f'nova_*_{self.name}_delta_t_{self.delta_t_str}_minLogE_{self.min_log_e:.1f}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
+                name = self.name.replace(' ', '_')
+                tmp_trials_base = self.trials_base + f'nova_*_{name}_delta_t_{self.delta_t_str}{self.min_log_e_str}_gamma_{ind:.1f}_allflavor_{self.all_flavor}_trials.pkl'
                 trials_f = glob(tmp_trials_base)[0]
                 with open(trials_f, 'rb') as f:
                     nova_trials = pickle.load(f)
@@ -909,7 +924,7 @@ class GammaRayNova():
         norm = h.integrate().values
         ts = np.linspace(.1, h.range[0][1], 100)
         ax.plot(ts, norm * bg.pdf(ts))
-        ax.semilogy(nonposy='clip')
+        ax.semilogy(nonpositive='clip')
         ax.set_ylim(1e-1, bg.n_total*1.5)
         ax.text(20, 6e2, self.name.replace('_', ' ') + '\n' + r'$\delta={:.0f}$'.format(self.dec*180./np.pi) \
             + r'$^{\circ}$' + '\n' + r'$\Delta T = {:.1f}$ days'.format(self.delta_t / 86400.), 
@@ -985,11 +1000,12 @@ class GammaRayNova():
         ens = np.logspace(-1., 3., 500)
         
         handles = []
+        alpha = kwargs.pop('alpha', 1.0)
         for spec in self.spec_ind:
             nu_sens_spec = np.power(ens, -spec)*self.sensitivity_trials[spec]['E2dNdE']*1e3*(1e-3)**(2.-spec)
             en_msk = (ens > self.central_90[spec][0]) & (ens < self.central_90[spec][1])
             ax.plot(ens[en_msk], nu_sens_spec[en_msk]*ens[en_msk]**2,
-                   color=self.gamma_colors[spec], lw = 1.5, zorder=5*(5.-spec))
+                   color=self.gamma_colors[spec], lw = 1.5, zorder=5*(5.-spec), alpha=alpha)
             handles.append(Line2D([0], [0], color=self.gamma_colors[spec], 
                                   lw=1.5, label=r"$\gamma = $" + f" {spec:.1f}"))
             
@@ -1000,8 +1016,9 @@ class GammaRayNova():
             photon_flux = photon_norm * np.power(ens, -gamma) * \
                             np.exp(-ens / cutoff)
             photon_flux = np.where(photon_flux > 1e-100, photon_flux, 1e-100)
+        ph_alpha = 0.7 if alpha > 0.7 else alpha*2.
         ax.plot(ens, photon_flux* ens**2. * self.delta_t,
-                color=sns.xkcd_rgb['battleship grey'], alpha=0.7)
+                color=sns.xkcd_rgb['battleship grey'], alpha=ph_alpha)
         
         ax.loglog()
         ax.set_ylim(1e-4, 3e4)
