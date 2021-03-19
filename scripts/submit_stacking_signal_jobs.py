@@ -47,8 +47,8 @@ high_mem_signal = pycondor.Job(
 	)
 
 for allflavor_str in [' --allflavor', '']:
-	#for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])):
-    for deltaT in [86400.*10.]:
+    for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])):
+        # for deltaT in [86400.*10.]:
         if deltaT > 86400.*5.:
             ntrials_sig = 50
         elif deltaT > 86400.:

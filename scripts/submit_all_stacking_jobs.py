@@ -85,14 +85,14 @@ for allflavor_str in [' --allflavor', '']:
             if deltaT > 86400:
                 high_mem_signal.add_arg(
                     f'--deltaT={deltaT} --index={gamma}' \
-                    + f' --ntrials_sig={ntrials_sig} ' \
-                    + f'--ntrials_bg={ntrials_bg}{allflavor_str}'
+                    + f' --ntrials_sig={ntrials_sig}' \
+                    + f'{allflavor_str}'
                     )
             else:
                 low_mem_signal.add_arg(
                     f'--deltaT={deltaT} --index={gamma}' \
-                    + f' --ntrials_sig={ntrials_sig} ' \
-                    + f'--ntrials_bg={ntrials_bg}{allflavor_str}'
+                    + f' --ntrials_sig={ntrials_sig}' \
+                    + f'{allflavor_str}'
                     )
 
 

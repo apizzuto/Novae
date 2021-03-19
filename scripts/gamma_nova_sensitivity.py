@@ -159,6 +159,7 @@ result['fit'] = allt
 result['settings'] = args
 result['source_info'] = {'ra': ra, 'dec': dec, 'name': name, 'mjd_start': mjd_start, 'mjd_stop': mjd_stop}
 
+name = name.replace(' ', '_')
 add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
 delta_t_str = f"{delta_t:.2e}" if not args.full_gamma_time else "full_gamma_time"
 output_loc = f"/data/user/apizzuto/Nova/csky_trials/nova_{nova_ind}_{name}_delta_t_{delta_t_str}_{add_str}gamma_{args.index}_allflavor_{args.allflavor}_trials.pkl"
