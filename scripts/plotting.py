@@ -6,7 +6,6 @@ import matplotlib as mpl
 #    pass 
 import matplotlib.pyplot as plt
 import pandas as pd
-import astropy as ap
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import pickle
@@ -16,12 +15,15 @@ import scipy.stats as st
 import mpmath
 import seaborn as sns
 from matplotlib.lines import Line2D
+import warnings
+warnings.filterwarnings("ignore") # histlite throws a bunch of UserWarnings
 
 import histlite as hl
 import csky as cy
 
 from glob import glob
 mpl.style.use('/home/apizzuto/Nova/scripts/novae_plots.mplstyle')
+
 master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 gamma_df = master_df[master_df['gamma']==True]
 gamma_df = gamma_df.reset_index()
@@ -160,6 +162,13 @@ class StackingPlots():
         ax1.set_xlabel(r"$n_\mathrm{s}$")
         ax1.legend(loc=4, facecolor=sns.xkcd_rgb['light grey'])
         fig.tight_layout()
+        if self.savefigs:
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'stacking_llh_scan_delta_t_{self.delta_t:.2e}{add_str}_truth_{truth}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def background_distribution(self, ax=None, show=True):
         """
@@ -189,6 +198,14 @@ class StackingPlots():
             ax.set_ylabel(r'number of trials')
             ax.legend()
             plt.tight_layout()
+        if self.savefigs:
+            cut = self.min_log_e
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'stacking_bg_ts_distribution_delta_t_{self.delta_t:.2e}{add_str}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def background_vs_time(self):
         """
@@ -218,6 +235,14 @@ class StackingPlots():
             axs[ii].set_ylim(3e-1, 3e5)
             axs[ii].legend(loc=1)
         plt.tight_layout()
+        if self.savefigs:
+            cut = self.min_log_e
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'stacking_bg_vs_time{add_str}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def sensitivity_plot(self, gamma=2.0):
         """
@@ -257,6 +282,14 @@ class StackingPlots():
         ax.set_ylabel(r'$N$')
         ax.legend()
         ax.set_ylim(3e-1, 1e4)
+        if self.savefigs:
+            cut = self.min_log_e
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'stacking_signal_and_bg_ts_dists_delta_t_{self.delta_t:.2e}{add_str}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def plot_sensitivity_vs_time(
         self, ax=None, gamma=2.0, in_flux=True, show=True, 
@@ -324,6 +357,14 @@ class StackingPlots():
                 plt.gca().add_artist(legend1)
             ylims = ax.set_ylim()
             ax.set_ylim(ylims[0]*0.6, ylims[1])
+        if self.savefigs:
+            cut = self.min_log_e
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'stacking_sensitivity_vs_time{add_str}_allflavor_{self.all_flavor}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def fitting_plot(self, gamma = 2.0, no_labels=False):
         """
@@ -381,6 +422,14 @@ class StackingPlots():
 
         axs[0].legend(loc=2)
         plt.tight_layout()
+        if self.savefigs:
+            cut = self.min_log_e
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'stacking_fitting_bias_delta_t_{self.delta_t:.2e}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def fitting_plot_panel(self):
         """bla"""
@@ -506,6 +555,15 @@ class StackingPlots():
                     r'$1 \mathrm{TeV}$ (TeV cm${-2}$)')
         if show_label:
             ax.legend(loc=1)
+
+        if self.savefigs:
+            cut = self.min_log_e
+            add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savepath + \
+                                f'differential_sens_stacking_nova_delta_t_{self.delta_t:.2e}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
         
     def set_seed(self, seed):
         """
@@ -538,7 +596,6 @@ class StackingPlots():
         else:
             return idx
     
-
 class GammaCatalog():
     r'''Helper class to make analysis plots for the
     individually gamma-ray novae
@@ -1080,7 +1137,7 @@ class GRECOPlots():
             for flav in mcfiles[1:]:
                 mc = np.concatenate((mc, np.load(flav)))
         else:
-            mcfile = glob(greco_base + 'IC86_2012.numu_with_angErr.npy')
+            mcfile = glob(greco_base + 'IC86_2012.numu_with_angErr.npy')[0]
             mc = np.load(mcfile)
         grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
         grl = [np.load(g) for g in grls]
@@ -1236,6 +1293,7 @@ class GRECOPlots():
                 plt.savefig(self.savepath + \
                             f'GRECO_error_vs_sindec.{ftype}', 
                             dpi=self.dpi, bbox_inches='tight')
+            plt.close()
 
     def effective_area(self, **kwargs):
         r'''Bla'''
@@ -1255,6 +1313,10 @@ class SynthesisPlots():
         datas = [np.load(dataf) for dataf in datafs]
         self.exps = datas
         self.palette = sns.color_palette('colorblind')
+        self.save = kwargs.pop('save', False)
+        if self.save:
+            self.savedir = kwargs.pop('savedir', './')
+            self.dpi = kwargs.pop('dpi', 150)
 
     def __mids(self, arr):
         return arr[:-1] + (np.diff(arr) / 2.)
@@ -1317,7 +1379,14 @@ class SynthesisPlots():
         plt.ylabel('Rate (Hz)')
         plt.xlabel('Time (MJD)')
         # plt.text(56200, 0.0041, 'IceCube Preliminary', color=sns.xkcd_rgb['tomato red'], fontsize=20)
-        plt.show()
+        if self.save:
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savedir + \
+                                f'lightcurve_with_greco_rate.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
 
     def all_sky_scatter_plot(self, fig = None, ax = None, 
         show_legend=True, **kwargs):
@@ -1371,6 +1440,14 @@ class SynthesisPlots():
         if show_legend:
             ax.legend(loc=(0.2, -0.18), handles=legend_els, ncol = 2, 
                 frameon=False)
+        if self.save:
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savedir + \
+                                f'all_sky_nova_scatter_plot.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
 
     def mollview_with_sensitivity(self, **kwargs):
         fig = plt.figure(figsize=(8,4), dpi=200, facecolor='w')
@@ -1423,3 +1500,11 @@ class SynthesisPlots():
         ax.legend(loc=(0.62, -0.22), handles=legend_els, ncol = 1, 
             frameon=False)
 
+        if self.save:
+            for ftype in ['pdf', 'png']:
+                    plt.savefig(self.savedir + \
+                                f'all_sky_nova_scatter_plot_with_sens.{ftype}', 
+                                dpi=self.dpi, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
