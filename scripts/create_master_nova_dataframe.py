@@ -97,6 +97,34 @@ novae['RA'], novae['Dec'] = format_coords(novae['RA'], novae['Dec'])
 novae['Variable'] = input_name(novae['Variable'], novae['Obscure xid'])
 
 ###############################################################################
+#######             Load novae from Elias              ######
+###############################################################################
+
+elias_novae = pd.read_csv('/home/apizzuto/Nova/source_list/nova_stats_from_elias_reformatted.csv')
+def clean_time_str(t):
+    if not '.' in t:
+        tmp = Time(t, scale='utc', format='iso')
+    else:
+        date, frac = t.split('.')
+        frac = '.' + frac
+        frac = float(frac)
+        mjd_date = Time(date, format='iso', scale='utc')
+        tmp = Time(mjd_date + frac, scale='utc', format='mjd')
+        tmp.format = 'iso'
+    return tmp
+
+elias_novae = elias_novae[['Nova', 'Date of optical peak',
+       'RA', 'Dec',
+       'Average Flux (10^-7 ph/s/cm^2)',
+       'Spectral index',
+       'gamma_start', 'gamma_end']]
+
+elias_novae['Date of optical peak'] = elias_novae['Date of optical peak'].apply(clean_time_str)
+elias_novae['gamma_start'] = elias_novae['gamma_start'].apply(clean_time_str)
+elias_novae['gamma_end'] = elias_novae['gamma_end'].apply(clean_time_str)
+
+
+###############################################################################
 #######   Load novae from x-ray/gamma analysis (used for gamma times)      ####
 ###############################################################################
 xray_tab = Table.read('/home/apizzuto/Nova/source_list/gamma_nova_from_xray_paper.tex').to_pandas()
@@ -175,12 +203,21 @@ for name in all_names:
             for mkey, x_key, key in [('gamma_start', 'Time$_{\\rm \\gamma-ray\\ start}$', 'Start Time'), 
                 ('gamma_stop', 'Time$_{\\rm \\gamma-ray\\ end}$', 'Stop Time')]:
                 master_dict[mkey].append(gamma_df[key][df_ind])
-            
-        if name in df['Name'].unique():
+
+        # Peak time
+        if name in elias_novae['Nova'].unique():
+            el_ind = elias_novae[elias_novae['Nova'] == name].index.values[0]
+            print("\t - Gamma nova found in Elias spreadsheet. Using spectroscopic optical peak")
+            for mkey, key in [('Date', 'Date of optical peak')]:
+                master_dict[mkey].append(elias_novae[key][el_ind])
+                print(type(elias_novae[key][el_ind]))
+            master_dict['refs'][-1] = master_dict['refs'][-1] + 'Elias'  
+        elif name in df['Name'].unique():
             df_ind = df[df['Name'] == name].index.values[0]
-            print("\t - Gamma nova found in Anna's paper, using peak from that", name)
-            for mkey, key in [('Date', 'Peak Time'), ('Peak', 'Peak')]:
+            print("\t - Gamma nova found in Anna's paper, using peak time from that", name)
+            for mkey, key in [('Date', 'Peak Time')]:
                 master_dict[mkey].append(df[key][df_ind])
+                print(type(df[key][df_ind]))
             master_dict['refs'][-1] = master_dict['refs'][-1] + 'Anna'  
         elif name in optical_info['Name'].unique():
             opt_ind = optical_info[optical_info['Name'] == name].index.values[0]
@@ -188,25 +225,31 @@ for name in all_names:
             print("\t\t using time from that list")
             master_dict['Date'].append(optical_info['OpticalPeak'][opt_ind])
             master_dict['refs'][-1] = master_dict['refs'][-1] + 'optical:' + optical_info['Ref'][opt_ind]
-            if name in novae['Variable'].unique():
-                print("\t - Taking peak mag from galnovae file for", name)
-                df_ind = novae[novae['Variable'] == name].index.values[0]
-                for mkey, key in [('Peak', 'Max Mag.')]:
-                    master_dict[mkey].append(novae[key][df_ind]) 
-            else:
-                if name == 'V3890 Sgr':
-                    print('\t - Using data from ATels for V3890 Sgr')
-                    master_dict['Peak'].append(6.7)
-                    master_dict['refs'][-1] = master_dict['refs'][-1] + 'optical:Atel13047'
-                else:
-                    print(f"\t - NO MAX MAGNITUDE FOR NOVA {name}")
         else:
             print("\t - COULD NOT FIND GAMMA NOVA IN EITHER, NO TIME AVAILABLE?", name)
             for mkey, key in [('Date', 'Date')]:
                 master_dict[mkey].append(np.nan)
-            master_dict['Peak'].append(peak_mag[name])
-        master_dict['gamma'].append(True)
         
+        # Peak magnitude
+        if name in df['Name'].unique():
+            df_ind = df[df['Name'] == name].index.values[0]
+            master_dict['Peak'].append(df['Peak'][df_ind])
+            master_dict['refs'][-1] = master_dict['refs'][-1] + 'Anna'  
+        elif name in novae['Variable'].unique():
+            print("\t - Taking peak mag from galnovae file for", name)
+            df_ind = novae[novae['Variable'] == name].index.values[0]
+            for mkey, key in [('Peak', 'Max Mag.')]:
+                master_dict[mkey].append(novae[key][df_ind]) 
+        else:
+            if name == 'V3890 Sgr':
+                print('\t - Using data from ATels for V3890 Sgr')
+                master_dict['Peak'].append(6.7)
+                master_dict['refs'][-1] = master_dict['refs'][-1] + 'optical:Atel13047'
+            else:
+                print(f"\t - NO MAX MAGNITUDE FOR NOVA {name}")
+                master_dict['Peak'].append(peak_mag[name])
+        master_dict['gamma'].append(True)
+
     elif name in df['Name'].unique():
         print(f"\t - Found in Anna's paper, all info from there")
         df_ind = df[df['Name'] == name].index.values[0]
