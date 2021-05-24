@@ -171,7 +171,7 @@ peak_mag = {
 master_dict = dict(Name = [], Date = [], Peak = [], RA = [], Dec = [], gamma = [],
                   gamma_start = [], gamma_stop = [], gamma_norm = [],
                   gamma_ind = [], gamma_cutoff = [],
-                  refs = [], )
+                  refs = [], gamma_lim = [])
 all_names = set(novae['Variable']) | set(df['Name']) | set(gamma_df['Name'])
 
 for name in all_names:
@@ -249,6 +249,7 @@ for name in all_names:
                 print(f"\t - NO MAX MAGNITUDE FOR NOVA {name}")
                 master_dict['Peak'].append(peak_mag[name])
         master_dict['gamma'].append(True)
+        master_dict['gamma_lim'].append(np.nan)
 
     elif name in df['Name'].unique():
         print(f"\t - Found in Anna's paper, all info from there")
@@ -259,6 +260,7 @@ for name in all_names:
         for mkey in ['gamma_start', 'gamma_stop', 'gamma_norm', 'gamma_ind', 'gamma_cutoff']:
             master_dict[mkey].append(np.nan)
         master_dict['refs'][-1] = master_dict['refs'][-1] + 'Anna'
+        master_dict['gamma_lim'].append(float(df['Flux'][df_ind].split('$')[-1]))
     
     elif name in novae['Variable'].unique():
         print(f"\t - Found in Galnovae file, getting info from there")
@@ -278,6 +280,7 @@ for name in all_names:
         master_dict['gamma'].append(False)
         for mkey in ['gamma_start', 'gamma_stop', 'gamma_norm', 'gamma_ind', 'gamma_cutoff']:
             master_dict[mkey].append(np.nan)
+        master_dict['gamma_lim'].append(np.nan)
     else:
         print("why here tho?")
 
