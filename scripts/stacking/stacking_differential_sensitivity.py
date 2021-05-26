@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
 import numpy as np
-import pandas as pd
-from astropy import units as u
-from astropy.time import Time
 import argparse
-import matplotlib as mpl
-mpl.use('Agg')
-import histlite as hl
 import csky as cy
 import pickle
-from glob import glob
+
+import sys
+sys.path.append('/home/apizzuto/Nova/scripts/')
+from source_config import *
+from stacking_config import *
 
 def run_differential_sens(args):
     r"""Look at output background trials and run the signal
@@ -19,59 +17,13 @@ def run_differential_sens(args):
     delta_t = args.deltaT
     delta_t_days = delta_t / 86400.
 
-    greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/'
-
-    data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
-    exp = [np.load(data) for data in data_fs]
-    exp = np.hstack(exp)
-    if args.allflavor:
-        mcfiles = glob(greco_base + 'IC86_2012.nu*_with_angErr.npy')
-        mc = np.load(mcfiles[0])
-        for flav in mcfiles[1:]:
-            mc = np.concatenate((mc, np.load(flav)))
-    else:
-        mcfile = glob(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')[0]
-        mc = np.load(mcfile)
-    grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
-    grl = [np.load(g) for g in grls]
-    grl = np.hstack(grl)
-
-    if args.minLogE is not None:
-        exp_msk = exp['logE'] > args.minLogE
-        exp = exp[exp_msk]
-        mc_msk = mc['logE'] > args.minLogE
-        mc = mc[mc_msk]
-
-    greco = cy.selections.CustomDataSpecs.CustomDataSpec(
-        exp, mc, np.sum(grl['livetime']), 
-        np.linspace(-1., 1., 31),
-        np.linspace(0., 4., 31), 
-        grl=grl, key='GRECOv2.5', cascades=True
-        )
-
     ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
+    greco, conf = get_stacking_objs(minLogE=args.minLogE)
     greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 
-    master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
-    ras = master_df['RA']
-    decs = master_df['Dec']
-    names = master_df['Name']
-    mjds = np.array([t.mjd for t in master_df['Date']])
-    delta_ts = np.ones_like(ras) * delta_t_days
-
-    conf = {'extended': True,
-        'space': "ps",
-        'time': "transient",
-        'sig': 'transient',
-        }
-
-    src = cy.utils.Sources(
-        ra=np.radians(ras), 
-        dec=np.radians(decs), 
-        mjd=mjds, 
-        sigma_t=np.zeros_like(delta_ts), 
-        t_100=delta_ts
-        )
+    only_gamma = ~args.all_nova
+    weighting_scheme = args.weighting
+    src, sample_str = get_sources(only_gamma, weighting_scheme, delta_t_days)
 
     cy.CONF['src'] = src
     cy.CONF['mp_cpus'] = 5
@@ -82,8 +34,8 @@ def run_differential_sens(args):
     add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
     bg = cy.bk.get_all(
         '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/bg/',
-        'delta_t_{:.2e}_{}seed_*.npy'.format(
-        delta_t, add_str), 
+        '{}delta_t_{:.2e}_{}seed_*.npy'.format(
+        sample_str, delta_t, add_str), 
         merge=np.concatenate, 
         post_convert=ndarray_to_Chi2TSD
         )
@@ -142,6 +94,14 @@ if __name__ == "__main__":
     parser.add_argument('--allflavor', action='store_true', default=False, help="All neutrino flavors in MC")
     parser.add_argument('--ntrials_sig', type=float, default=250, help="Number of signal trials")
     parser.add_argument('--seed', type=int, default=123, help="Random number seed")
+    parser.add_argument(
+        '--all_nova', default=False, action='store_true',
+        help = 'Only stack gamma ray detected novae if False, else, stack all novae'
+    )
+    parser.add_argument(
+        '--weighting', default="optical", 
+        help="Weighting scheme. Choose between 'optical' and 'gamma'"
+    )
     args = parser.parse_args()
 
     run_differential_sens(args)
