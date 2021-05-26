@@ -17,6 +17,15 @@ mpl.style.use('/home/apizzuto/Nova/scripts/novae_plots.mplstyle')
 ###############################################################################
 #######              Load all novae from Anna's paper            ##############
 ###############################################################################
+def clean_mag_col(p):
+    if type(p) == str:
+        if '(I)' in p:
+            p = p.split(' (I)')[0]
+        p = float(p)
+    else:
+        p = float(p)
+    return p
+
 tab = Table.read('/home/apizzuto/Nova/source_list/appendix.tex')
 df = tab.to_pandas()
 coords = SkyCoord(frame="galactic", l=df['$l$']*u.degree, b=df['$b$']*u.degree)
@@ -27,6 +36,7 @@ df['gamma'] = [~np.char.startswith(fl, '$<$') for fl in df['Flux']]
 df = df.replace(['-'], np.nan)
 df[u'$t_2$'] = df[u'$t_2$'].astype(float)
 df['Peak Time'] = [Time(t, format='iso') for t in df['Peak Time']]
+df['Peak'] = df['Peak'].apply(clean_mag_col)
 
 ###############################################################################
 #######          Load gamma novae from the list we've made       ##############
@@ -63,6 +73,9 @@ def format_coords(ras, decs):
     new_ras = coords.ra
     new_decs = coords.dec
     return new_ras, new_decs
+    
+def input_name(variable, obscure):
+    return np.where(variable == '', obscure, variable)
 
 def clean_mag(mag):
     if mag == '':
@@ -74,9 +87,6 @@ def clean_mag(mag):
             mag = mag[:-1]
         mag = float(mag)
         return mag
-    
-def input_name(variable, obscure):
-    return np.where(variable == '', obscure, variable)
 
 pivs = [('Name', 1), ('Date', 15), ('Variable', 32), ('RA', 44), 
         ('Dec', 60), ('Disc. Mag', 75), ('Max Mag.', 84), ('Min Mag.', 92), 
