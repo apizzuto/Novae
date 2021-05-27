@@ -7,7 +7,7 @@ import csky as cy
 import pickle
 
 import sys
-sys.path.append('/home/apizzuto/Nova/scripts/')
+sys.path.append('/home/apizzuto/Nova/scripts/stacking/')
 from source_config import *
 from stacking_config import *
 
@@ -24,7 +24,7 @@ def run_background_trials(args):
     greco, conf = get_stacking_objs(minLogE=args.minLogE)
     greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 
-    only_gamma = ~args.all_nova
+    only_gamma = not args.all_nova
     weighting_scheme = args.weighting
     src, sample_str = get_sources(only_gamma, weighting_scheme, delta_t_days)
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--all_nova', default=False, action='store_true',
-        help = 'Only stack gamma ray detected novae if False, else, stack all novae'
+        help = 'Raise this flag if you want to include the optically detected novae'
     )
     parser.add_argument(
         '--weighting', default="optical", 

@@ -6,7 +6,7 @@ import csky as cy
 import pickle
 
 import sys
-sys.path.append('/home/apizzuto/Nova/scripts/')
+sys.path.append('/home/apizzuto/Nova/scripts/stacking/')
 from source_config import *
 from stacking_config import *
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=123, help="Random number seed")
     parser.add_argument(
         '--all_nova', default=False, action='store_true',
-        help = 'Only stack gamma ray detected novae if False, else, stack all novae'
+        help = 'Raise this flag if you want to include the optically detected novae'
     )
     parser.add_argument(
         '--weighting', default="optical", 

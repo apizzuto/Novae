@@ -26,14 +26,14 @@ def get_sources(only_gamma, weights, delta_t_days):
     if weights == 'optical':
         weight = 10.**(master_df['Peak'] / 2.5)
         weight /= weight.sum()
-        sample_str += 'weight_optical'
+        sample_str += '_weight_optical'
     else:
         if not only_gamma:
             raise ValueError("Not able to use gamma derived weights " \
                 + "for non-gamma-detected novae")
         weight = master_df['gamma_norm']
         weight /= weight.sum()
-        sample_str += 'weight_gamma'
+        sample_str += '_weight_gamma'
     
     ras = master_df['RA']
     decs = master_df['Dec']
