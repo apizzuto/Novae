@@ -1117,7 +1117,7 @@ class GRECOPlots():
             self.low_en_bin = self.min_log_e
         else:
             self.low_en_bin = 0.0
-        self.log_energy_bins = kwargs.pop('log_e_bins', np.linspace(self.low_en_bin, 4., 31))
+        self.log_energy_bins = kwargs.pop('log_e_bins', np.linspace(0.0, 4., 31))
         self.sin_dec_bins = kwargs.pop('sin_dec_bins', np.linspace(-1., 1., 31))
         self.initialize_analysis()
         self.dpi = kwargs.pop('dpi', 150)
@@ -1148,6 +1148,23 @@ class GRECOPlots():
             mc_msk = mc['logE'] > self.min_log_e
             mc = mc[mc_msk]
 
+            # If you cut out events, you need to fix your grl
+            bin_lefts = grl['start']
+            bin_rights = grl['stop']
+            # Some bins out of order because of test runs
+            sorted_bins = np.argsort(bin_lefts)
+            bin_lefts_sorted = bin_lefts[sorted_bins]
+            bin_rights_sorted = bin_rights[sorted_bins]
+            bins = [None] * (bin_lefts_sorted.size * 2)
+            bins[::2] = bin_lefts_sorted
+            bins[1::2] = bin_rights_sorted
+            count_hist = np.histogram(exp['time'], bins=bins)
+            new_grl_counts = count_hist[0][::2]
+            #Undo the bin sorting that we did
+            undo_argsort = np.argsort(sorted_bins)
+            new_grl_counts = new_grl_counts[undo_argsort]
+            grl['events'] = new_grl_counts
+
         greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']),
                                                              self.sin_dec_bins,
                                                              self.log_energy_bins,
@@ -1159,7 +1176,10 @@ class GRECOPlots():
         self.ana = greco_ana
 
     def declination_pdf(self, **kwargs):
-        fig, ax = plt.subplots()
+        if 'ax' not in kwargs:
+            fig, ax = plt.subplots()
+        else:
+            ax = kwargs['ax']
         hl.plot1d (ax, self.ana[0].bg_space_param.h, crosses=True, color='k', label='histogram')
         sd = np.linspace (-1, 1, 300)
         ax.plot (sd, self.ana[0].bg_space_param(sindec=sd), label='spline')
@@ -1297,7 +1317,38 @@ class GRECOPlots():
 
     def effective_area(self, **kwargs):
         r'''Bla'''
-        pass
+        if 'ax' in kwargs:
+            ax = kwargs['ax']
+        else:
+            fig, ax = plt.subplots()
+
+        mc = self.ana.anas[0].sig
+        decs = np.radians(np.asarray([[-90., -30.], [-30., 30.], [30., 90.]]))
+        sin_decs = np.sin(decs)
+        E_bins = np.logspace(0., 9., 61)
+        logE_bins = np.log10(E_bins)
+        dlog_E = np.diff(logE_bins)
+
+        for ii, (low_dec, high_dec) in enumerate(sin_decs):
+            d_omega = 2.*np.pi*np.abs(high_dec - low_dec)
+            dec_msk = np.sin(mc['true_dec']) > low_dec
+            dec_msk *= np.sin(mc['true_dec']) < high_dec
+            mc_cut = mc[dec_msk]
+            weights = mc_cut['oneweight'] / (1e4 * mc_cut['true_energy'] * dlog_E[np.digitize(
+                np.log10(mc_cut['true_energy']), bins = logE_bins) -1] * d_omega * np.log(10.))
+            lab = f"{np.degrees(np.arcsin(low_dec)):.1f}" + r'$^{\circ} <  \delta < \; $' \
+                            + f"{np.degrees(np.arcsin(high_dec)):.1f}" + r'$^{\circ}$'
+            ax.hist(mc_cut['true_energy'], bins = E_bins, 
+                    weights = weights,
+                    histtype = 'step', linewidth = 2., 
+                    label=lab)
+
+        ax.set_yscale('log')
+        ax.set_xscale('log')
+        ax.set_xlim(4e-1, 3e3)
+        ax.set_xlabel(r'$E_{\nu}$ (GeV)', fontsize = 20)
+        ax.set_ylabel('$A_{\mathrm{eff}}$ (m$^{2}$)', fontsize=20)
+        ax.legend(loc=2, fontsize=14, frameon=False)
 
 class SynthesisPlots():
     r'''Combines GRECO information with general nova information'''
