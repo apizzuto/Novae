@@ -41,7 +41,7 @@ df['Peak'] = df['Peak'].apply(clean_mag_col)
 ###############################################################################
 #######          Load gamma novae from the list we've made       ##############
 ###############################################################################
-gamma_df = pd.read_csv('/home/apizzuto/Nova/gamma_ray_novae.csv')
+gamma_df = pd.read_csv('/home/apizzuto/Nova/source_list/gamma_ray_novae.csv')
 gamma_coords = SkyCoord(gamma_df['RA'], gamma_df['Dec'], unit='deg')
 
 def mjd_to_time(date):
