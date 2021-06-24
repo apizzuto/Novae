@@ -1,14 +1,11 @@
 *checkpoints
-notebook/*checkpoints*
-notebook/*Untitled*
-scripts/kent_scripts/
+notebooks/*checkpoints*
+notebooks/non_novae_notebooks/
 data/
 Upgrade_MC/
 effective_areas_Ali.txt
 models/
-scripts/optical_novae/
-scripts/mprofile*
-notebook/.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
 scripts/*.pyc
 scripts/stacking_sens_res/
 source_list/galnovae/
