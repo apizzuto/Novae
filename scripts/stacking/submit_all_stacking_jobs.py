@@ -64,20 +64,20 @@ high_mem_signal = pycondor.Job(
 	)
 
 sample_schemes = [(' --all_nova', 'optical'), ('', 'gamma')]
-for sample, weighting in sample_schemes:
-    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400., np.array([86400.*5.])):
-        for seed in range(10):
-            if deltaT > 86400.:
-                ntrials_bg = 2000
-            else:
-                ntrials_bg = 5000
-            for cut in [0.0, 0.5, 1.0]:
-                background_jobs.add_arg(
-                    f"--deltaT={deltaT} --ntrials={ntrials_bg} --minLogE={cut} --seed={seed} --weighting={weighting}{sample}"
-                )        
+#for sample, weighting in sample_schemes:
+#    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400., np.array([86400.*5.])):
+#        for seed in range(10):
+#            if deltaT > 86400.:
+#                ntrials_bg = 2000
+#            else:
+#                ntrials_bg = 5000
+#            for cut in [0.0, 0.5, 1.0]:
+#                background_jobs.add_arg(
+#                    f"--deltaT={deltaT} --ntrials={ntrials_bg} --minLogE={cut} --seed={seed} --weighting={weighting}{sample}"
+#                )        
 
 allflavor_str = ' --allflavor'
-for sample, weighting in sample_schemes:
+for sample, weighting in sample_schemes[:1]:
     for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400., np.array([86400.*5.])):
         if deltaT > 86400.:
             ntrials_sig = 100
@@ -99,8 +99,8 @@ for sample, weighting in sample_schemes:
                         )
 
 
-background_jobs.add_child(low_mem_signal)
-background_jobs.add_child(high_mem_signal)
+#background_jobs.add_child(low_mem_signal)
+#background_jobs.add_child(high_mem_signal)
 
 dagman.build_submit()
 

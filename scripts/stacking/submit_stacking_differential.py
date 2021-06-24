@@ -46,26 +46,28 @@ high_mem_signal = pycondor.Job(
     dag=dagman
 	)
 
-for allflavor_str in [' --allflavor', '']:
-    for deltaT in np.append(np.logspace(-3., 1., 9)[:]*86400., np.array([86400.*5.])):
+sample_schemes = [(' --all_nova', 'optical'), ('', 'gamma')]
+allflavor_str = ' --allflavor'
+for sample, weighting in sample_schemes:
+    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400., np.array([86400.*5.])):
         if deltaT > 86400.*5.:
             ntrials_sig = 50
         elif deltaT > 86400.:
             ntrials_sig = 100
         else:
             ntrials_sig = 250
-        # for cut in [0.0, 0.5, 1.0]:
-        if deltaT > 86400:
-            high_mem_signal.add_arg(
-            f'--deltaT={deltaT}' \
-                + f' --ntrials_sig={ntrials_sig}' \
-                + f'{allflavor_str}'
-                )
-        else:
-            low_mem_signal.add_arg(
-                f'--deltaT={deltaT}' \
-                + f' --ntrials_sig={ntrials_sig}' \
-                + f'{allflavor_str}'
-                ) 
+        for cut in [0.0, 0.5, 1.0]:
+            if deltaT > 86400:
+                high_mem_signal.add_arg(
+                f'--deltaT={deltaT} --minLogE={cut}' \
+                    + f' --ntrials_sig={ntrials_sig}' \
+                    + f'{allflavor_str}'
+                    )
+            else:
+                low_mem_signal.add_arg(
+                    f'--deltaT={deltaT} --minLogE={cut}' \
+                    + f' --ntrials_sig={ntrials_sig}' \
+                    + f'{allflavor_str}'
+                    ) 
 
 dagman.build_submit()
