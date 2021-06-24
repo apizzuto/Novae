@@ -24,7 +24,7 @@ def get_sources(only_gamma, weights, delta_t_days):
     else:
         sample_str = 'all_novae'
     if weights == 'optical':
-        weight = 10.**(master_df['Peak'] / 2.5)
+        weight = 10.**(master_df['Peak'] / 2.5) #Convert from mag to flux
         weight /= weight.sum()
         sample_str += '_weight_optical'
     else:

@@ -34,7 +34,7 @@ def run_differential_sens(args):
     add_str = 'minLogE_{:.1f}_'.format(args.minLogE) if args.minLogE is not None else ''
     bg = cy.bk.get_all(
         '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/bg/',
-        '{}delta_t_{:.2e}_{}seed_*.npy'.format(
+        '{}_delta_t_{:.2e}_{}seed_*.npy'.format(
         sample_str, delta_t, add_str), 
         merge=np.concatenate, 
         post_convert=ndarray_to_Chi2TSD
@@ -82,8 +82,8 @@ def run_differential_sens(args):
     result['source_info'] = {'ra': ras, 'dec': decs, 'name': names, 'mjd': mjds}
 
     with open('/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/differential_sens/' +
-        'delta_t_{:.2e}_{}allflavor_{}.pkl'.format(
-        delta_t, add_str, args.allflavor), 'wb') as f:
+        '{}_delta_t_{:.2e}_{}allflavor_{}.pkl'.format(
+        sample_str, delta_t, add_str, args.allflavor), 'wb') as f:
         pickle.dump(result, f)
 
 if __name__ == "__main__":

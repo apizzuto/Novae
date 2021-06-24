@@ -21,7 +21,10 @@ def run_all_signal_trials(args):
     greco, conf = get_stacking_objs(minLogE=args.minLogE, allflavor=args.allflavor)
     greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
 
-    only_gamma = ~args.all_nova
+    only_gamma = not args.all_nova
+    print('only', only_gamma)
+    print('all', args.all_nova)
+    print('~all', ~args.all_nova)
     weighting_scheme = args.weighting
     src, sample_str = get_sources(only_gamma, weighting_scheme, delta_t_days)
 
