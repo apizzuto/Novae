@@ -26,7 +26,7 @@ gamma_df = master_df[master_df['gamma']==True]
 gamma_df = gamma_df.reset_index()
 
 for nova_num in range(len(gamma_df)):
-    for deltaT in np.logspace(-3.5, 1., 10)*86400.:
+    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400., np.array([86400.*5.])):
         for gamma in [2.0, 2.5, 3.0]:
             for cut in [0.0, 0.5, 1.0]:
                 flav = ' --allflavor'

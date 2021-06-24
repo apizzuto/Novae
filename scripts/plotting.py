@@ -23,6 +23,10 @@ import csky as cy
 
 from glob import glob
 mpl.style.use('/home/apizzuto/Nova/scripts/novae_plots.mplstyle')
+import sys
+sys.path.append('/home/apizzuto/Nova/scripts/stacking/')
+from source_config import *
+from stacking_config import *
 
 master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 gamma_df = master_df[master_df['gamma']==True]
@@ -32,8 +36,12 @@ class StackingPlots():
     r'''Helper class to make analysis plots for the
     stacking analysis'''
     
-    def __init__(self, delta_t, **kwargs):
+    def __init__(self, delta_t, catalog, weighting, **kwargs):
         self.delta_t = delta_t
+        assert catalog in ['all_novae', 'gamma'], 'Catalog not recognized'
+        assert weighting in ['optical', 'gamma'], 'Weighting scheme not recognized'
+        self.catalog = catalog
+        self.weights = weighting
         self.min_log_e = kwargs.pop('min_log_e', 0.)
         self.all_flavor = kwargs.pop('allflavor', False)
         self.spec_ind = kwargs.pop('index', [2., 2.5, 3.])
@@ -41,63 +49,38 @@ class StackingPlots():
         self.rng_seed = kwargs.pop('seed', None)
         self.df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
         self.names = self.df['Name']
+        only_gamma = True if self.catalog == 'gamma' else False
+        src, sample_str = get_sources(only_gamma, self.weights, self.delta_t / 86400.)
+        self.src = src
+        self.sample_str = sample_str
         self.dpi = kwargs.pop('dpi', 150)
         self.savefigs = kwargs.pop('save', False)
         self.savepath = kwargs.pop('output', '/data/user/apizzuto/Nova/plots/')
         self.fontsize = kwargs.pop('fontsize', 16)
         self.show = kwargs.pop('show', True)
-        # self.trials_base = '/home/apizzuto/Nova/scripts/stacking_sens_res/'
         self.trials_base = '/data/user/apizzuto/Nova/csky_trials/stacking_sens_res/'
-        # self.all_delta_ts = np.logspace(-3., 1., 9)[:-1]*86400.
-        self.all_delta_ts = np.sort(np.append(np.logspace(-3., 1., 9)[:]*86400.,
+        self.all_delta_ts = np.sort(np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
             np.array([86400.*5.])))
-        # self.all_delta_ts = np.logspace(-3., 1., 9)*86400.
         self.all_results = None
         self.ana = None
         self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
         self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3', None: 'C0'}
-        # self.initialize_analysis()
         self.diff_sens = None
+        self.get_all_sens()
 
     def initialize_analysis(self):
         """Set up a csky analysis object"""
         if self.verbose:
             print("Initializing csky analysis")
-        greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/'
-
-        data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
-        exp = [np.load(data) for data in data_fs]; exp = np.hstack(exp)
-        mc = np.load(greco_base + 'IC86_2012.numu_merged_with_angErr.npy')
-        grls = sorted(glob(greco_base + 'GRL/IC86_20*data.npy'))
-        grl = [np.load(g) for g in grls]; grl = np.hstack(grl)
-
-        if self.min_log_e is not None:
-            exp_msk = exp['logE'] > self.min_log_e
-            exp = exp[exp_msk]
-            mc_msk = mc['logE'] > self.min_log_e
-            mc = mc[mc_msk]
-
-        greco = cy.selections.CustomDataSpecs.CustomDataSpec(exp, mc, np.sum(grl['livetime']), 
-                                                            np.linspace(-1., 1., 31),
-                                                            np.linspace(0., 4., 31), 
-                                                            grl=grl, key='GRECOv2.5', cascades=True)
-
+        greco, conf = get_stacking_objs(
+            minLogE=self.min_log_e, 
+            allflavor=self.all_flavor
+            )
         ana_dir = cy.utils.ensure_dir('/data/user/apizzuto/csky_cache/greco_ana')
         greco_ana = cy.get_analysis(cy.selections.repo, greco, dir=ana_dir)
-        ras = self.df['RA']; decs = self.df['Dec']
-        delta_t = np.ones_like(ras)*self.delta_t/86400.
-        mjds = np.array([t.mjd for t in self.df['Date']])
-        conf = {'extended': True, 'space': "ps", 'time': "transient", 'sig': 'transient'}
-        src = cy.utils.Sources(ra=np.radians(ras), 
-                       dec=np.radians(decs), 
-                       mjd=mjds, 
-                       sigma_t=np.zeros_like(delta_t), 
-                       t_100=delta_t)
-
-        cy.CONF['src'] = src
+        cy.CONF['src'] = self.src
         cy.CONF['mp_cpus'] = 10
         self.conf = conf
-        self.src = src
         self.greco = greco
         self.ana = greco_ana
     
@@ -166,7 +149,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'stacking_llh_scan_delta_t_{self.delta_t:.2e}{add_str}_truth_{truth}.{ftype}', 
+                                f'stacking_llh_scan_{self.sample_str}_delta_t_{self.delta_t:.2e}{add_str}_truth_{truth}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
@@ -203,7 +186,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'stacking_bg_ts_distribution_delta_t_{self.delta_t:.2e}{add_str}.{ftype}', 
+                                f'stacking_bg_ts_distribution_{self.sample_str}_delta_t_{self.delta_t:.2e}{add_str}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
@@ -240,7 +223,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'stacking_bg_vs_time{add_str}.{ftype}', 
+                                f'stacking_bg_vs_time_{self.sample_str}{add_str}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
@@ -287,7 +270,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'stacking_signal_and_bg_ts_dists_delta_t_{self.delta_t:.2e}{add_str}.{ftype}', 
+                                f'stacking_signal_and_bg_ts_dists_{self.sample_str}_delta_t_{self.delta_t:.2e}{add_str}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
@@ -362,7 +345,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'stacking_sensitivity_vs_time{add_str}_allflavor_{self.all_flavor}.{ftype}', 
+                                f'stacking_sensitivity_vs_time_{self.sample_str}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
@@ -427,7 +410,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'stacking_fitting_bias_delta_t_{self.delta_t:.2e}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
+                                f'stacking_fitting_bias_{self.sample_str}_delta_t_{self.delta_t:.2e}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
@@ -465,7 +448,7 @@ class StackingPlots():
             for t in self.all_delta_ts:
                 try:
                     results[gamma][t] = np.load(self.trials_base + 'signal_results/' \
-                        + f'delta_t_{t:.2e}_gamma_{gamma}{add_str}_' \
+                        + f'{self.sample_str}_delta_t_{t:.2e}_gamma_{gamma}{add_str}_' \
                         + f'allflavor_{self.all_flavor}.pkl',
                         allow_pickle=True)
                 except:
@@ -519,7 +502,7 @@ class StackingPlots():
         cut = self.min_log_e
         add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
         results =  np.load(self.trials_base + 'differential_sens/' \
-            + f'delta_t_{self.delta_t:.2e}{add_str}_' \
+            + f'{self.sample_str}_delta_t_{self.delta_t:.2e}{add_str}_' \
             + f'allflavor_{self.all_flavor}.pkl',
             allow_pickle=True)
         self.diff_sens = results
@@ -561,7 +544,7 @@ class StackingPlots():
             add_str = f'_minLogE_{cut:.1f}' if cut is not None else ''
             for ftype in ['pdf', 'png']:
                     plt.savefig(self.savepath + \
-                                f'differential_sens_stacking_nova_delta_t_{self.delta_t:.2e}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
+                                f'differential_sens_stacking_nova_{self.sample_str}_delta_t_{self.delta_t:.2e}{add_str}_allflavor_{self.all_flavor}.{ftype}', 
                                 dpi=self.dpi, bbox_inches='tight')
             plt.close()
         
