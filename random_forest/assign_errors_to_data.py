@@ -4,7 +4,7 @@ model and perform the regression'''
 
 import numpy as np
 from glob import glob
-import pickle, h5py, inspect, astropy, argparse, sys
+import argparse, sys
 import pandas as pd
 import healpy as hp
 from numpy.lib.recfunctions import append_fields
@@ -19,13 +19,6 @@ args = parser.parse_args()
 infiles = glob(args.infiles)
 for infile in infiles:
     events = np.load(infile)
-
-    #if np.max(events['monopod_zen']) > np.max(events['monopod_azi']):
-    #    #Next few lines because monopod reco angles are swapped in original MC file
-    #    tmp_azi = events['monopod_zen'].copy()
-    #    tmp_zen = events['monopod_azi'].copy()
-    #    events['monopod_zen'] = tmp_zen
-    #    events['monopod_azi'] = tmp_azi
 
     monopod_ra, monopod_dec = astro.dir_to_equa(events['monopod_zen'].astype(float), 
                         events['monopod_azi'].astype(float), events['time'].astype(float))
@@ -49,6 +42,5 @@ for infile in infiles:
     X = clean_data(appended_events)
     predictions = predict_from_model(X, model = forest)
 
-    #df['angErr'] = predictions
     appended_events['angErr'] = predictions
     np.save(infile[:-4] + '_with_angErr.npy', appended_events)

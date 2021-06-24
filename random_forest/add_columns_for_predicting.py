@@ -1,10 +1,4 @@
 import numpy as np
-from glob import glob 
-import pickle
-import h5py
-import inspect
-import astropy
-import pandas as pd
 import healpy as hp
 from icecube import astro
 import argparse
@@ -15,19 +9,11 @@ args = parser.parse_args()
 
 from numpy.lib.recfunctions import append_fields
 
-#neutrinos = np.load('/home/mlarson/IC86_2018_MC.npy')
-
 neutrinos = np.load(args.infile)
-#Next few lines because monopod reco angles are swapped in original MC file
-#tmp_azi = neutrinos['monopod_zen'].copy()
-#tmp_zen = neutrinos['monopod_azi'].copy()
-#neutrinos['monopod_zen'] = tmp_zen
-#neutrinos['monopod_azi'] = tmp_azi
 
 mzens = neutrinos['monopod_zen'].astype(float)
 mazis = neutrinos['monopod_azi'].astype(float)
 times = neutrinos['time'].astype(float)
-#monopod_ra, monopod_dec = astro.dir_to_equa(neutrinos['monopod_zen'], neutrinos['monopod_azi'], neutrinos['time'])
 monopod_ra, monopod_dec = astro.dir_to_equa(mzens, mazis, times)
 
 monopod_pegleg_dpsi = hp.rotator.angdist([np.rad2deg(neutrinos['ra']), 

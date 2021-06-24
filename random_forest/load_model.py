@@ -56,16 +56,13 @@ def clean_monte_carlo(path, logSep = True, standardize = False,
     neutrinos_df = pd.DataFrame.from_dict(neutrinos)
     if pid is not None:
         neutrinos_df = neutrinos_df[np.abs(neutrinos_df['ptype']) == pid]
-    #if CC_only:
     neutrinos_df['int_type'] = np.where(neutrinos_df['iscc'] == False, 'NC', 'CC')
-    #neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
-    #                              'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
-    #                              'trueDeltaLLH', 'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow'], axis = 'columns')
-    neutrinos_df = neutrinos_df.drop(['run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
-                                          'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
-                                          #'trueDeltaLLH', 
-                                          'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow',
-                                          'conv', 'astro', 'prompt', 'genie_gen_r', 'genie_gen_z', 'uncorrected_ow'], axis = 'columns')
+    neutrinos_df = neutrinos_df.drop([
+        'run', 'event', 'subevent', 'angErr', 'trueE', 'azi', 'monopod_azi',
+        'trueRa', 'trueDec', 'time', 'ptype', 'iscc',
+        'ra', 'dec', 'monopod_ra', 'monopod_dec', 'ow',
+        'conv', 'astro', 'prompt', 'genie_gen_r', 
+        'genie_gen_z', 'uncorrected_ow'], axis = 'columns')
     old_names = neutrinos_df.columns
     new_names = [on.replace('_', ' ') for on in old_names]
     neutrinos_df.columns = new_names
@@ -147,7 +144,6 @@ def predict_from_model(X, model = None, logSep = True, standardize = False):
     --------
     predictions for opening angle (IN RADIANS)
     '''
-    #X = clean_data(data, logSep = logSep, standardize = standardize)
     y_pred = model.predict(X)
     if logSep:
         y_pred = np.power(10., y_pred)
