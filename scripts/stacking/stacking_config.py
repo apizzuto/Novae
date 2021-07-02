@@ -12,7 +12,7 @@ def get_stacking_objs(minLogE=None, allflavor=True):
         allflavor (bool): Include all flavors for signal. If false, only
             use numu simulation
     """
-    greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/'
+    greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.6/'
 
     data_fs = sorted(glob(greco_base + 'IC86_20*data_with_angErr.npy'))
     exp = [np.load(data) for data in data_fs]
