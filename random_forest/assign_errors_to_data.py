@@ -9,7 +9,6 @@ import pandas as pd
 import healpy as hp
 from numpy.lib.recfunctions import append_fields
 from icecube import astro
-sys.path.append('/home/apizzuto/Nova/scripts/')
 from load_model import *
 
 parser = argparse.ArgumentParser(description='Calculate opening angle between monopod and pegleg')
