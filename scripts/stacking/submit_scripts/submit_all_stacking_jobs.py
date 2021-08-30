@@ -64,8 +64,15 @@ high_mem_signal = pycondor.Job(
 
 sample_schemes = [(' --all_nova', 'optical'), ('', 'gamma')]
 for sample, weighting in sample_schemes:
-    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
-                            np.array([86400.*5.])):
+    if sample == ' --all_nova':
+        delta_ts = np.append(
+            np.logspace(-1.5, 0.5, 5)[:]*86400.,
+            np.array([86400.*5.]))
+    else:
+        delta_ts = np.append(
+            np.logspace(-1.5, 1., 6)[:]*86400.,
+            np.array([86400.*5.]))
+    for deltaT in delta_ts:
         for seed in range(10):
             if deltaT > 86400.:
                 ntrials_bg = 2000
@@ -75,9 +82,16 @@ for sample, weighting in sample_schemes:
                 f"--deltaT={deltaT} --ntrials={ntrials_bg} "
                 + f"--seed={seed} --weighting={weighting}{sample}")
 
-for sample, weighting in sample_schemes[:1]:
-    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
-                            np.array([86400.*5.])):
+for sample, weighting in sample_schemes[:]:
+    if sample == ' --all_nova':
+        delta_ts = np.append(
+            np.logspace(-1.5, 0.5, 5)[:]*86400.,
+            np.array([86400.*5.]))
+    else:
+        delta_ts = np.append(
+            np.logspace(-1.5, 1., 6)[:]*86400.,
+            np.array([86400.*5.]))
+    for deltaT in delta_ts:
         if deltaT > 86400.:
             ntrials_sig = 100
         else:
