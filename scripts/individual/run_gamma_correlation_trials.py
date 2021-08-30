@@ -33,7 +33,7 @@ for nova_num in range(len(gamma_df)):
                             np.array([86400.*5.])):
         for gamma in [2.0, 2.5, 3.0]:
             job.add_arg(
-                '--nova_num={} --deltaT={} --index={} --minLogE={}{}'.format(
+                '--nova_num={} --deltaT={} --index={}'.format(
                     nova_num, deltaT, gamma))
 
 for nova_num in range(len(gamma_df)):
