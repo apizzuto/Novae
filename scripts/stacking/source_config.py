@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import csky as cy
 
+
 def get_sources(only_gamma, weights, delta_t_days):
     """
     Based on analysis type, get the right csky Sources Array
@@ -24,17 +25,18 @@ def get_sources(only_gamma, weights, delta_t_days):
     else:
         sample_str = 'all_novae'
     if weights == 'optical':
-        weight = 10.**(master_df['Peak'] / 2.5) #Convert from mag to flux
+        weight = 10.**(master_df['Peak'] / 2.5)  # Convert from mag to flux
         weight /= weight.sum()
         sample_str += '_weight_optical'
     else:
         if not only_gamma:
-            raise ValueError("Not able to use gamma derived weights " \
+            raise ValueError(
+                "Not able to use gamma derived weights "
                 + "for non-gamma-detected novae")
         weight = master_df['gamma_norm']
         weight /= weight.sum()
         sample_str += '_weight_gamma'
-    
+
     ras = master_df['RA']
     decs = master_df['Dec']
     names = master_df['Name']
@@ -43,12 +45,12 @@ def get_sources(only_gamma, weights, delta_t_days):
     mjds -= delta_ts / 2.
 
     src = cy.utils.Sources(
-        ra=np.radians(ras), 
-        dec=np.radians(decs), 
-        mjd=mjds, 
-        sigma_t=np.zeros_like(delta_ts), 
+        ra=np.radians(ras),
+        dec=np.radians(decs),
+        mjd=mjds,
+        sigma_t=np.zeros_like(delta_ts),
         t_100=delta_ts,
         weight=weight
         )
-    
+
     return src, sample_str
