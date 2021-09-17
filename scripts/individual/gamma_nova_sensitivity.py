@@ -122,7 +122,7 @@ discovery['CL'] = args.disc_CL
 ########################################################################
 # FIT BIAS TRIALS
 ########################################################################
-n_sigs = np.r_[:51:10]
+n_sigs = np.r_[:201:10]
 trials = [tr.get_many_fits(
     args.ntrials_sig, n_sig=n_sig,
     logging=False, seed=n_sig) for n_sig in n_sigs]
