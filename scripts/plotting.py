@@ -14,12 +14,11 @@ import warnings
 import histlite as hl
 import csky as cy
 from glob import glob
-import sys
+# import sys
+from stacking.source_config import get_sources
 
 warnings.filterwarnings("ignore")  # histlite throws a bunch of UserWarnings
 mpl.style.use('/home/apizzuto/Nova/scripts/novae_plots.mplstyle')
-sys.path.append('/home/apizzuto/Nova/scripts/stacking/')
-from source_config import get_sources
 
 master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 gamma_df = master_df[master_df['gamma']]
@@ -55,9 +54,14 @@ class StackingPlots():
         self.show = kwargs.pop('show', True)
         self.trials_base = '/data/user/apizzuto/Nova/csky_trials/' \
             + 'stacking_sens_res/'
-        self.all_delta_ts = np.sort(
-            np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
-                      np.array([86400.*5.])))
+        if catalog == 'all_novae':
+            self.all_delta_ts = np.sort(
+                np.append(np.logspace(-1.5, 1., 6)[:-1]*86400.,
+                          np.array([86400.*5.])))
+        else:
+            self.all_delta_ts = np.sort(
+                np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
+                          np.array([86400.*5.])))
         self.all_results = None
         self.ana = None
         self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
@@ -554,6 +558,64 @@ class StackingPlots():
                     dpi=self.dpi, bbox_inches='tight')
             plt.close()
 
+    def sensitivity_efficiency_curve(self, discovery=False):
+        """
+        Plot the passing fraction curve for calculating sensitivity
+        or discovery potential
+
+        :type discovery: bool (default=False)
+        :param discovery: Discovery potential if true, else sensitivity
+        """
+        fig, ax = plt.subplots()
+
+        for gamma in [2.0, 2.5, 3.0]:
+            if discovery:
+                res = self.discovery[gamma]['info']
+                sens = self.discovery[gamma]['n_sig']
+                e2dnde = self.discovery[gamma]['E2dNdE']
+                beta = res['ts_beta']
+            else:
+                res = self.sensitivity[gamma]['info']
+                sens = self.sensitivity[gamma]['n_sig']
+                e2dnde = self.sensitivity[gamma]['E2dNdE']
+                beta = res['ts_beta']
+
+            my_lab = r'$\gamma = {<gam>}$'.replace('<gam>', f'{gamma:.1f}')
+            my_lab += f', sens.= {sens:.1f} events'
+            plt.errorbar(
+                res['n_sigs'],
+                res['CLs'],
+                yerr=res['sigmas'], linestyle='',
+                color=self.gam_cols[gamma],
+                capsize=4, marker='o', markersize=4,
+                label=my_lab)
+
+            dof = res['dof']
+            loc = res['loc']
+            scale = res['scale']
+            params = dof, loc, scale
+
+            def chi2cdf(n):
+                return st.chi2.cdf(n, *params)
+
+            xs = np.linspace(0., max(res['n_sigs']), 500)
+            ys = chi2cdf(xs)
+            plt.plot(xs, ys, color=self.gam_cols[gamma])
+            plt.axvline(
+                sens, ls='dashed', lw=1.25,
+                color=self.gam_cols[gamma])
+        plt.axhline(beta, ls='dashed', lw=1, color='grey')
+
+        plt.xlabel(r'$\langle n_{\mathrm{inj}} \rangle$')
+        if discovery:
+            nsigma = self.discovery_nsigma
+            thresh = r'$q_{<nsigma>\sigma}(TS_{\mathrm{bg}})$'.replace(
+                '<nsigma>', f'{nsigma:.0f}')
+        else:
+            thresh = r'$q_{50}(TS_{\mathrm{bg}})$'
+        plt.ylabel(r'$P(TS_{\mathrm{sig}}) >$' + thresh)
+        plt.legend(loc=4, framealpha=0.9)
+
     def set_seed(self, seed):
         """
         Reset the seed to a new value to get unique llh trials
@@ -607,7 +669,8 @@ class GammaCatalog():
         gamma_df = master_df[master_df['gamma']]
         gamma_df = gamma_df.reset_index()
         names = gamma_df['Name']
-        delta_ts = np.logspace(-3.5, 1., 10)*86400.
+        delta_ts = np.sort(np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
+                                     np.array([86400.*5.])))
         self.delta_ts = delta_ts
         all_novae = {name: {
             delta_t: GammaRayNova(
@@ -620,7 +683,7 @@ class GammaCatalog():
             tmp_del_t = gamma_df[gamma_df['Name'] == name]['gamma_stop'] - \
                             gamma_df[gamma_df['Name'] == name]['gamma_start']
             tmp_del_t = tmp_del_t.values[0].sec
-            if tmp_del_t > 10.*86400:
+            if tmp_del_t > 1000.*86400:
                 self.full_time_novae[name] = GammaRayNova(
                     name, delta_t=86400.*10., **kwargs)
             else:
@@ -754,8 +817,9 @@ class GammaCatalog():
                 except Exception as e:
                     print(e)
                     pass
-            title = r"$\Delta T_{\nu} = " \
-                + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
+            title = r"$\Delta T_{\nu} = $" \
+                + r"$\Delta T_{\gamma}$"
+            # + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -783,6 +847,9 @@ class GammaCatalog():
             fig, aaxs = plt.subplots(
                 nrows=4, ncols=4, dpi=self.dpi,
                 figsize=(14, 14), sharey=True, sharex=True)
+        else:
+            fig = kwargs['fig']
+            aaxs = kwargs['axs']
         plt.subplots_adjust(hspace=0.05, wspace=0.05)
         spec = kwargs.pop('gamma', 2.)
         axs = np.ravel(aaxs)
@@ -812,7 +879,8 @@ class GammaCatalog():
                 except Exception as e:
                     pass
             title = r"$\Delta T_{\nu} = $" \
-                + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
+                + r"$\Delta T_{\gamma}$"
+            # + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -868,7 +936,8 @@ class GammaCatalog():
                 except Exception as e:
                     pass
             title = r"$\Delta T_{\nu} = $" \
-                + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
+                + r"$\Delta T_{\gamma}$"
+            # + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         for ax in axs:
             if ax not in used_axs:
                 ax.set_visible(False)
@@ -905,16 +974,18 @@ class GammaCatalog():
                     if self.verbose:
                         print(f"No sensitivity for nova {name}")
             title = r"$\Delta T_{\nu} = $" \
-                + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
+                + r"$\Delta T_{\gamma}$"
+            # + r"$\min(\Delta T_{\gamma}, 10 \;\mathrm{days})$"
         else:
             delta_t = kwargs['delta_t']
             for name in self.names:
                 try:
+                    kwargs['ax'] = ax
                     self.all_novae[name][delta_t].compare_sens_to_photons(
-                        ax=ax, **kwargs)
+                        **kwargs)
                 except Exception as e:
                     if self.verbose:
-                        print(e, f"No sensitivity for nova {name}")
+                        print(f"No sensitivity for nova {name}")
             title = r"$\Delta T_{\nu} = $" + f"{delta_t:.2e} s"
         if 'omit_title' not in kwargs.keys():
             ax.set_title(title, fontsize=self.fontsize)
@@ -950,10 +1021,6 @@ class GammaRayNova():
             delta_t = delta_t.values[0].sec
             self.delta_t = delta_t
             self.delta_t_str = "full_gamma_time"
-            if self.delta_t > 1e6:
-                print(
-                    "LOOKING AT NOVA WITH TIME WINDOW "
-                    + "LONGER THAN 1e6 SECONDS")
         else:
             try:
                 self.delta_t = kwargs['delta_t']
@@ -1008,7 +1075,7 @@ class GammaRayNova():
         h = bg.get_hist(bins=40, range=(0, 20))
         hl.plot1d(ax, h, crosses=True)
         norm = h.integrate().values
-        ts = np.linspace(.1, h.range[0][1], 100)
+        ts = np.linspace(.5, h.range[0][1], 100)
         ax.plot(ts, norm * bg.pdf(ts))
         ax.semilogy(nonpositive='clip')
         ax.set_ylim(1e-1, bg.n_total*1.5)
@@ -1401,7 +1468,7 @@ class SynthesisPlots():
     def __init__(self, **kwargs):
         self.nova_info = pd.read_pickle(
             '/home/apizzuto/Nova/master_nova_dataframe.pkl')
-        self.greco_base = '/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/'
+        self.greco_base = '/data/ana/analyses/greco_online/version-002-p10/'
         grls = sorted(glob(self.greco_base + 'GRL/IC86_20*data.npy'))
         self.grls = [np.load(g) for g in grls]
         grl = np.hstack(grls)
@@ -1427,7 +1494,6 @@ class SynthesisPlots():
     def gamma_lightcurve_with_greco_rate(self, show_opt=False):
         vals, ts = [], []
         uptime = []
-        col_ind = []
 
         for grl, exp in zip(self.grls, self.exps):
             time_bins = np.arange(grl['start'][0], grl['stop'][-1], 14.)
@@ -1636,6 +1702,90 @@ class SynthesisPlots():
                 plt.savefig(
                     self.savedir +
                     f'all_sky_nova_scatter_plot_with_sens.{ftype}',
+                    dpi=self.dpi, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
+
+    def make_weights_scatter_plot(self):
+        def clean_mag_col(p):
+            if type(p) == str:
+                if '(I)' in p:
+                    p = p.split(' (I)')[0]
+                p = float(p)
+            else:
+                p = float(p)
+            return p
+        df = self.nova_info
+        df['Peak'] = df['Peak'].apply(clean_mag_col)
+        fig, ax = plt.subplots(dpi=200)
+
+        arb_fl = 10.**(-df["Peak"] / 2.5)
+        plt.scatter(df['gamma_norm'][df['gamma']], arb_fl[df['gamma']])
+
+        where_lims = ~np.isnan(df['gamma_lim'])
+        xerrs = [0.1*gam_lim for gam_lim in df['gamma_lim'][where_lims]]
+        plt.errorbar(
+            df['gamma_lim'][where_lims],
+            arb_fl[where_lims], xuplims=True,
+            xerr=xerrs, ls='', color='grey',
+            marker='o', alpha=0.6, markeredgewidth=0.0)
+
+        plt.xlabel(
+            r'$\gamma$-ray Flux ($10^{-7}$ ph s$^{-1}$ cm$^{-2}$)',
+            fontsize=20)
+        plt.ylabel(
+            r'$10^{\frac{-m}{2.5}}$ (arb. units)',
+            fontsize=20)
+
+        plt.loglog()
+        if self.save:
+            for ftype in ['pdf', 'png']:
+                plt.savefig(
+                    self.savedir +
+                    f'nova_catalog_weights_scatter.{ftype}',
+                    dpi=self.dpi, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
+
+    def make_magnitude_hist(self):
+        def clean_mag_col(p):
+            if type(p) == str:
+                if '(I)' in p:
+                    p = p.split(' (I)')[0]
+                p = float(p)
+            else:
+                p = float(p)
+            return p
+        df = self.nova_info
+        df['Peak'] = df['Peak'].apply(clean_mag_col)
+        fig, ax = plt.subplots(dpi=200)
+        mag_bins = np.linspace(3., 17., 9)
+
+        plt.hist(
+            df['Peak'][~df['gamma']],
+            bins=mag_bins, histtype='step', lw=2., label='Optical only')
+
+        plt.hist(
+            df['Peak'][df['gamma']],
+            bins=mag_bins, histtype='step', lw=2.,
+            label=r'$\gamma$-ray detected')
+
+        plt.hist(
+            df['Peak'], lw=4., ls='--',
+            color=sns.xkcd_rgb['battleship grey'],
+            histtype='step', label='Total', bins=mag_bins, zorder=1)
+
+        plt.legend(loc=2, frameon=False)
+        plt.xlabel('Apparent Magnitude')
+        plt.ylabel('Counts')
+        plt.xlim(0, plt.xlim()[1])
+        if self.save:
+            for ftype in ['pdf', 'png']:
+                plt.savefig(
+                    self.savedir +
+                    f'nova_catalog_optical_magnitudes.{ftype}',
                     dpi=self.dpi, bbox_inches='tight')
             plt.close()
         else:
