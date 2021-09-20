@@ -64,8 +64,8 @@ class StackingPlots():
                           np.array([86400.*5.])))
         self.all_results = None
         self.ana = None
-        self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C3'}
-        self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C3', None: 'C0'}
+        self.gam_cols = {2.0: 'C0', 2.5: 'C1', 3.0: 'C2'}
+        self.min_log_cols = {0.0: 'C0', 0.5: 'C1', 1.0: 'C2', None: 'C0'}
         self.diff_sens = None
         self.get_all_sens()
 
@@ -139,6 +139,11 @@ class StackingPlots():
         im = ax1.pcolor(
             mesh_ns, mesh_gam, -1.*(ts_space.T - best_fit_ts),
             cmap="Blues_r", vmin=0, vmax=50)
+        if truth and n_inj == 0.:
+            data_sim = 'DATA'
+        else:
+            data_sim = 'SIMULATION'
+
         ax_c = plt.colorbar(im, ax=ax1, format='$%.1f$')
         ax_c.ax.tick_params(direction='out')
         ax_c.set_label(r"$-2\Delta\,\mathrm{LLH}$")
@@ -153,7 +158,7 @@ class StackingPlots():
         ax1.plot(
             best_fit_ns, best_fit_gamma, marker="*", color="w",
             markersize=10, label='Best-fit')
-        print(best_fit_ts, best_fit_ns, best_fit_gamma)
+        ax1.text(5, 3.5, data_sim)
         ax1.set_ylabel(r"$\gamma$")
         ax1.set_xlabel(r"$n_\mathrm{s}$")
         ax1.legend(loc=4, facecolor=sns.xkcd_rgb['light grey'])
@@ -581,7 +586,7 @@ class StackingPlots():
                 beta = res['ts_beta']
 
             my_lab = r'$\gamma = {<gam>}$'.replace('<gam>', f'{gamma:.1f}')
-            my_lab += f', sens.= {sens:.1f} events'
+            my_lab += f', {e2dnde:.1e} TeV cm' + r'$^{-2}$'
             plt.errorbar(
                 res['n_sigs'],
                 res['CLs'],
@@ -600,7 +605,9 @@ class StackingPlots():
 
             xs = np.linspace(0., max(res['n_sigs']), 500)
             ys = chi2cdf(xs)
-            plt.plot(xs, ys, color=self.gam_cols[gamma])
+            plt.plot(
+                xs, ys, color=self.gam_cols[gamma],
+                alpha=0.6, lw=3.)
             plt.axvline(
                 sens, ls='dashed', lw=1.25,
                 color=self.gam_cols[gamma])
@@ -615,6 +622,50 @@ class StackingPlots():
             thresh = r'$q_{50}(TS_{\mathrm{bg}})$'
         plt.ylabel(r'$P(TS_{\mathrm{sig}}) >$' + thresh)
         plt.legend(loc=4, framealpha=0.9)
+        save_title = 'discovery' if discovery else 'sensitivity'
+        if self.savefigs:
+            for ftype in ['pdf', 'png']:
+                plt.savefig(
+                    self.savepath +
+                    f'{save_title}_efficiency_curve_{self.sample_str}_'
+                    + f'delta_t_{self.delta_t:.2e}.{ftype}',
+                    dpi=self.dpi, bbox_inches='tight')
+            plt.close()
+
+    def sensitivity_vs_gamma(self, in_flux=True, discovery=False,
+                             **kwargs):
+        gammas = np.linspace(2.0, 3.0, 11)
+
+        results = {}
+        for gamma in gammas:
+            t = self.delta_t
+            try:
+                results[gamma] = np.load(
+                    self.trials_base + 'signal_results/'
+                    + f'{self.sample_str}_delta_t_{t:.2e}_gamma_{gamma}_'
+                    + '.pkl',
+                    allow_pickle=True)
+            except Exception as e:
+                pass
+        flux_key = 'E2dNdE' if in_flux else 'n_sig'
+        disc_key = 'discovery' if discovery else 'sensitivity'
+        sens_vals = [results[gamma][disc_key][flux_key]
+                     for gamma in sorted(results.keys())]
+        if 'ax' not in kwargs.keys():
+            fig, ax = plt.subplots()
+        else:
+            ax = kwargs['ax']
+
+        gammas = sorted(results.keys())
+        ax.scatter(gammas, sens_vals, marker='o')
+        ax.plot(gammas, sens_vals, lw=3., alpha=0.6)
+
+        ax.set_xlabel(r'$\gamma$')
+        if in_flux:
+            ylab = r'$E^2 \frac{dN}{dEdA} @1 \mathrm{TeV}$ (TeV cm${-2}$)'
+        else:
+            ylab = r'$\langle n_{\mathrm{inj}} \rangle$'
+        ax.set_ylabel(ylab)
 
     def set_seed(self, seed):
         """
@@ -1111,7 +1162,7 @@ class GammaRayNova():
                          ls='--', lw=1, zorder=-10)
         ax.plot(lim, lim, **expect_kw)
         ax.text(
-            2, 42,
+            2, max(n_sigs)*0.75,
             self.name.replace('_', ' ') + '\n' + r'$\delta={:.0f}$'.format(
                 self.dec*180./np.pi)
             + r'$^{\circ}$' + '\n' + r'$\Delta T = {:.1f}$ days'.format(
