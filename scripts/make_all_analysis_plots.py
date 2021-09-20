@@ -16,19 +16,7 @@ def make_gamma_correlation_plots(cat):
         for disc in [True, False]:
             cat.sensitivity_vs_time(discovery=disc, annotate=True, gamma=gamma)
     plt.close('all')
-    print("\t - Finished plots with full gamma ray duration")
-
-    # print("\t - Beginning plots with fixed time windows")
-    # for delta_t in cat.delta_ts[::2]:
-    #     # Note that we are skipping some windows because otherwise it's
-    #     # just too many plots
-    #     cat.background_ts_panel(delta_t=delta_t)
-    #     cat.gamma_fitting_panel(delta_t=delta_t)
-    #     cat.compare_photon_to_nus(delta_t=delta_t)
-    #     for gamma in [2.0, 2.5, 3.0]:
-    #         cat.ns_fitting_panel(gamma=gamma, delta_t=delta_t)
-    #     plt.close('all')
-    # print("\t - Finished plots with fixed time windows")
+    print("\t - Finished plots with full gamma ray duration\n")
 
 
 def make_stacking_plots(stack):
@@ -36,24 +24,33 @@ def make_stacking_plots(stack):
     stack.get_all_sens()
     stack.sensitivity_plot()
     stack.background_distribution()
-    stack.background_vs_time()
+    stack.set_seed(2)
+    stack.likelihood_scan(n_inj=50., inj_gamma=2.0)
     # stack.likelihood_scan(truth=True)
     stack.fitting_plot(gamma=[2.0, 2.5, 3.])
-    # for gam in [2.0, 2.5, 3.0]:
-    #     for disc in [True, False]:
-    #         stack.sensitivity_efficiency_curve(
-    #             gamma=gam, discovery=disc
-    #             )
+    for discovery in [True, False]:
+        stack.sensitivity_efficiency_curve(discovery=discovery)
+    for in_flux in [True, False]:
+        fig, ax = plt.subplots()
+        for discovery in [True, False]:
+            stack.sensitivity_vs_gamma(
+                in_flux=in_flux, discovery=discovery,
+                ax=ax)
+        fl_label = 'flux' if in_flux else 'events'
+
+        for ftype in ['pdf', 'png']:
+            plt.savefig(
+                stack.savepath
+                + f'sensitivity_vs_gamma_{stack.sample_str}'
+                + f'_{fl_label}.{ftype}',
+                bbox_inches='tight')
+        plt.close()
     print("\t Finished stacking plots")
 
 
 def make_GRECO_plots(gplots):
     gplots.declination_pdf()
     gplots.energy_pdf()
-    for true_en in [True, False]:
-        for true_err in [True, False]:
-            gplots.angular_error_plot(true_energy=true_en, true_error=true_err)
-    gplots.errors_vs_declination()
 
 
 def make_synthesis_plots(syn_plots):
@@ -83,9 +80,19 @@ if __name__ == '__main__':
 
     print("Making figures for the stacked analysis with parameters:")
     print(f"\t Stacking time window: {args.stacking_time:.2e} s")
+    print(f"\t Catalog - only gamma ray novae")
     print(f"\t Figures will be saved to {args.output_path}")
     stack_plots = StackingPlots(
-        args.stacking_time, min_log_e=None, allflavor=args.allflavor,
+        args.stacking_time, 'gamma', 'gamma', index=[2.0, 2.5, 3.0],
+        save=True, output=args.output_path)
+    make_stacking_plots(stack_plots)
+
+    print("Making figures for the stacked analysis with parameters:")
+    print(f"\t Stacking time window: {args.stacking_time:.2e} s")
+    print(f"\t Catalog - all novae")
+    print(f"\t Figures will be saved to {args.output_path}")
+    stack_plots = StackingPlots(
+        args.stacking_time, 'all_novae', 'optical', index=[2.0, 2.5, 3.0],
         save=True, output=args.output_path)
     make_stacking_plots(stack_plots)
 
