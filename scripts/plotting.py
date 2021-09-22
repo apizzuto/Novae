@@ -658,7 +658,12 @@ class StackingPlots():
 
         gammas = sorted(results.keys())
         ax.scatter(gammas, sens_vals, marker='o')
-        ax.plot(gammas, sens_vals, lw=3., alpha=0.6)
+        if 'label' in kwargs.keys():
+            ax.plot(
+                gammas, sens_vals, lw=3., alpha=0.6,
+                label=kwargs['label'])
+        else:
+            ax.plot(gammas, sens_vals, lw=3., alpha=0.6)
 
         ax.set_xlabel(r'$\gamma$')
         if in_flux:
@@ -1681,24 +1686,30 @@ class SynthesisPlots():
             ax.legend(
                 loc=(0.2, -0.18), handles=legend_els, ncol=2,
                 frameon=False)
-        if self.save:
+        if 'skip_save' in kwargs.keys():
+            skip_save = kwargs['skip_save']
+        else:
+            skip_save = False
+        if self.save and not skip_save:
             for ftype in ['pdf', 'png']:
                 plt.savefig(
                     self.savedir +
                     f'all_sky_nova_scatter_plot.{ftype}',
                     dpi=self.dpi, bbox_inches='tight')
             plt.close()
-        else:
+        elif not skip_save:
             plt.show()
 
     def mollview_with_sensitivity(self, **kwargs):
         fig = plt.figure(figsize=(8, 4), dpi=200, facecolor='w')
         ax = fig.add_subplot(111, projection='mollweide')
-        self.all_sky_scatter_plot(fig=fig, ax=ax, show_legend=False)
+        self.all_sky_scatter_plot(
+            fig=fig, ax=ax, show_legend=False,
+            skip_save=True)
         sens_vs_dec = np.load(
             '/data/user/apizzuto/Nova/csky_trials/sens_vs_dec/'
             + 'sens_vs_dec_delta_t_8.64e+04_gamma'
-            + '_2.0_allflavor_True_trials.pkl',
+            + '_2.0_trials.pkl',
             allow_pickle=True)
         spl = UnivariateSpline(
             np.sin(np.array(sens_vs_dec['dec'])),
