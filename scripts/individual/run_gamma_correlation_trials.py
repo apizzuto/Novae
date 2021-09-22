@@ -28,13 +28,13 @@ master_df = pd.read_pickle('/home/apizzuto/Nova/master_nova_dataframe.pkl')
 gamma_df = master_df[master_df['gamma']]
 gamma_df = gamma_df.reset_index()
 
-for nova_num in range(len(gamma_df)):
-    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
-                            np.array([86400.*5.])):
-        for gamma in [2.0, 2.5, 3.0]:
-            job.add_arg(
-                '--nova_num={} --deltaT={} --index={}'.format(
-                    nova_num, deltaT, gamma))
+#for nova_num in range(len(gamma_df)):
+#    for deltaT in np.append(np.logspace(-1.5, 1., 6)[:]*86400.,
+#                            np.array([86400.*5.])):
+#        for gamma in [2.0, 2.5, 3.0]:
+#            job.add_arg(
+#                '--nova_num={} --deltaT={} --index={}'.format(
+#                    nova_num, deltaT, gamma))
 
 for nova_num in range(len(gamma_df)):
     for gamma in [2.0, 2.5, 3.0]:

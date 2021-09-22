@@ -65,13 +65,15 @@ high_mem_signal = pycondor.Job(
 sample_schemes = [(' --all_nova', 'optical'), ('', 'gamma')]
 for sample, weighting in sample_schemes:
     if sample == ' --all_nova':
-        delta_ts = np.append(
-            np.logspace(-1.5, 0.5, 5)[:]*86400.,
-            np.array([86400.*5.]))
+        # delta_ts = np.append(
+        #     np.logspace(-1.5, 0.5, 5)[:]*86400.,
+        #     np.array([86400.*5.]))
+        delta_ts = [2. * 86400.]
     else:
-        delta_ts = np.append(
-            np.logspace(-1.5, 1., 6)[:]*86400.,
-            np.array([86400.*5.]))
+        # delta_ts = np.append(
+        #     np.logspace(-1.5, 1., 6)[:]*86400.,
+        #     np.array([86400.*5.]))
+        delta_ts = [2. * 86400.]
     for deltaT in delta_ts:
         for seed in range(10):
             if deltaT > 86400.:
@@ -84,13 +86,15 @@ for sample, weighting in sample_schemes:
 
 for sample, weighting in sample_schemes[:]:
     if sample == ' --all_nova':
-        delta_ts = np.append(
-            np.logspace(-1.5, 0.5, 5)[:]*86400.,
-            np.array([86400.*5.]))
+        # delta_ts = np.append(
+        #     np.logspace(-1.5, 0.5, 5)[:]*86400.,
+        #     np.array([86400.*5.]))
+        delta_ts = [2. * 86400.]
     else:
-        delta_ts = np.append(
-            np.logspace(-1.5, 1., 6)[:]*86400.,
-            np.array([86400.*5.]))
+        # delta_ts = np.append(
+        #     np.logspace(-1.5, 1., 6)[:]*86400.,
+        #     np.array([86400.*5.]))
+        delta_ts = [2. * 86400.]
     for deltaT in delta_ts:
         if deltaT > 86400.:
             ntrials_sig = 100
@@ -101,13 +105,13 @@ for sample, weighting in sample_schemes[:]:
                 high_mem_signal.add_arg(
                     f'--deltaT={deltaT} --index={gamma}'
                     + f' --ntrials_sig={ntrials_sig}'
-                    + f'--weighting={weighting}{sample}'
+                    + f' --weighting={weighting}{sample}'
                     )
             else:
                 low_mem_signal.add_arg(
                     f'--deltaT={deltaT} --index={gamma}'
                     + f' --ntrials_sig={ntrials_sig}'
-                    + f'--weighting={weighting}{sample}'
+                    + f' --weighting={weighting}{sample}'
                     )
 
 
