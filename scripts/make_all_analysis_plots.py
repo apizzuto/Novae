@@ -33,11 +33,13 @@ def make_stacking_plots(stack):
     for in_flux in [True, False]:
         fig, ax = plt.subplots()
         for discovery in [True, False]:
+            label = 'Discovery potential' if discovery else 'Sensitivity'
             stack.sensitivity_vs_gamma(
                 in_flux=in_flux, discovery=discovery,
-                ax=ax)
+                ax=ax, label=label)
         fl_label = 'flux' if in_flux else 'events'
 
+        ax.legend(loc=2)
         for ftype in ['pdf', 'png']:
             plt.savefig(
                 stack.savepath
@@ -51,6 +53,7 @@ def make_stacking_plots(stack):
 def make_GRECO_plots(gplots):
     gplots.declination_pdf()
     gplots.energy_pdf()
+    plt.close('all')
 
 
 def make_synthesis_plots(syn_plots):
