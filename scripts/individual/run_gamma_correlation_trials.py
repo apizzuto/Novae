@@ -38,12 +38,14 @@ gamma_df = gamma_df.reset_index()
 
 for nova_num in range(len(gamma_df)):
     for gamma in [2.0, 2.5, 3.0]:
-        job.add_arg(
-            f'--nova_num={nova_num} --index={gamma} '
+        print(f'--nova_num={nova_num} --index={gamma} '
             + '--full_gamma_time')
+        # job.add_arg(
+        #     f'--nova_num={nova_num} --index={gamma} '
+        #     + '--full_gamma_time')
 
-dagman = pycondor.Dagman(
-    'Skylab_Novae_sensitivity_trials',
-    submit=submit, verbose=2)
-dagman.add_job(job)
-dagman.build_submit()
+# dagman = pycondor.Dagman(
+#     'Skylab_Novae_sensitivity_trials',
+#     submit=submit, verbose=2)
+# dagman.add_job(job)
+# dagman.build_submit()
