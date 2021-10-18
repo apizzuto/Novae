@@ -187,7 +187,8 @@ all_names = set(novae['Variable']) | set(df['Name']) | set(gamma_df['Name'])
 for name in all_names:
     print(f"Beginning {name}")
     if name in ["V1404 Cen", "V5854 Sgr", "V1657 Sco", "V3663 Oph", 
-        "FM Cir", "V3731 Oph", "V3730 Oph", "V2891 Cyg", "V1709 Sco"]:
+        "FM Cir", "V3731 Oph", "V3730 Oph", "V2891 Cyg", "V1709 Sco",
+        "V5852 Sgr", "V611 Sct"]:
         print(f"Skipping {name}")
         continue
     master_dict['refs'].append('')
@@ -307,10 +308,10 @@ master_df = pd.DataFrame.from_dict(master_dict)
 ###############################################################################
 #######         Cut out novae that occured outside of GRECO      ##############
 ###############################################################################
-min_greco_mjd = np.min(np.load('/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/IC86_2012.data.npy')['time'])
+min_greco_mjd = np.min(np.load('/data/ana/analyses/greco_online/version-002-p10/IC86_2012.data.npy')['time'])
 min_greco_time = Time(min_greco_mjd, format='mjd')
 
-max_greco_mjd = np.max(np.load('/data/user/apizzuto/Nova/GRECO_Skylab_Dataset/v2.5/IC86_2019.data.npy')['time'])
+max_greco_mjd = np.max(np.load('/data/ana/analyses/greco_online/version-002-p10/IC86_2019.data.npy')['time'])
 # max_greco_mjd = 59000. # End of May 2020 lines up with end of 2019 data
 max_greco_time = Time(max_greco_mjd, format='mjd')
 
